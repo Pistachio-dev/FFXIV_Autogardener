@@ -1,0 +1,6 @@
+1. Fork this
+1.5. Add DalamudBasics as a submodule, with git submodule add "whatever the route of this is"
+2. Rename every file and folder named ProjectTemplate to your plugin's name
+3. Replace in files ProjectTemplate to your plugin's name. Avoid spaces and special characters.
+4. Fill the .json file with your own data.
+5. Update Command name and, if used, text reader mark
