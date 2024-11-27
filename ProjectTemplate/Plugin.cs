@@ -10,6 +10,7 @@ using DalamudBasics.Logging;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using ProjectTemplate.Windows;
+using ECommons;
 
 namespace ProjectTemplate;
 
@@ -27,6 +28,8 @@ public sealed class Plugin : IDalamudPlugin
 
     public Plugin(IDalamudPluginInterface pluginInterface)
     {
+        ECommonsMain.Init(pluginInterface, this);
+
         serviceProvider = BuildServiceProvider(pluginInterface);
         logService = serviceProvider.GetRequiredService<ILogService>();
 
