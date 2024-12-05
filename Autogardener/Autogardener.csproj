@@ -4,8 +4,8 @@
 
   <PropertyGroup>
     <Version>0.0.0.1</Version>
-    <Description>ProjectTemplate</Description>
-    <PackageProjectUrl>https://github.com/goatcorp/ProjectTemplate</PackageProjectUrl>
+    <Description>Autogardener</Description>
+    <PackageProjectUrl>https://github.com/goatcorp/Autogardener</PackageProjectUrl>
     <PackageLicenseExpression>AGPL-3.0-or-later</PackageLicenseExpression>
     <IsPackable>false</IsPackable>
   </PropertyGroup>

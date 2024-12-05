@@ -1,9 +1,0 @@
-{
-    "Author": "Pistachio Herald",
-    "Name": "ProjectTemplate",
-    "Punchline": "A quippy one liner",
-    "Description": "A description that shows up in /xlplugins. List any major slash-command(s).",
-    "ApplicableVersion": "any",
-    "Tags": [
-    ]
-}

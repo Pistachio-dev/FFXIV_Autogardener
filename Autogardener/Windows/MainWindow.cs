@@ -4,12 +4,12 @@ using ImGuiNET;
 using System;
 using System.Numerics;
 
-namespace ProjectTemplate.Windows;
+namespace Autogardener.Windows;
 
 public class MainWindow : PluginWindowBase, IDisposable
 {
     public MainWindow(ILogService logService, IServiceProvider serviceProvider)
-        : base(logService, "ProjectTemplate", ImGuiWindowFlags.AlwaysAutoResize)
+        : base(logService, "Autogardener", ImGuiWindowFlags.AlwaysAutoResize)
     {
         SizeConstraints = new WindowSizeConstraints
         {

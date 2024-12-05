@@ -9,18 +9,18 @@ using DalamudBasics.Interop;
 using DalamudBasics.Logging;
 using Microsoft.Extensions.DependencyInjection;
 using System;
-using ProjectTemplate.Windows;
+using Autogardener.Windows;
 using ECommons;
 
-namespace ProjectTemplate;
+namespace Autogardener;
 
 public sealed class Plugin : IDalamudPlugin
 {
-    private const string CommandName = "/ProjectTemplate";
+    private const string CommandName = "/autog";
 
     public Configuration Configuration { get; init; }
 
-    public readonly WindowSystem WindowSystem = new("ProjectTemplate");
+    public readonly WindowSystem WindowSystem = new("Autogardener");
     private ConfigWindow ConfigWindow { get; init; }
     private MainWindow MainWindow { get; init; }
     private IServiceProvider serviceProvider { get; init; }
@@ -43,7 +43,7 @@ public sealed class Plugin : IDalamudPlugin
 
         serviceProvider.GetRequiredService<ICommandManager>().AddHandler(CommandName, new CommandInfo(OnCommand)
         {
-            HelpMessage = "Type /ProjectTemplate to start"
+            HelpMessage = "Type /autog to start"
         });
 
         pluginInterface.UiBuilder.Draw += DrawUI;
@@ -80,7 +80,7 @@ public sealed class Plugin : IDalamudPlugin
     {
         IFramework framework = serviceProvider.GetRequiredService<IFramework>();
         serviceProvider.GetRequiredService<ILogService>().AttachToGameLogicLoop(framework);
-        serviceProvider.GetRequiredService<IChatListener>().InitializeAndRun("[TTT]");
+        serviceProvider.GetRequiredService<IChatListener>().InitializeAndRun("[AG]");
         serviceProvider.GetRequiredService<HookManager>();
     }
 

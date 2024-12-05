@@ -7,7 +7,7 @@ using DalamudBasics.Logging;
 using ImGuiNET;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace ProjectTemplate.Windows;
+namespace Autogardener.Windows;
 
 public class ConfigWindow : PluginWindowBase, IDisposable
 {
