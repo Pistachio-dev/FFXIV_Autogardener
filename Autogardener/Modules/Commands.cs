@@ -69,6 +69,13 @@ namespace Autogardener.Modules
             IGameObject? plotSelected = clientState.LocalPlayer?.TargetObject;
             if (plotSelected == null)
             {
+                clientChatGui.PrintError("No plot selected.");
+                return false;
+            }
+
+            if ( plotSelected.Name.TextValue != "")
+            {
+                clientChatGui.PrintError("That's not a plot");
                 return false;
             }
 
