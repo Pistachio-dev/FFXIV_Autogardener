@@ -1,9 +1,14 @@
 using Dalamud.Game.ClientState.Objects;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin.Services;
+using Dalamud.Utility;
 using DalamudBasics.Chat.ClientOnlyDisplay;
 using DalamudBasics.Logging;
 using DalamudBasics.Targeting;
+using ECommons;
+using ECommons.GameFunctions;
+using ECommons.GameHelpers;
+using FFXIVClientStructs.FFXIV.Client.Game.Control;
 using FFXIVClientStructs.FFXIV.Client.Game.Object;
 
 namespace Autogardener.Modules
@@ -53,6 +58,24 @@ namespace Autogardener.Modules
 
             logService.Info($"Name: [{target.Name}] GameObjectId [{target.GameObjectId}] EntityId [{target.EntityId}] DataId [{target.DataId}]");
             logService.Info($" OwnerId [{target.OwnerId}] ObjectIndex [{target.ObjectIndex}] ObjectKind [{target.ObjectKind}] SubKind [{target.SubKind}]");
+        }
+
+        public unsafe bool InteractWithTargetPlot()
+        {
+            if (!Player.Available) return false;
+            if (Player.IsAnimationLocked) return false;
+            if (!Utils.DismountIfNeeded()) return false;
+            if (GenericHelpers.IsOccupied()) return false;
+            IGameObject? plotSelected = clientState.LocalPlayer?.TargetObject;
+            if (plotSelected == null)
+            {
+                return false;
+            }
+
+            // TODO: verify plot is a plot
+            TargetSystem.Instance()->InteractWithObject(plotSelected.Struct(), true);
+
+            return true;
         }
     }
 }

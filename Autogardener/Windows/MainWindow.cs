@@ -29,5 +29,6 @@ public class MainWindow : PluginWindowBase, IDisposable
     protected override void SafeDraw()
     {
         DrawActionButton(() => commands.DescribeTarget(), "Describe target");
+        DrawActionButton(() => commands.InteractWithTargetPlot(), "Interact with plot");
     }
 }
