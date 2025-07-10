@@ -1,0 +1,3 @@
+[submodule "DalamudBasics"]
+	path = DalamudBasics
+	url = https://github.com/Pistachio-dev/DalamudBasics.git

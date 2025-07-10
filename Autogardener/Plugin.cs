@@ -11,6 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using System;
 using Autogardener.Windows;
 using ECommons;
+using Autogardener.Modules;
 
 namespace Autogardener;
 
@@ -72,6 +73,7 @@ public sealed class Plugin : IDalamudPlugin
         IServiceCollection serviceCollection = new ServiceCollection();
         serviceCollection.AddAllDalamudBasicsServices<Configuration>(pluginInterface);
         serviceCollection.AddSingleton<StringDebugUtils>();
+        serviceCollection.AddSingleton<Commands>();
 
         return serviceCollection.BuildServiceProvider();
     }

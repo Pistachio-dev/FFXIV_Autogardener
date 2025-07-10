@@ -1,0 +1,11 @@
+22:51:41.172 | INF | [Autogardener] Name: [] GameObjectId [1073744909] EntityId [1073744909] DataId [2003757] -> Royal Kukuru Bean, half grown
+22:51:41.172 | INF | [Autogardener]  OwnerId [3758096384] ObjectIndex [453] ObjectKind [EventObj] SubKind [0]
+22:51:42.572 | INF | [Autogardener] Name: [] GameObjectId [1073744910] EntityId [1073744910] DataId [2003757] -> Mimett gourd, ready
+22:51:42.572 | INF | [Autogardener]  OwnerId [3758096384] ObjectIndex [454] ObjectKind [EventObj] SubKind [0] 
+22:51:45.222 | INF | [Autogardener] Name: [] GameObjectId [1073744911] EntityId [1073744911] DataId [2003757] -> Royal Kukuru Bean, sprout
+22:51:45.222 | INF | [Autogardener]  OwnerId [3758096384] ObjectIndex [455] ObjectKind [EventObj] SubKind [0]
+
+Same data id for all of them.
+Also same owner.
+GameObjectId and index are consecutive. Could use this for order.
+Object kind is EventObj and Subkind is 0 for all.

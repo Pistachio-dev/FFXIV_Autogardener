@@ -1,6 +1,9 @@
+using Autogardener.Modules;
 using DalamudBasics.GUI.Windows;
 using DalamudBasics.Logging;
+using ECommons.ChatMethods;
 using ImGuiNET;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Numerics;
 
@@ -8,6 +11,7 @@ namespace Autogardener.Windows;
 
 public class MainWindow : PluginWindowBase, IDisposable
 {
+    Commands commands;
     public MainWindow(ILogService logService, IServiceProvider serviceProvider)
         : base(logService, "Autogardener", ImGuiWindowFlags.AlwaysAutoResize)
     {
@@ -16,12 +20,14 @@ public class MainWindow : PluginWindowBase, IDisposable
             MinimumSize = new Vector2(375, 330),
             MaximumSize = new Vector2(float.MaxValue, float.MaxValue)
         };
+
+        commands = serviceProvider.GetRequiredService<Commands>();
     }
 
     public void Dispose() { }
 
     protected override void SafeDraw()
     {
-        throw new NotImplementedException();
+        DrawActionButton(() => commands.DescribeTarget(), "Describe target");
     }
 }

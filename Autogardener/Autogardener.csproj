@@ -1,20 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="Dalamud.Plugin.Bootstrap.targets" />
-
+<Project Sdk="Dalamud.NET.Sdk/12.0.2">
   <PropertyGroup>
     <Version>0.0.0.1</Version>
-    <Description>Autogardener</Description>
+    <Description>Augment yourself with a robotic Green Thumb™</Description>
     <PackageProjectUrl>https://github.com/goatcorp/Autogardener</PackageProjectUrl>
     <PackageLicenseExpression>AGPL-3.0-or-later</PackageLicenseExpression>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\..\TruthOrDareHelper\DalamudBasics\DalamudBasics.csproj" />
+    <ProjectReference Include="..\DalamudBasics\DalamudBasics\DalamudBasics.csproj" />
+    <ProjectReference Include="..\DalamudBasics\ECommons\ECommons\ECommons.csproj" />
   </ItemGroup>
 </Project>
