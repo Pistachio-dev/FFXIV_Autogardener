@@ -74,6 +74,7 @@ public sealed class Plugin : IDalamudPlugin
         serviceCollection.AddAllDalamudBasicsServices<Configuration>(pluginInterface);
         serviceCollection.AddSingleton<StringDebugUtils>();
         serviceCollection.AddSingleton<Commands>();
+        serviceCollection.AddSingleton<Utils>();
 
         return serviceCollection.BuildServiceProvider();
     }
@@ -83,7 +84,6 @@ public sealed class Plugin : IDalamudPlugin
         IFramework framework = serviceProvider.GetRequiredService<IFramework>();
         serviceProvider.GetRequiredService<ILogService>().AttachToGameLogicLoop(framework);
         serviceProvider.GetRequiredService<IChatListener>().InitializeAndRun("[AG]");
-        serviceProvider.GetRequiredService<HookManager>();
     }
 
     private void OnCommand(string command, string args)

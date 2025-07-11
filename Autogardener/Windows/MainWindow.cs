@@ -30,5 +30,9 @@ public class MainWindow : PluginWindowBase, IDisposable
     {
         DrawActionButton(() => commands.DescribeTarget(), "Describe target");
         DrawActionButton(() => commands.InteractWithTargetPlot(), "Interact with plot");
+        DrawActionButton(() => commands.ListCurrentMenuOptions(), "List current menu options");
+        DrawActionButton(() => commands.SelectEntry("Quit"), "Select Quit");
+        DrawActionButton(() => commands.SelectEntry("Harvest Crop"), "Select Harvest Crop");
+        DrawActionButton(() => commands.SelectEntry("Plant Seeds"), "Select Plant Seeds");
     }
 }

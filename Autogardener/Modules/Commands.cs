@@ -8,8 +8,12 @@ using DalamudBasics.Targeting;
 using ECommons;
 using ECommons.GameFunctions;
 using ECommons.GameHelpers;
+using ECommons.UIHelpers.AddonMasterImplementations;
 using FFXIVClientStructs.FFXIV.Client.Game.Control;
 using FFXIVClientStructs.FFXIV.Client.Game.Object;
+using FFXIVClientStructs.FFXIV.Client.UI;
+using FFXIVClientStructs.FFXIV.Component.GUI;
+using System.Linq;
 
 namespace Autogardener.Modules
 {
@@ -26,12 +30,13 @@ namespace Autogardener.Modules
         private readonly ICondition condition;
         private readonly IClientState clientState;
         private readonly INotificationManager notificationManager;
+        private readonly Utils utils;
 
         public Commands(ILogService logService, IClientChatGui clientChatGui, IObjectTable objectTable, ITargetingService targetingService,
             ITargetManager rawTargeting,
             IGameGui gameGui,
             IContextMenu contextMenu, IDataManager dataManager, ICondition condition, IClientState clientState,
-            INotificationManager notificationManager)
+            INotificationManager notificationManager, Utils utils)
         {
             this.logService = logService;
             this.clientChatGui = clientChatGui;
@@ -44,6 +49,7 @@ namespace Autogardener.Modules
             this.condition = condition;
             this.clientState = clientState;
             this.notificationManager = notificationManager;
+            this.utils = utils;
         }
 
         public void DescribeTarget()
@@ -60,11 +66,45 @@ namespace Autogardener.Modules
             logService.Info($" OwnerId [{target.OwnerId}] ObjectIndex [{target.ObjectIndex}] ObjectKind [{target.ObjectKind}] SubKind [{target.SubKind}]");
         }
 
+        public unsafe void ListCurrentMenuOptions()
+        {
+            if(GenericHelpers.TryGetAddonByName<AddonSelectString>("SelectString", out AddonSelectString* addon)
+                && IsAddonReady(&addon->AtkUnitBase))
+            {
+                foreach (var entry in new AddonMaster.SelectString(addon).Entries)
+                {
+                    logService.Info($"Entry {entry.Index}: {entry.Text}");
+                }
+                return;
+            }
+            logService.Info("No SelectString addon present, or it was not ready.");
+            return;
+        }
+
+        public unsafe void SelectEntry(string text)
+        {
+            if (GenericHelpers.TryGetAddonByName<AddonSelectString>("SelectString", out AddonSelectString* addon)
+                && IsAddonReady(&addon->AtkUnitBase))
+            {
+                var entries = new AddonMaster.SelectString(addon).Entries;
+                Func<AddonMaster.SelectString.Entry, bool> equality = (entry) => entry.Text.StartsWith(text, StringComparison.OrdinalIgnoreCase);
+                if (!entries.Any(equality))
+                {
+                    logService.Warning($"No entry with text {text} was found in the list menu.");
+                }
+                var entry = entries.First(equality);
+                entry.Select();
+            }
+
+            logService.Info("No SelectString addon present, or it was not ready.");
+            return;
+        }
+
         public unsafe bool InteractWithTargetPlot()
         {
             if (!Player.Available) return false;
             if (Player.IsAnimationLocked) return false;
-            if (!Utils.DismountIfNeeded()) return false;
+            if (!utils.DismountIfNeeded()) return false;
             if (GenericHelpers.IsOccupied()) return false;
             IGameObject? plotSelected = clientState.LocalPlayer?.TargetObject;
             if (plotSelected == null)
