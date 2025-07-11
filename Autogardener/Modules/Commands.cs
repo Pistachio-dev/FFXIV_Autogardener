@@ -1,11 +1,9 @@
 using Dalamud.Game.ClientState.Objects;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin.Services;
-using Dalamud.Utility;
 using DalamudBasics.Chat.ClientOnlyDisplay;
 using DalamudBasics.Logging;
 using DalamudBasics.Targeting;
-using ECommons;
 using ECommons.GameFunctions;
 using ECommons.GameHelpers;
 using ECommons.UIHelpers.AddonMasterImplementations;
@@ -98,6 +96,102 @@ namespace Autogardener.Modules
 
             logService.Info("No SelectString addon present, or it was not ready.");
             return;
+        }
+        public unsafe bool TryDetectGardeningWindow(out AtkUnitBase* addon)
+        {
+            if (!GenericHelpers.TryGetAddonByName<AtkUnitBase>("HousingGardening", out addon))
+            {
+                logService.Info("Housing gardening action not detected");
+                return false;
+            }
+            logService.Info("Housing gardening action detected");
+
+            return true;
+        }
+
+        public unsafe void ClickCancelOnGardeningWindow()
+        {
+            if (TryDetectGardeningWindow(out AtkUnitBase* addon))
+            {
+                try
+                {
+                    logService.Warning("Attempting serialization");
+
+                    //string serialized = System.Text.Json.JsonSerializer.Serialize(*addon, typeof(AtkComponentBase),
+                    //    new System.Text.Json.JsonSerializerOptions()
+                    //    {
+                    //        IncludeFields = true,
+                    //    });
+                    //logService.Info($"Node: {addon->GetAtkResNode()->ToString()}"); // This is a crash. Or maybe ToString is...
+                    //logService.Info($"Node: {addon->GetAtkResNode()->Type}"); // Nope, Type also crashes...
+                    var node = addon->NameString;
+                    logService.Info($"Name: {node}");
+                    var root = addon->RootNode->Type;
+                    logService.Info($"Root type: {root}");
+                    //AtkResNode* res = addon->RootNode;
+                    //Type button = addon->WindowNode->PrevSiblingNode->GetComponent()->GetType();
+                    //var wah = (AtkArrayData*)addon->GetRootNode()->GetComponent()->GetAtkResNode();
+                    //logService.Info("Type for button: " + addon->GetRootNode()->GetComponent()->GetAtkResNode()->NodeId);
+                    //logService.Info($"Is it null: {*node == default}");
+                    var windowNode = addon->RootNode->ChildNode;
+                    var textNode = GetSiblingResNodeById(windowNode, 8);
+                    if (textNode == null)
+                    {
+                        logService.Info("Could not find the text node");
+                    }
+
+                    string text = textNode->GetAsAtkComponentButton()->ButtonTextNode->NodeText.GetText();
+                    logService.Info($"Text recovered: {text}");
+
+                }
+                catch (Exception e) { logService.Error(e, "Error"); }
+
+                //try
+                //{
+                //    logService.Info($"Node: {addon->GetResNodeById(1)->ToString()}");
+                //}
+                //catch { }
+                //var baseNode = addon->GetNodeById(1);
+                //if (baseNode == null)
+                //{
+                //    logService.Warning("We didn't get shit.");
+                //}
+                //logService.Info($"This should be the base node, id 1, type {baseNode->Type}");
+
+                //var cancelButton = addon->GetNodeById(9);
+                //logService.Info($"Hopefully cancel button, id 9, type {cancelButton->Type}");
+                //var acceptButton = addon->GetNodeById(8);
+                //logService.Info($"Hopefully accept button, id 8, type {acceptButton->Type}");
+
+                //cancelButton->SetChecked(true);
+            }
+        }
+
+
+        private unsafe AtkResNode* GetSiblingResNodeById(AtkResNode* startingPoint, uint id)
+        {
+            var nodeBefore = GetSiblingResNodeById(startingPoint, id, true);
+            if (nodeBefore != null)
+            {
+                return nodeBefore;
+            }
+
+            return GetSiblingResNodeById(startingPoint, id, false);
+        }
+
+        private unsafe AtkResNode* GetSiblingResNodeById(AtkResNode* node, uint id, bool goBackwards)
+        {
+            if (node == null || node->NodeId == id)
+            {
+                return node;
+            }
+            var nextNode = goBackwards ? node->PrevSiblingNode : node->NextSiblingNode;
+            if (nextNode == null)
+            {
+                return null;
+            }
+
+            return GetSiblingResNodeById(nextNode, id, goBackwards);
         }
 
         public unsafe bool InteractWithTargetPlot()
