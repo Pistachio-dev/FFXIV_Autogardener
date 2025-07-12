@@ -36,6 +36,7 @@ public class MainWindow : PluginWindowBase, IDisposable
         DrawActionButton(() => commands.SelectEntry("Harvest Crop"), "Select Harvest Crop");
         DrawActionButton(() => commands.SelectEntry("Plant Seeds"), "Select Plant Seeds");
         DrawActionButton(() => commands.TryDetectGardeningWindow(out var _), "Detect gardening window");
-        DrawActionButton(() => commands.ClickCancelOnGardeningWindow(), "Click cancel in gardening window");
+        DrawActionButton(() => commands.GetTextButtonText(), "Click cancel in gardening window");
+        DrawActionButton(() => commands.GetSoilDragAndDropEntries(), "Get soil entries");
     }
 }

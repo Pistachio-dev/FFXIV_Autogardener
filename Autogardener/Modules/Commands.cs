@@ -109,7 +109,36 @@ namespace Autogardener.Modules
             return true;
         }
 
-        public unsafe void ClickCancelOnGardeningWindow()
+        public unsafe void GetSoilDragAndDropEntries()
+        {
+            if (!TryDetectGardeningWindow(out AtkUnitBase* addon))
+            {
+                logService.Warning("Gardening window not detected or ready");
+                return;
+            }
+            var windowNode = addon->RootNode->ChildNode;
+            var soilDragDrop = GetSiblingResNodeById(windowNode, 6);
+            var component = soilDragDrop->GetAsAtkComponentDragDrop();
+
+            if (!(TryGetAddonByName<AddonContextIconMenu>("ContextIconMenu", out var subAddon)
+                && IsAddonReady(&subAddon->AtkUnitBase)))
+            {
+                logService.Info("ContextIconMenu not detected");
+                return;
+            }
+
+            for (int i = 0; i < subAddon->AtkValuesCount; i++)
+            {
+                var value = subAddon->AtkValuesSpan[i];
+                if (value.Type == FFXIVClientStructs.FFXIV.Component.GUI.ValueType.ManagedString
+                    || value.Type == FFXIVClientStructs.FFXIV.Component.GUI.ValueType.String)
+                {
+                    logService.Info($"Value #{i}: {value.GetValueAsString()}");
+                }
+            }
+        }
+
+        public unsafe void GetTextButtonText()
         {
             if (TryDetectGardeningWindow(out AtkUnitBase* addon))
             {
@@ -117,22 +146,10 @@ namespace Autogardener.Modules
                 {
                     logService.Warning("Attempting serialization");
 
-                    //string serialized = System.Text.Json.JsonSerializer.Serialize(*addon, typeof(AtkComponentBase),
-                    //    new System.Text.Json.JsonSerializerOptions()
-                    //    {
-                    //        IncludeFields = true,
-                    //    });
-                    //logService.Info($"Node: {addon->GetAtkResNode()->ToString()}"); // This is a crash. Or maybe ToString is...
-                    //logService.Info($"Node: {addon->GetAtkResNode()->Type}"); // Nope, Type also crashes...
                     var node = addon->NameString;
                     logService.Info($"Name: {node}");
                     var root = addon->RootNode->Type;
                     logService.Info($"Root type: {root}");
-                    //AtkResNode* res = addon->RootNode;
-                    //Type button = addon->WindowNode->PrevSiblingNode->GetComponent()->GetType();
-                    //var wah = (AtkArrayData*)addon->GetRootNode()->GetComponent()->GetAtkResNode();
-                    //logService.Info("Type for button: " + addon->GetRootNode()->GetComponent()->GetAtkResNode()->NodeId);
-                    //logService.Info($"Is it null: {*node == default}");
                     var windowNode = addon->RootNode->ChildNode;
                     var textNode = GetSiblingResNodeById(windowNode, 8);
                     if (textNode == null)
@@ -146,24 +163,6 @@ namespace Autogardener.Modules
                 }
                 catch (Exception e) { logService.Error(e, "Error"); }
 
-                //try
-                //{
-                //    logService.Info($"Node: {addon->GetResNodeById(1)->ToString()}");
-                //}
-                //catch { }
-                //var baseNode = addon->GetNodeById(1);
-                //if (baseNode == null)
-                //{
-                //    logService.Warning("We didn't get shit.");
-                //}
-                //logService.Info($"This should be the base node, id 1, type {baseNode->Type}");
-
-                //var cancelButton = addon->GetNodeById(9);
-                //logService.Info($"Hopefully cancel button, id 9, type {cancelButton->Type}");
-                //var acceptButton = addon->GetNodeById(8);
-                //logService.Info($"Hopefully accept button, id 8, type {acceptButton->Type}");
-
-                //cancelButton->SetChecked(true);
             }
         }
 
