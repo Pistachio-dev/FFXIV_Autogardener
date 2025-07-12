@@ -127,7 +127,8 @@ namespace Autogardener.Modules
                 return;
             }
 
-            for (int i = 0; i < subAddon->AtkValuesCount; i++)
+            var availableItemTypes = subAddon->AtkValuesSpan[4].UInt;
+            for (int i = 13; i < (13 + availableItemTypes * 8); i+= 8)
             {
                 var value = subAddon->AtkValuesSpan[i];
                 if (value.Type == FFXIVClientStructs.FFXIV.Component.GUI.ValueType.ManagedString
