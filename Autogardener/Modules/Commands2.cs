@@ -7,7 +7,9 @@ using ECommons.UIHelpers.AddonMasterImplementations;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.Control;
 using FFXIVClientStructs.FFXIV.Client.UI;
+using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using FFXIVClientStructs.FFXIV.Component.GUI;
+using Lumina.Excel.Sheets;
 using System.Linq;
 
 
@@ -25,7 +27,7 @@ namespace Autogardener.Modules
         private bool _gardening = false;
         public bool Gardening => _gardening && GardenPlotDataIds.Contains(clientState.LocalPlayer?.TargetObject?.DataId ?? 0);
 
-        public unsafe void ExecuteInteraction()
+        public unsafe void FullPlantSeedsInteraction()
         {
             var tmconfig = new TaskManagerConfiguration()
             {
@@ -39,13 +41,39 @@ namespace Autogardener.Modules
             taskManager.EnqueueDelay(300);
             taskManager.Enqueue(SkipDialogueIfNeeded, "Skip dialogue", tmconfig);
             taskManager.EnqueueDelay(100);
-            taskManager.Enqueue(SelectActionString, "Select Plant Seeds", tmconfig);
+            taskManager.Enqueue(() => SelectActionString("plant seeds"), "Select Plant Seeds", tmconfig);
             taskManager.EnqueueDelay(100);
             taskManager.Enqueue(SeedPlot, "Seed and soil", tmconfig);
             taskManager.EnqueueDelay(100);
             taskManager.Enqueue(ClickConfirmOnHousingGardening, "Click confirm", tmconfig);
             taskManager.EnqueueDelay(100);
             taskManager.Enqueue(ConfirmYes, "Click Yes", tmconfig);
+        }
+
+        public unsafe void Fertilize()
+        {
+            uint itemId = FishmealId;
+            if (!TryGetItemSlotByItemId(itemId, out var container, out var itemSlotNumber))
+            {
+                logService.Warning("Could not find item with id " + itemId);
+                return;
+            }
+
+            logService.Info($"Fertilizer found in slot {container->Type}:{itemSlotNumber}");
+            var ag = AgentInventoryContext.Instance();
+            var addonId = AgentModule.Instance()->GetAgentByInternalId(AgentId.Inventory)->GetAddonId();
+            ag->OpenForItemSlot(container->Type, itemSlotNumber, addonId);
+            var contextMenu = (AtkUnitBase*)gameGui.GetAddonByName("ContextMenu", 1);
+            if (contextMenu == null) return;
+            for (int p = 0; p <= contextMenu->AtkValuesCount; p++)
+            {
+                if (ag->EventIds[p] == 7)
+                {
+                    Callback.Fire(contextMenu, true, 0, p - 7, 0, 0, 0);
+                    return;
+                }
+            }
+
         }
 
         public unsafe bool SkipDialogueIfNeeded()
@@ -65,13 +93,13 @@ namespace Autogardener.Modules
             }
         }
 
-        public unsafe bool SelectActionString()
+        public unsafe bool SelectActionString(string actionToSelect)
         {
             if (TryGetAddonByName<AddonSelectString>("SelectString", out var addonSelectString)
                 && IsAddonReady(&addonSelectString->AtkUnitBase))
             {
                 var entries = new AddonMaster.SelectString(addonSelectString).Entries;
-                if (entries.First().Text.Contains("Plant seeds", StringComparison.OrdinalIgnoreCase)) // TODO: Replace this with text obtained from Svc.Data.GetExcelSheet<Addon>().ToDictionary(x => x.RowId, x => x); so it is language agnostic
+                if (entries.First().Text.Contains(actionToSelect, StringComparison.OrdinalIgnoreCase)) // TODO: Replace this with text obtained from Svc.Data.GetExcelSheet<Addon>().ToDictionary(x => x.RowId, x => x); so it is language agnostic
                 {
                     entries.First().Select();
                 }
@@ -156,7 +184,7 @@ namespace Autogardener.Modules
             return false;
         }
         
-        private unsafe int GetIndexFromCollection(HashSet<uint> idCollection, uint targetId)
+        private unsafe InventoryContainer*[] GetCombinedInventories()
         {
             var im = InventoryManager.Instance();
             var inv1 = im->GetInventoryContainer(InventoryType.Inventory1);
@@ -164,6 +192,34 @@ namespace Autogardener.Modules
             var inv3 = im->GetInventoryContainer(InventoryType.Inventory3);
             var inv4 = im->GetInventoryContainer(InventoryType.Inventory4);
             InventoryContainer*[] container = { inv1, inv2, inv3, inv4 };
+            return container;
+        }
+        private unsafe bool TryGetItemSlotByItemId(uint itemId, out InventoryContainer* container, out int slotNumber)
+        {
+            InventoryContainer*[] inventories = GetCombinedInventories();
+            container = null;
+            slotNumber = -1;
+            foreach (var inventory in inventories)
+            {
+                logService.Info($"Checking inventory {inventory->Type}");
+                for (int i = 0; i < inventory->Size; i++)
+                {
+                    InventoryItem* slot = inventory->GetInventorySlot(i);
+                    if (!slot->IsEmpty() && slot->ItemId == itemId)
+                    {
+                        slotNumber = i;
+                        container = inventory;
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        private unsafe int GetIndexFromCollection(HashSet<uint> idCollection, uint targetId)
+        {
+            InventoryContainer*[] container = GetCombinedInventories();
             int indexOfTargetItem = 0;
             foreach (var cont in container)
             {

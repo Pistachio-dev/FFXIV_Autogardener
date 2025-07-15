@@ -205,11 +205,11 @@ namespace Autogardener.Modules
         }
         public unsafe void OpenContextMenu(AtkUnitBase* baseNode, AtkResNode* dragDropNode)
         {
-            int x = (int)(baseNode->RootNode->X + dragDropNode->X + 10);
-            int y = (int)(baseNode->RootNode->Y + dragDropNode->Y + 10);
-            logService.Info($"Moving to X: {x} Y: {y}");
-            WindowsKeypress.SendMouseMove(x, y);
-            WindowsKeypress.SendMousepress(LimitedKeys.RightMouseButton);
+            //int x = (int)(baseNode->RootNode->X + dragDropNode->X + 10);
+            //int y = (int)(baseNode->RootNode->Y + dragDropNode->Y + 10);
+            //logService.Info($"Moving to X: {x} Y: {y}");
+            //WindowsKeypress.SendMouseMove(x, y);
+            //WindowsKeypress.SendMousepress(LimitedKeys.RightMouseButton);
         }
 
         public unsafe void EnumerateInventory()
