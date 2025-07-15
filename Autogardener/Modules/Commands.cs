@@ -5,6 +5,7 @@ using DalamudBasics.Chat.ClientOnlyDisplay;
 using DalamudBasics.Logging;
 using DalamudBasics.Targeting;
 using ECommons.Automation;
+using ECommons.Automation.LegacyTaskManager;
 using ECommons.Automation.UIInput;
 using ECommons.GameFunctions;
 using ECommons.GameHelpers;
@@ -47,7 +48,7 @@ namespace Autogardener.Modules
             ITargetManager rawTargeting,
             IGameGui gameGui,
             IContextMenu contextMenu, IDataManager dataManager, ICondition condition, IClientState clientState,
-            INotificationManager notificationManager, Utils utils, IFramework framework)
+            INotificationManager notificationManager, Utils utils, IFramework framework, TaskManager taskManager)
         {
             this.logService = logService;
             this.clientChatGui = clientChatGui;
@@ -61,8 +62,6 @@ namespace Autogardener.Modules
             this.clientState = clientState;
             this.notificationManager = notificationManager;
             this.utils = utils;
-            taskManager = new ECommons.Automation.NeoTaskManager.TaskManager();
-
 
             Seeds = Svc.Data.GetExcelSheet<Item>().Where(x => x.ItemUICategory.RowId == 82 && x.FilterGroup == 20).ToDictionary(x => x.RowId, x => x);
             Soils = Svc.Data.GetExcelSheet<Item>().Where(x => x.ItemUICategory.RowId == 82 && x.FilterGroup == 21).ToDictionary(x => x.RowId, x => x);

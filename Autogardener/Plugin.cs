@@ -13,6 +13,7 @@ using Autogardener.Windows;
 using ECommons;
 using Autogardener.Modules;
 using Autogardener.Modules.PlotRecognition;
+using ECommons.Automation.LegacyTaskManager;
 
 namespace Autogardener;
 
@@ -77,6 +78,7 @@ public sealed class Plugin : IDalamudPlugin
         serviceCollection.AddSingleton<Commands>();
         serviceCollection.AddSingleton<Utils>();
         serviceCollection.AddSingleton<PlotWatcher>();
+        serviceCollection.AddSingleton<TaskManager>();
 
         return serviceCollection.BuildServiceProvider();
     }

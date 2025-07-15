@@ -1,5 +1,6 @@
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin.Services;
+using ECommons.Automation.LegacyTaskManager;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -13,16 +14,21 @@ namespace Autogardener.Modules.PlotRecognition
     {
         private readonly IObjectTable objectTable;
         private readonly IClientState clientState;
+        private readonly IFramework framework;
+        private readonly TaskManager taskManager;
+        private List<Plot> plots;
 
-        public PlotWatcher(IObjectTable objectTable, IClientState clientState)
+        public PlotWatcher(IObjectTable objectTable, IClientState clientState, IFramework framework)
         {
             this.objectTable = objectTable;
             this.clientState = clientState;
+            this.framework = framework;
+            // Add an "scan" button. 
+            this.framework.RunOnFrameworkThread(() => { plots = DiscoverPlots(); });                        
         }
 
         public void ListNearbyPlots()
         {
-            var plots = DiscoverPlots();
             foreach (var plot in plots)
             {
                 Log.Information($"{plot.Alias} =========================");
@@ -39,6 +45,11 @@ namespace Autogardener.Modules.PlotRecognition
                     $"Z: {clientState.LocalPlayer.Position.Z}");
             }
             
+        }
+
+        private void UpdatePlotList(ushort territoryId)
+        {
+            var plots = DiscoverPlots();
         }
 
         public List<Plot> DiscoverPlots()
