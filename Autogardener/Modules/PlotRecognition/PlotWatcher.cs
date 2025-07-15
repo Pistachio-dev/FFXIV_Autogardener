@@ -1,52 +1,90 @@
 using Dalamud.Game.ClientState.Objects.Types;
+using Dalamud.Interface.Utility;
 using Dalamud.Plugin.Services;
 using DalamudBasics.Logging;
 using ECommons.Automation.LegacyTaskManager;
-using Serilog;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Autogardener.Modules.PlotRecognition
 {
     internal class PlotWatcher
     {
+        private static readonly uint HighlightColor = ImGui.GetColorU32(new Vector4(0, 1, 0, 1));
         private readonly ILogService log;
         private readonly IObjectTable objectTable;
         private readonly IClientState clientState;
         private readonly IFramework framework;
+        private readonly IGameGui gameGui;
         private readonly TaskManager taskManager;
         private List<Plot> plots = new();
+        private bool drawHighlights = false;
 
-        public PlotWatcher(ILogService log, IObjectTable objectTable, IClientState clientState, IFramework framework)
+        public PlotWatcher(ILogService log, IObjectTable objectTable, IClientState clientState, IFramework framework, IGameGui gameGui)
         {
             this.log = log;
             this.objectTable = objectTable;
             this.clientState = clientState;
             this.framework = framework;
+            this.gameGui = gameGui;
+            this.framework.RunOnFrameworkThread(UpdatePlotList);
             // Add an "scan" button. 
+        }
+
+        public void ToggleDrawHighlights()
+        {
+            drawHighlights = !drawHighlights;
+        }
+
+        public void HighlightPlots()
+        {
+            List<(Vector2,string)> points = new();
+            foreach (var plot in plots)
+            {
+                if (gameGui.WorldToScreen(plot.Location, out Vector2 screenPos))
+                {
+                    points.Add((screenPos, plot.Alias));
+                }
+            }
+
+            DrawHighlights(points);
+        }
+
+        private void DrawHighlights(List<(Vector2, string)> pointsWithNames)
+        {
+
+            if (!drawHighlights)
+            {
+                return;
+            }
+            ImGui.GetBackgroundDrawList().PushClipRect(ImGuiHelpers.MainViewport.Pos, ImGuiHelpers.MainViewport.Pos + ImGuiHelpers.MainViewport.Size, false);
+
+            foreach ((var point, var alias) in pointsWithNames)
+            {
+                ImGui.GetBackgroundDrawList().AddText(new Vector2(point.X, point.Y - 20), HighlightColor, alias);
+                ImGui.GetBackgroundDrawList().AddCircleFilled(point, 5, HighlightColor);
+            }
+            
+            ImGui.GetBackgroundDrawList().PopClipRect();
+
         }
 
         public void ListNearbyPlots()
         {
             foreach (var plot in plots)
             {
-                Log.Information($"{plot.Alias} =========================");
+                log.Info($"{plot.Alias} =========================");
                 foreach (var hole in plot.PlantingHoles)
                 {
-                    Log.Information($"ObjId: {hole.GameObjectId} X: {hole.Location.X} Y: {hole.Location.Y} Z: {hole.Location.Z}");
+                    log.Info($"ObjId: {hole.GameObjectId} X: {hole.Location.X} Y: {hole.Location.Y} Z: {hole.Location.Z}");
                 }
             }
 
             if (clientState.LocalPlayer != null)
             {
-                Log.Information($"Player pos: X:{clientState.LocalPlayer.Position.X} " +
+                log.Info($"Player pos: X:{clientState.LocalPlayer.Position.X} " +
                     $"Y: {clientState.LocalPlayer.Position.Y} " +
                     $"Z: {clientState.LocalPlayer.Position.Z}");
-            }
-            
+            }            
         }
 
         public void UpdatePlotList()

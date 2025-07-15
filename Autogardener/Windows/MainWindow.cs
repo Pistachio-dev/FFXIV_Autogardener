@@ -56,6 +56,8 @@ public class MainWindow : PluginWindowBase, IDisposable
         DrawActionButton(() => commands.Fertilize(), "Fertilize");
         DrawActionButton(() => plotWatcher.ListNearbyPlots(), "List nearby plots");
         DrawActionButton(() => plotWatcher.UpdatePlotList(), "Scan for plots");
+        DrawActionButton(() => plotWatcher.ToggleDrawHighlights(), "Toggle display highlights");
+        plotWatcher.HighlightPlots();
 
     }
 }
