@@ -12,6 +12,7 @@ using System;
 using Autogardener.Windows;
 using ECommons;
 using Autogardener.Modules;
+using Autogardener.Modules.PlotRecognition;
 
 namespace Autogardener;
 
@@ -75,6 +76,7 @@ public sealed class Plugin : IDalamudPlugin
         serviceCollection.AddSingleton<StringDebugUtils>();
         serviceCollection.AddSingleton<Commands>();
         serviceCollection.AddSingleton<Utils>();
+        serviceCollection.AddSingleton<PlotWatcher>();
 
         return serviceCollection.BuildServiceProvider();
     }

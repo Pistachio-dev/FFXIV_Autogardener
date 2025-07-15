@@ -1,4 +1,5 @@
 using Autogardener.Modules;
+using Autogardener.Modules.PlotRecognition;
 using DalamudBasics.GUI.Windows;
 using DalamudBasics.Logging;
 using ECommons.ChatMethods;
@@ -13,6 +14,7 @@ namespace Autogardener.Windows;
 public class MainWindow : PluginWindowBase, IDisposable
 {
     Commands commands;
+    PlotWatcher plotWatcher;
     public MainWindow(ILogService logService, IServiceProvider serviceProvider)
         : base(logService, "Autogardener", ImGuiWindowFlags.AlwaysAutoResize)
     {
@@ -23,6 +25,7 @@ public class MainWindow : PluginWindowBase, IDisposable
         };
 
         commands = serviceProvider.GetRequiredService<Commands>();
+        plotWatcher = serviceProvider.GetRequiredService<PlotWatcher>();
     }
 
     public void Dispose() { }
@@ -51,5 +54,6 @@ public class MainWindow : PluginWindowBase, IDisposable
         DrawActionButton(() => commands.ConfirmYes(), "Click yes on dialog");
         ImGui.Separator();
         DrawActionButton(() => commands.Fertilize(), "Fertilize");
+        DrawActionButton(() => plotWatcher.ListNearbyPlots(), "List nearby plots");
     }
 }

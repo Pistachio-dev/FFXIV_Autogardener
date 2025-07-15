@@ -18,14 +18,10 @@ namespace Autogardener.Modules
     public partial class Commands
     {
         private TaskManager taskManager;
-        private const uint OutdoorPatchDataId = 2003757;
-        private const uint RivieraFlowerpotDataId = 197051;
-        private const uint GladeFlowerpotDataId = 197052;
-        private const uint OasisFlowerpotDataId = 197053;
-        private static readonly List<uint> GardenPlotDataIds 
-            = new List<uint> { OutdoorPatchDataId, RivieraFlowerpotDataId, GladeFlowerpotDataId, OasisFlowerpotDataId };
+
+
         private bool _gardening = false;
-        public bool Gardening => _gardening && GardenPlotDataIds.Contains(clientState.LocalPlayer?.TargetObject?.DataId ?? 0);
+        public bool Gardening => _gardening && GlobalItemIds.GardenPlotDataIds.Contains(clientState.LocalPlayer?.TargetObject?.DataId ?? 0);
 
         public unsafe void FullPlantSeedsInteraction()
         {
@@ -265,7 +261,7 @@ namespace Autogardener.Modules
                 return false;
             }
 
-            if (!GardenPlotDataIds.Contains(plotSelected.DataId))
+            if (!GlobalItemIds.GardenPlotDataIds.Contains(plotSelected.DataId))
             {
                 clientChatGui.PrintError("That's not a plot");
                 return false;
