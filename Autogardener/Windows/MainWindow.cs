@@ -38,5 +38,16 @@ public class MainWindow : PluginWindowBase, IDisposable
         DrawActionButton(() => commands.TryDetectGardeningWindow(out var _), "Detect gardening window");
         DrawActionButton(() => commands.GetTextButtonText(), "Click cancel in gardening window");
         DrawActionButton(() => commands.GetSoilDragAndDropEntries(), "Get soil entries");
+        DrawActionButton(() => commands.UseFishmeal(), "Fertilize");
+        DrawActionButton(() => commands.UseItem(15865), "Use Firelight Seeds");
+        DrawActionButton(() => commands.EnumerateInventory(), "Enumerate inventory");
+        DrawActionButton(() => commands.ClickFertilizer(), "Click fertilizer");
+        DrawActionButton(() => commands.ExecuteInteraction(), "Execute interaction");
+        DrawActionButton(() => commands.SkipDialogueIfNeeded(), "SkipDialogue");
+        DrawActionButton(() => commands.SelectActionString(), "Select plant seeds");
+        DrawActionButton(() => commands.SeedPlot(), "Fill seeds and soil");
+        DrawActionButton(() => commands.ClickConfirmOnHousingGardening(), "Confirm plant seeds");
+        DrawActionButton(() => commands.ConfirmYes(), "Click yes on dialog");
+
     }
 }

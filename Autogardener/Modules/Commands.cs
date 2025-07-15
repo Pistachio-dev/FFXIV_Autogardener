@@ -4,19 +4,28 @@ using Dalamud.Plugin.Services;
 using DalamudBasics.Chat.ClientOnlyDisplay;
 using DalamudBasics.Logging;
 using DalamudBasics.Targeting;
+using ECommons.Automation;
+using ECommons.Automation.UIInput;
 using ECommons.GameFunctions;
 using ECommons.GameHelpers;
+using ECommons.Interop;
 using ECommons.UIHelpers.AddonMasterImplementations;
+using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.Control;
 using FFXIVClientStructs.FFXIV.Client.Game.Object;
 using FFXIVClientStructs.FFXIV.Client.UI;
+using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using FFXIVClientStructs.FFXIV.Component.GUI;
+using Lumina.Excel.Sheets;
 using System.Linq;
+using static FFXIVClientStructs.FFXIV.Client.UI.Agent.AgentMJIFarmManagement;
 
 namespace Autogardener.Modules
 {
-    public class Commands
+    public partial class Commands
     {
+        
+
         private readonly ILogService logService;
         private readonly IClientChatGui clientChatGui;
         private readonly IObjectTable objectTable;
@@ -30,11 +39,15 @@ namespace Autogardener.Modules
         private readonly INotificationManager notificationManager;
         private readonly Utils utils;
 
+        public Dictionary<uint, Item> Seeds { get; set; }
+        public Dictionary<uint, Item> Soils { get; set; }
+        public Dictionary<uint, Item> Fertilizers { get; set; }
+
         public Commands(ILogService logService, IClientChatGui clientChatGui, IObjectTable objectTable, ITargetingService targetingService,
             ITargetManager rawTargeting,
             IGameGui gameGui,
             IContextMenu contextMenu, IDataManager dataManager, ICondition condition, IClientState clientState,
-            INotificationManager notificationManager, Utils utils)
+            INotificationManager notificationManager, Utils utils, IFramework framework)
         {
             this.logService = logService;
             this.clientChatGui = clientChatGui;
@@ -48,6 +61,12 @@ namespace Autogardener.Modules
             this.clientState = clientState;
             this.notificationManager = notificationManager;
             this.utils = utils;
+            taskManager = new ECommons.Automation.NeoTaskManager.TaskManager();
+
+
+            Seeds = Svc.Data.GetExcelSheet<Item>().Where(x => x.ItemUICategory.RowId == 82 && x.FilterGroup == 20).ToDictionary(x => x.RowId, x => x);
+            Soils = Svc.Data.GetExcelSheet<Item>().Where(x => x.ItemUICategory.RowId == 82 && x.FilterGroup == 21).ToDictionary(x => x.RowId, x => x);
+            Fertilizers = Svc.Data.GetExcelSheet<Item>().Where(x => x.ItemUICategory.RowId == 82 && x.FilterGroup == 22).ToDictionary(x => x.RowId, x => x);
         }
 
         public void DescribeTarget()
@@ -139,6 +158,137 @@ namespace Autogardener.Modules
             }
         }
 
+        public unsafe void EatACookie()
+        {
+            uint acornCookieId = 4701;
+            int amount = InventoryManager.Instance()->GetInventoryItemCount(acornCookieId);
+            clientChatGui.Print($"{amount} cookies left");
+            var player = clientState.LocalPlayer;
+            ActionManager.Instance()->UseAction(ActionType.Item, acornCookieId, player.GameObjectId, extraParam: 65535);
+        }
+
+        public unsafe void UseItem(uint itemId)
+        {
+            int amount = InventoryManager.Instance()->GetInventoryItemCount(itemId);
+            clientChatGui.Print($"{amount} items left");
+            var player = clientState.LocalPlayer;
+            ActionManager.Instance()->UseAction(ActionType.Item, itemId, player.TargetObjectId, extraParam: 65535);
+        }
+
+        public unsafe void UseFishmeal()
+        {
+            uint fishmealId = 7767;
+            int amount = InventoryManager.Instance()->GetInventoryItemCount(fishmealId);
+            clientChatGui.Print($"{amount} fertilizer units left");
+            var player = clientState.LocalPlayer;
+            ActionManager.Instance()->UseAction(ActionType.Unk_18, fishmealId, player.TargetObjectId, extraParam: 65535);
+        }
+
+        public unsafe void ClickFertilizer()
+        {
+            uint fishmealId = 7767;
+            if(!TryGetItemSlotAddonByItemId(fishmealId, out var inventory, out var slot)){
+                logService.Warning("Could not find the fishmeal");
+            }
+
+            //var ev = new AtkEvent();
+            //ev.State = new AtkEventState();
+            //ev.State.EventType = AtkEventType.Right;
+            //ev.Target = &slot->AtkEventTarget;
+            //ev.Node = slot;
+
+            //slot->GetAsAtkComponentButton()->
+            //slot->GetAsAtkComponentDragDrop()->ClickAddonDragDrop(inventory, &ev);
+            //OpenContextMenu(inventory, slot);
+            //logService.Warning("Slot should have been rightclicked");
+
+        }
+        public unsafe void OpenContextMenu(AtkUnitBase* baseNode, AtkResNode* dragDropNode)
+        {
+            int x = (int)(baseNode->RootNode->X + dragDropNode->X + 10);
+            int y = (int)(baseNode->RootNode->Y + dragDropNode->Y + 10);
+            logService.Info($"Moving to X: {x} Y: {y}");
+            WindowsKeypress.SendMouseMove(x, y);
+            WindowsKeypress.SendMousepress(LimitedKeys.RightMouseButton);
+        }
+
+        public unsafe void EnumerateInventory()
+        {
+            InventoryType[] inventories = [InventoryType.Inventory1, InventoryType.Inventory2, InventoryType.Inventory3, InventoryType.Inventory4];
+            for (int i = 0; i < inventories.Length; i++)
+            {
+                for (int k = 0; k < 35; k++)
+                {
+                    InventoryItem* item = InventoryManager.Instance()->GetInventorySlot(inventories[i], k);
+                    if (item->GetItemId() != 0)
+                    {
+                        if(dataManager.GetExcelSheet<Item>().TryGetRow(item->GetItemId(), out Item itemData))
+                        {
+                            logService.Info($"Slot {k} Id:{item->GetItemId()} Name:{itemData.Name} Action: {itemData.ItemAction}");
+                        }
+                        else
+                        {
+                            logService.Info($"Slot {k} Id:{item->GetItemId()} Iten data retrieval failed");
+                        }
+                    }
+                    else
+                    {
+                        logService.Info($"Slot {k}: emtpy");
+                    }
+
+                }
+            }
+        }
+
+        public unsafe bool TryGetItemSlotAddonByItemId(uint itemId, out AtkUnitBase* inventoryAddon, out AtkResNode* slotAddon)
+        {
+            slotAddon = null;
+            (int inventory, int slot) = GetItemInventorySlot(itemId);
+            string inventoryComponentName = $"InventoryGrid{inventory}E";
+            if (!GenericHelpers.TryGetAddonByName<AtkUnitBase>(inventoryComponentName, out inventoryAddon))
+            {
+                logService.Info("Inventory grid not detected");
+                return false;
+            }
+
+            
+            var firstNode = inventoryAddon->RootNode->ChildNode->PrevSiblingNode->ChildNode;
+            if (firstNode == null)
+            {
+                logService.Warning("The first node is null!");
+                return false;
+            }
+            int firstItemNodeId = 3;
+            int expectedId = firstItemNodeId + slot;
+            logService.Info($"Seeking item in position: {expectedId}");
+            AtkResNode* node = GetSiblingResNodeById(firstNode, (uint)(expectedId));
+            if (node == null)
+            {
+                logService.Warning("Found no node with id " + expectedId);
+                return false;
+            }
+            logService.Info($"Arrived at node with id: {node->NodeId}, type: {node->Type}");
+            slotAddon = node;
+            return true;
+        }
+
+        public unsafe (int, int) GetItemInventorySlot(uint itemId)
+        {
+            InventoryType[] inventories = [InventoryType.Inventory1, InventoryType.Inventory2, InventoryType.Inventory3, InventoryType.Inventory4];
+            for (int i = 0; i < inventories.Length; i++)
+            {
+                for (int k = 0; k < 35; k++)
+                {
+                    InventoryItem* item = InventoryManager.Instance()->GetInventorySlot(inventories[i], k);
+                    if (item->ItemId == itemId)
+                    {
+                        return (i, k);
+                    }
+                }
+            }
+            return (-1, -1);
+        }
+
         public unsafe void GetTextButtonText()
         {
             if (TryDetectGardeningWindow(out AtkUnitBase* addon))
@@ -181,41 +331,34 @@ namespace Autogardener.Modules
 
         private unsafe AtkResNode* GetSiblingResNodeById(AtkResNode* node, uint id, bool goBackwards)
         {
-            if (node == null || node->NodeId == id)
+            
+            if (node == null )
+            {
+                return null;
+            }
+            //logService.Info($"Iterating node: " + node->NodeId);
+            if (node->NodeId == id)
             {
                 return node;
             }
             var nextNode = goBackwards ? node->PrevSiblingNode : node->NextSiblingNode;
-            if (nextNode == null)
-            {
-                return null;
-            }
 
             return GetSiblingResNodeById(nextNode, id, goBackwards);
         }
 
-        public unsafe bool InteractWithTargetPlot()
+
+
+        public unsafe bool IsCursorOnAddon(int addonAbsolutePosX, int addonAbsolutePosY, int addonHeight)
         {
-            if (!Player.Available) return false;
-            if (Player.IsAnimationLocked) return false;
-            if (!utils.DismountIfNeeded()) return false;
-            if (GenericHelpers.IsOccupied()) return false;
-            IGameObject? plotSelected = clientState.LocalPlayer?.TargetObject;
-            if (plotSelected == null)
-            {
-                clientChatGui.PrintError("No plot selected.");
+            if (!GenericHelpers.TryGetAddonByName<AtkUnitBase>("CursorAddon", out var cursorAddon))
+            {                
+                logService.Info("Cursor addon detected");
                 return false;
             }
+            logService.Info("Cursor addon detected");
 
-            if ( plotSelected.Name.TextValue != "")
-            {
-                clientChatGui.PrintError("That's not a plot");
-                return false;
-            }
-
-            // TODO: verify plot is a plot
-            TargetSystem.Instance()->InteractWithObject(plotSelected.Struct(), true);
-
+            var doesXMatch = cursorAddon->X > addonAbsolutePosX - 70 && cursorAddon->X < addonAbsolutePosX - 40;
+            var doesYMatch = cursorAddon->Y > addonAbsolutePosY && cursorAddon->Y < addonAbsolutePosY + addonHeight;
             return true;
         }
     }

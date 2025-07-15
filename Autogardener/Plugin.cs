@@ -84,6 +84,7 @@ public sealed class Plugin : IDalamudPlugin
         IFramework framework = serviceProvider.GetRequiredService<IFramework>();
         serviceProvider.GetRequiredService<ILogService>().AttachToGameLogicLoop(framework);
         serviceProvider.GetRequiredService<IChatListener>().InitializeAndRun("[AG]");
+        ActionWatcher.SetLogService(logService);
     }
 
     private void OnCommand(string command, string args)
