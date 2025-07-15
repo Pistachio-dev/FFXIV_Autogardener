@@ -1,5 +1,6 @@
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin.Services;
+using DalamudBasics.Logging;
 using ECommons.Automation.LegacyTaskManager;
 using Serilog;
 using System;
@@ -12,19 +13,20 @@ namespace Autogardener.Modules.PlotRecognition
 {
     internal class PlotWatcher
     {
+        private readonly ILogService log;
         private readonly IObjectTable objectTable;
         private readonly IClientState clientState;
         private readonly IFramework framework;
         private readonly TaskManager taskManager;
-        private List<Plot> plots;
+        private List<Plot> plots = new();
 
-        public PlotWatcher(IObjectTable objectTable, IClientState clientState, IFramework framework)
+        public PlotWatcher(ILogService log, IObjectTable objectTable, IClientState clientState, IFramework framework)
         {
+            this.log = log;
             this.objectTable = objectTable;
             this.clientState = clientState;
             this.framework = framework;
             // Add an "scan" button. 
-            this.framework.RunOnFrameworkThread(() => { plots = DiscoverPlots(); });                        
         }
 
         public void ListNearbyPlots()
@@ -47,9 +49,9 @@ namespace Autogardener.Modules.PlotRecognition
             
         }
 
-        private void UpdatePlotList(ushort territoryId)
+        public void UpdatePlotList()
         {
-            var plots = DiscoverPlots();
+            this.plots = DiscoverPlots();
         }
 
         public List<Plot> DiscoverPlots()
@@ -58,6 +60,7 @@ namespace Autogardener.Modules.PlotRecognition
             Plot? plotInConstruction = null;
             List<IGameObject> plotHoleObjects = objectTable
                 .Where(o => o != null && GlobalItemIds.GardenPlotDataIds.Contains(o.DataId)).OrderBy(o => o.GameObjectId).ToList();
+            log.Info("Total planting holes discovered: " + plotHoleObjects.Count);
             int plotNumber = 1;
             foreach (IGameObject plotHole in plotHoleObjects)
             {
@@ -68,18 +71,16 @@ namespace Autogardener.Modules.PlotRecognition
                     if (plotInConstruction != null)
                     {
                         foundPlots.Add(plotInConstruction);
+                        
                     }
-
+                    
                     plotInConstruction = new Plot($"Plot {plotNumber}");
                     plotNumber++;
                 }
 
-                if (plotInConstruction != null)
-                {
-                    PlotHole newHole = new PlotHole(plotHole.GameObjectId, plotHole.EntityId,
-                                                        plotHole.ObjectIndex, plotHole.DataId, plotHole.Position);
-                    plotInConstruction?.PlantingHoles.Add(newHole);
-                }
+                PlotHole newHole = new PlotHole(plotHole.GameObjectId, plotHole.EntityId,
+                                                    plotHole.ObjectIndex, plotHole.DataId, plotHole.Position);
+                plotInConstruction?.PlantingHoles.Add(newHole);
 
             }
 
@@ -87,6 +88,8 @@ namespace Autogardener.Modules.PlotRecognition
             {
                 foundPlots.Add(plotInConstruction);
             }
+
+            log.Info("Total plots formed: " + foundPlots.Count);
 
             return foundPlots;
         }

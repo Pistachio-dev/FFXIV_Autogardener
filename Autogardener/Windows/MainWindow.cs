@@ -55,5 +55,7 @@ public class MainWindow : PluginWindowBase, IDisposable
         ImGui.Separator();
         DrawActionButton(() => commands.Fertilize(), "Fertilize");
         DrawActionButton(() => plotWatcher.ListNearbyPlots(), "List nearby plots");
+        DrawActionButton(() => plotWatcher.UpdatePlotList(), "Scan for plots");
+
     }
 }
