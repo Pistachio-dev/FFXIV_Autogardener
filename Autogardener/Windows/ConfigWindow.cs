@@ -1,10 +1,6 @@
-using System;
-using System.Numerics;
-using Dalamud.Interface.Windowing;
 using DalamudBasics.Configuration;
 using DalamudBasics.GUI.Windows;
 using DalamudBasics.Logging;
-using ImGuiNET;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Autogardener.Windows;
@@ -21,7 +17,8 @@ public class ConfigWindow : PluginWindowBase, IDisposable
         configuration = sp.GetRequiredService<IConfiguration>();
     }
 
-    public void Dispose() { }
+    public void Dispose()
+    { }
 
     public override void PreDraw()
     {
@@ -29,6 +26,5 @@ public class ConfigWindow : PluginWindowBase, IDisposable
 
     protected override void SafeDraw()
     {
-        
     }
 }

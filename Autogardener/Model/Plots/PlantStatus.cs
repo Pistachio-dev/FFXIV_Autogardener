@@ -1,10 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Autogardener.Model.Plot.Plot
+namespace Autogardener.Model.Plots
 {
     public enum PlantStatus
     {

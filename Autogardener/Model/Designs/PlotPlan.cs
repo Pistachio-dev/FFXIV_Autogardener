@@ -1,9 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace Autogardener.Model.Designs
 {
     public class PlotPlan
@@ -12,6 +6,8 @@ namespace Autogardener.Model.Designs
 
         public string PlanDescription { get; set; } = string.Empty;
 
-        List<PlotHolePlan> PlotHolePlans { get; set; } = new();
+        public List<PlotHolePlan> PlotHolePlans { get; set; } = new();
+
+        public int Rotations = 0; // Each rotatio means a 90º clockwise rotation
     }
 }

@@ -1,6 +1,4 @@
-using Autogardener.Model;
-using Autogardener.Model.Plot;
-using Dalamud.Game.ClientState.Objects.Types;
+using Autogardener.Model.Plots;
 using Dalamud.Interface.Utility;
 using Dalamud.Plugin.Services;
 using DalamudBasics.Logging;
@@ -29,7 +27,7 @@ namespace Autogardener.Modules
             this.framework = framework;
             this.gameGui = gameGui;
             this.framework.RunOnFrameworkThread(UpdatePlotList);
-            // Add an "scan" button. 
+            // Add an "scan" button.
         }
 
         public void ToggleDrawHighlights()
@@ -39,35 +37,38 @@ namespace Autogardener.Modules
 
         public void HighlightPlots()
         {
-            List<(Vector2,string)> points = new();
+            List<PlotHighlightData> points = new();
             foreach (var plot in plots)
             {
                 if (gameGui.WorldToScreen(plot.Location, out var screenPos))
                 {
-                    points.Add((screenPos, plot.Alias));
+                    points.Add(new PlotHighlightData(screenPos, plot.Alias, plot.DesignName));
                 }
             }
 
             DrawHighlights(points);
         }
 
-        private void DrawHighlights(List<(Vector2, string)> pointsWithNames)
+        private void DrawHighlights(List<PlotHighlightData> data)
         {
-
             if (!drawHighlights)
             {
                 return;
             }
             ImGui.GetBackgroundDrawList().PushClipRect(ImGuiHelpers.MainViewport.Pos, ImGuiHelpers.MainViewport.Pos + ImGuiHelpers.MainViewport.Size, false);
 
-            foreach ((var point, var alias) in pointsWithNames)
+            foreach (var dataPoint in data)
             {
-                ImGui.GetBackgroundDrawList().AddText(new Vector2(point.X, point.Y - 20), HighlightColor, alias);
-                ImGui.GetBackgroundDrawList().AddCircleFilled(point, 5, HighlightColor);
-            }
-            
-            ImGui.GetBackgroundDrawList().PopClipRect();
+                ImGui.GetBackgroundDrawList()
+                    .AddText(new Vector2(dataPoint.Position.X, dataPoint.Position.Y - 40), HighlightColor, dataPoint.PlotName);
 
+                ImGui.GetBackgroundDrawList()
+                    .AddText(new Vector2(dataPoint.Position.X, dataPoint.Position.Y - 20), HighlightColor, dataPoint.DesignName);
+
+                ImGui.GetBackgroundDrawList().AddCircleFilled(dataPoint.Position, 5, HighlightColor);
+            }
+
+            ImGui.GetBackgroundDrawList().PopClipRect();
         }
 
         public void ListNearbyPlots()
@@ -86,7 +87,7 @@ namespace Autogardener.Modules
                 log.Info($"Player pos: X:{clientState.LocalPlayer.Position.X} " +
                     $"Y: {clientState.LocalPlayer.Position.Y} " +
                     $"Z: {clientState.LocalPlayer.Position.Z}");
-            }            
+            }
         }
 
         public void UpdatePlotList()
@@ -104,16 +105,15 @@ namespace Autogardener.Modules
             var plotNumber = 1;
             foreach (var plotHole in plotHoleObjects)
             {
-                if (plotInConstruction == null 
+                if (plotInConstruction == null
                     || plotInConstruction?.PlantingHoles.Last().ObjectIndex + 1 != plotHole.ObjectIndex)
                 {
                     // Discontiguous, or first hole. Create new plot.
                     if (plotInConstruction != null)
                     {
                         foundPlots.Add(plotInConstruction);
-                        
                     }
-                    
+
                     plotInConstruction = new Plot($"Plot {plotNumber}");
                     plotNumber++;
                 }
@@ -121,7 +121,6 @@ namespace Autogardener.Modules
                 var newHole = new PlotHole(plotHole.GameObjectId, plotHole.EntityId,
                                                     plotHole.ObjectIndex, plotHole.DataId, plotHole.Position);
                 plotInConstruction?.PlantingHoles.Add(newHole);
-
             }
 
             if (plotInConstruction != null)

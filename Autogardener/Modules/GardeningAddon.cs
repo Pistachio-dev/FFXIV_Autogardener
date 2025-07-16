@@ -12,7 +12,6 @@ namespace Autogardener.Modules
     {
         public GardeningAddon(nint addon) : base(addon)
         {
-
         }
 
         public override string AddonDescription => "The pop up window to select seeds and fertilizer for gardening";

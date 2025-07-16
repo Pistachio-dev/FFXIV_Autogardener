@@ -1,18 +1,14 @@
+using Autogardener.Modules;
+using Autogardener.Windows;
 using Dalamud.Game.Command;
-using Dalamud.Interface.Windowing;
-using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using DalamudBasics.Chat.Listener;
 using DalamudBasics.Debugging;
 using DalamudBasics.DependencyInjection;
 using DalamudBasics.Interop;
 using DalamudBasics.Logging;
-using Microsoft.Extensions.DependencyInjection;
-using System;
-using Autogardener.Windows;
-using ECommons;
-using Autogardener.Modules;
 using ECommons.Automation.LegacyTaskManager;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Autogardener;
 
@@ -66,7 +62,7 @@ public sealed class Plugin : IDalamudPlugin
         ConfigWindow.Dispose();
         MainWindow.Dispose();
 
-        serviceProvider.GetRequiredService<ICommandManager>().RemoveHandler(CommandName);        
+        serviceProvider.GetRequiredService<ICommandManager>().RemoveHandler(CommandName);
     }
 
     private IServiceProvider BuildServiceProvider(IDalamudPluginInterface pluginInterface)
@@ -101,5 +97,6 @@ public sealed class Plugin : IDalamudPlugin
     private void DrawUI() => WindowSystem.Draw();
 
     public void ToggleConfigUI() => ConfigWindow.Toggle();
+
     public void ToggleMainUI() => MainWindow.Toggle();
 }

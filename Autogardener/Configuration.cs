@@ -1,6 +1,5 @@
 using Dalamud.Game.Text;
 using DalamudBasics.Configuration;
-using System;
 
 namespace Autogardener;
 

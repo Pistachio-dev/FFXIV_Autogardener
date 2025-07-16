@@ -1,21 +1,17 @@
 using Autogardener.Modules;
 using DalamudBasics.GUI.Windows;
 using DalamudBasics.Logging;
-using ECommons.ChatMethods;
-using ECommons.UIHelpers.AddonMasterImplementations;
-using ImGuiNET;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Numerics;
 
 namespace Autogardener.Windows;
 
 public class MainWindow : PluginWindowBase, IDisposable
 {
-    UtilOld oldUtil;
-    PlotWatcher plotWatcher;
-    GlobalData globalData;
-    Commands commands;
+    private UtilOld oldUtil;
+    private PlotWatcher plotWatcher;
+    private GlobalData globalData;
+    private Commands commands;
+
     public MainWindow(ILogService logService, IServiceProvider serviceProvider)
         : base(logService, "Autogardener", ImGuiWindowFlags.AlwaysAutoResize)
     {
@@ -31,9 +27,28 @@ public class MainWindow : PluginWindowBase, IDisposable
         commands = serviceProvider.GetRequiredService<Commands>();
     }
 
-    public void Dispose() { }
+    public void Dispose()
+    { }
 
     protected override unsafe void SafeDraw()
+    {
+        if (ImGui.BeginTabBar("MainTabBar"))
+        {
+            if (ImGui.BeginTabItem("Plots"))
+            {
+                plotWatcher.HighlightPlots();
+                ImGui.EndTabBar();
+            }
+            if (ImGui.BeginTabItem("Designs"))
+            {
+                ImGui.EndTabItem();
+            }
+
+            ImGui.EndTabBar();
+        }
+    }
+
+    private unsafe void DrawAssortedActions()
     {
         DrawActionButton(() => oldUtil.DescribeTarget(), "Describe target");
         DrawActionButton(() => commands.InteractWithTargetPlot(), "Interact with plot");
@@ -62,6 +77,5 @@ public class MainWindow : PluginWindowBase, IDisposable
         DrawActionButton(() => plotWatcher.ToggleDrawHighlights(), "Toggle display highlights");
         DrawActionButton(() => logService.Info(globalData.GetGardeningOptionStringLocalized(GlobalData.GardeningOption.Purple)), "GetLocalizedString");
         plotWatcher.HighlightPlots();
-
     }
 }

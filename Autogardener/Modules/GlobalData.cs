@@ -16,9 +16,10 @@ namespace Autogardener.Modules
         public const uint RivieraFlowerpotDataId = 197051;
         public const uint GladeFlowerpotDataId = 197052;
         public const uint OasisFlowerpotDataId = 197053;
+
         public static readonly List<uint> GardenPlotDataIds
             = new List<uint> { OutdoorPatchDataId, RivieraFlowerpotDataId, GladeFlowerpotDataId, OasisFlowerpotDataId };
-        
+
         private readonly ILogService logService;
         private readonly IClientState clientState;
 

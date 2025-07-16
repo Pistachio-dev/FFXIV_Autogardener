@@ -1,10 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Autogardener.Model.Plot
+namespace Autogardener.Model.Plots
 {
     public class PlotHole
     {
@@ -16,6 +10,7 @@ namespace Autogardener.Model.Plot
             DataId = dataId;
             Location = location;
         }
+
         public uint DesignatedPlant { get; set; } //ItemId
         public uint DesignatedSoil { get; set; } //ItemId
 

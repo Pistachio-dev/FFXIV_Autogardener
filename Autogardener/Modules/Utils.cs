@@ -70,10 +70,12 @@ namespace Autogardener.Modules
         private readonly ILogService log;
 
         internal bool GenericThrottle => FrameThrottler.Throttle(ThrottleKey, FrameDelay);
+
         internal void RethrottleGeneric(int num)
         {
             FrameThrottler.Throttle(ThrottleKey, num, true);
         }
+
         internal void RethrottleGeneric()
         {
             FrameThrottler.Throttle(ThrottleKey, FrameDelay, true);

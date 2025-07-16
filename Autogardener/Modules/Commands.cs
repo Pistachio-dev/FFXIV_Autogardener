@@ -15,7 +15,6 @@ using FFXIVClientStructs.FFXIV.Component.GUI;
 using Lumina.Excel.Sheets;
 using System.Linq;
 
-
 namespace Autogardener.Modules
 {
     public class Commands
@@ -88,7 +87,6 @@ namespace Autogardener.Modules
                     return;
                 }
             }
-
         }
 
         public unsafe bool SkipDialogueIfNeeded()
@@ -96,7 +94,7 @@ namespace Autogardener.Modules
             if (TryGetAddonByName<AddonTalk>("Talk", out var addonTalk)
                 && addonTalk->AtkUnitBase.IsVisible)
             {
-                new AddonMaster.Talk((nint)addonTalk).Click();                
+                new AddonMaster.Talk((nint)addonTalk).Click();
                 logService.Warning("Talk addon FOUND");
                 taskManager.InsertDelay(100);
                 return true;
@@ -148,7 +146,6 @@ namespace Autogardener.Modules
             logService.Info($"Soil: {soilIndex} Seed: {seedIndex}");
 
             return ChooseGardeningItems(soilIndex, seedIndex, gardeningAddon);
-
         }
 
         public unsafe bool ClickConfirmOnHousingGardening()
@@ -180,6 +177,7 @@ namespace Autogardener.Modules
 
             return true;
         }
+
         public unsafe bool ConfirmYes()
         {
             if (Svc.Condition[Dalamud.Game.ClientState.Conditions.ConditionFlag.Occupied39]) return false;
@@ -199,7 +197,7 @@ namespace Autogardener.Modules
 
             return false;
         }
-        
+
         private unsafe InventoryContainer*[] GetCombinedInventories()
         {
             var im = InventoryManager.Instance();
@@ -210,6 +208,7 @@ namespace Autogardener.Modules
             InventoryContainer*[] container = { inv1, inv2, inv3, inv4 };
             return container;
         }
+
         private unsafe bool TryGetItemSlotByItemId(uint itemId, out InventoryContainer* container, out int slotNumber)
         {
             InventoryContainer*[] inventories = GetCombinedInventories();
@@ -260,12 +259,11 @@ namespace Autogardener.Modules
         }
 
         private unsafe void FertilizePlot()
-        {            
+        {
         }
 
         private unsafe void TendToCrop()
         {
-
         }
 
         public unsafe bool InteractWithTargetPlot()
@@ -363,7 +361,6 @@ namespace Autogardener.Modules
                     Type = FFXIVClientStructs.FFXIV.Component.GUI.ValueType.Int,
                     UInt = 0
                 };
-
 
                 contextMenu->FireCallback(5, values, true);
                 Svc.Log.Debug($"Filled slot {i}");

@@ -1,10 +1,7 @@
-using System;
-using System.Collections.Generic;
+using Autogardener.Model.Designs;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Autogardener.Model.Plot
+namespace Autogardener.Model.Plots
 {
     public class Plot
     {
@@ -12,6 +9,9 @@ namespace Autogardener.Model.Plot
         {
             Alias = alias;
         }
+
+        public string DesignName => AppliedDesign?.PlanName ?? "Unassigned plan";
+        public PlotPlan AppliedDesign { get; set; } = null;
 
         public string Alias { get; set; }
 

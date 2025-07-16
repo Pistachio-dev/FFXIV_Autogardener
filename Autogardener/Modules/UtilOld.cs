@@ -25,8 +25,6 @@ namespace Autogardener.Modules
 {
     public partial class UtilOld
     {
-        
-
         private readonly ILogService logService;
         private readonly IClientChatGui clientChatGui;
         private readonly IObjectTable objectTable;
@@ -84,7 +82,7 @@ namespace Autogardener.Modules
 
         public unsafe void ListCurrentMenuOptions()
         {
-            if(GenericHelpers.TryGetAddonByName<AddonSelectString>("SelectString", out AddonSelectString* addon)
+            if (GenericHelpers.TryGetAddonByName<AddonSelectString>("SelectString", out AddonSelectString* addon)
                 && IsAddonReady(&addon->AtkUnitBase))
             {
                 foreach (var entry in new AddonMaster.SelectString(addon).Entries)
@@ -115,6 +113,7 @@ namespace Autogardener.Modules
             logService.Info("No SelectString addon present, or it was not ready.");
             return;
         }
+
         public unsafe bool TryDetectGardeningWindow(out AtkUnitBase* addon)
         {
             if (!GenericHelpers.TryGetAddonByName<AtkUnitBase>("HousingGardening", out addon))
@@ -146,7 +145,7 @@ namespace Autogardener.Modules
             }
 
             var availableItemTypes = subAddon->AtkValuesSpan[4].UInt;
-            for (int i = 13; i < (13 + availableItemTypes * 8); i+= 8)
+            for (int i = 13; i < (13 + availableItemTypes * 8); i += 8)
             {
                 var value = subAddon->AtkValuesSpan[i];
                 if (value.Type == FFXIVClientStructs.FFXIV.Component.GUI.ValueType.ManagedString
@@ -186,7 +185,8 @@ namespace Autogardener.Modules
         public unsafe void ClickFertilizer()
         {
             uint fishmealId = 7767;
-            if(!TryGetItemSlotAddonByItemId(fishmealId, out var inventory, out var slot)){
+            if (!TryGetItemSlotAddonByItemId(fishmealId, out var inventory, out var slot))
+            {
                 logService.Warning("Could not find the fishmeal");
             }
 
@@ -200,8 +200,8 @@ namespace Autogardener.Modules
             //slot->GetAsAtkComponentDragDrop()->ClickAddonDragDrop(inventory, &ev);
             //OpenContextMenu(inventory, slot);
             //logService.Warning("Slot should have been rightclicked");
-
         }
+
         public unsafe void OpenContextMenu(AtkUnitBase* baseNode, AtkResNode* dragDropNode)
         {
             //int x = (int)(baseNode->RootNode->X + dragDropNode->X + 10);
@@ -221,7 +221,7 @@ namespace Autogardener.Modules
                     InventoryItem* item = InventoryManager.Instance()->GetInventorySlot(inventories[i], k);
                     if (item->GetItemId() != 0)
                     {
-                        if(dataManager.GetExcelSheet<Item>().TryGetRow(item->GetItemId(), out Item itemData))
+                        if (dataManager.GetExcelSheet<Item>().TryGetRow(item->GetItemId(), out Item itemData))
                         {
                             logService.Info($"Slot {k} Id:{item->GetItemId()} Name:{itemData.Name} Action: {itemData.ItemAction}");
                         }
@@ -234,7 +234,6 @@ namespace Autogardener.Modules
                     {
                         logService.Info($"Slot {k}: emtpy");
                     }
-
                 }
             }
         }
@@ -250,7 +249,6 @@ namespace Autogardener.Modules
                 return false;
             }
 
-            
             var firstNode = inventoryAddon->RootNode->ChildNode->PrevSiblingNode->ChildNode;
             if (firstNode == null)
             {
@@ -309,13 +307,10 @@ namespace Autogardener.Modules
 
                     string text = textNode->GetAsAtkComponentButton()->ButtonTextNode->NodeText.GetText();
                     logService.Info($"Text recovered: {text}");
-
                 }
                 catch (Exception e) { logService.Error(e, "Error"); }
-
             }
         }
-
 
         private unsafe AtkResNode* GetSiblingResNodeById(AtkResNode* startingPoint, uint id)
         {
@@ -330,8 +325,7 @@ namespace Autogardener.Modules
 
         private unsafe AtkResNode* GetSiblingResNodeById(AtkResNode* node, uint id, bool goBackwards)
         {
-            
-            if (node == null )
+            if (node == null)
             {
                 return null;
             }
@@ -345,12 +339,10 @@ namespace Autogardener.Modules
             return GetSiblingResNodeById(nextNode, id, goBackwards);
         }
 
-
-
         public unsafe bool IsCursorOnAddon(int addonAbsolutePosX, int addonAbsolutePosY, int addonHeight)
         {
             if (!GenericHelpers.TryGetAddonByName<AtkUnitBase>("CursorAddon", out var cursorAddon))
-            {                
+            {
                 logService.Info("Cursor addon detected");
                 return false;
             }
