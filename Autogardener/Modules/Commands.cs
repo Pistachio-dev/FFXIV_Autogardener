@@ -148,7 +148,7 @@ namespace Autogardener.Modules
             {
                 new AddonMaster.Talk((nint)addonTalk).Click();
                 logService.Warning("Talk addon FOUND");
-                taskManager.InsertDelay(100);
+
                 return true;
             }
             else
@@ -164,14 +164,18 @@ namespace Autogardener.Modules
                 && IsAddonReady(&addonSelectString->AtkUnitBase))
             {
                 var entries = new AddonMaster.SelectString(addonSelectString).Entries;
-                if (entries.First().Text.Contains(actionToSelect, StringComparison.OrdinalIgnoreCase)) // TODO: Replace this with text obtained from Svc.Data.GetExcelSheet<Addon>().ToDictionary(x => x.RowId, x => x); so it is language agnostic
+                var matchingEntry = entries.FirstOrDefault(e => e.SeString.ToString().Contains(actionToSelect, StringComparison.OrdinalIgnoreCase));
+                if (matchingEntry.Index != default)
                 {
-                    entries.First().Select();
+                    matchingEntry.Select();
                 }
-
-                foreach (var entry in new AddonMaster.SelectString(addonSelectString).Entries)
+                else
                 {
-                    logService.Info("Entry: " + entry.SeString.ToString());
+                    logService.Info($"\"{actionToSelect}\" didn't match any option");
+                    foreach (var entry in new AddonMaster.SelectString(addonSelectString).Entries)
+                    {
+                        logService.Info("Entry: " + entry.SeString.ToString());
+                    }
                 }
 
                 return true;

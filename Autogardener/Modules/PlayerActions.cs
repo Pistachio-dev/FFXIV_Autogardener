@@ -1,17 +1,12 @@
 using Autogardener.Model;
 using Autogardener.Model.Plots;
 using Dalamud.Game.ClientState.Objects;
-using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin.Services;
 using DalamudBasics.Logging;
 using DalamudBasics.SaveGames;
 using ECommons.Automation.NeoTaskManager;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Autogardener.Modules
 {
@@ -72,6 +67,10 @@ namespace Autogardener.Modules
                 taskManager.Enqueue(() => TargetObject(plotOb));
                 taskManager.Enqueue(() => commands.InteractWithTargetPlot(), "InteractWithPlot", DefConfig);
                 taskManager.Enqueue(() => commands.SetPlantTypeFromDialogue(plotHole), "Extract plant type", DefConfig);
+                taskManager.Enqueue(() => commands.SkipDialogueIfNeeded(), "Skip dialogue", DefConfig);
+                taskManager.Enqueue(() => commands.SelectActionString(globalData
+                    .GetGardeningOptionStringLocalized(GlobalData.GardeningOption.Quit)), "Select Quit", DefConfig);
+                taskManager.EnqueueDelay(new Random().Next(200, 300));
             }
         }
 
