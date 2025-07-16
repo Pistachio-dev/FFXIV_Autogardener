@@ -3,6 +3,7 @@ using Autogardener.Model.Plots;
 using Dalamud.Game.ClientState.Objects;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin.Services;
+using DalamudBasics.Extensions;
 using DalamudBasics.Logging;
 using DalamudBasics.SaveGames;
 using ECommons.Automation.NeoTaskManager;
@@ -43,6 +44,7 @@ namespace Autogardener.Modules
 
         public void RegisterNearestPlot()
         {
+            
             var player = clientState.LocalPlayer;
             if (player == null)
             {
@@ -50,20 +52,41 @@ namespace Autogardener.Modules
                 return;
             }
 
+            var state = saveManager.LoadSave()!;
+            var charState = state.GetCharacterSaveState(player.GetFullName());
+            logService.Info(System.Text.Json.JsonSerializer.Serialize(charState));
+
             Plot? plot = GetNearestPlot();
+            if (plot == null)
+            {
+                logService.Warning("No plot is near");
+                chatGui.PrintError("No plot is near");
+                return;
+            }
+            Plot? alreadySeenPlot = charState.Plots.FirstOrDefault(p => p.Equals(plot));
+            if (alreadySeenPlot != null)
+            {
+                plot = alreadySeenPlot;
+            }
+            else
+            {
+                charState.Plots.Add(plot);
+            }
+
             if (plot == null)
             {
                 logService.Warning("Could not get the nearest plot");
                 return;
             }
 
-            foreach (var plotHole in plot.PlantingHoles)
+            foreach (PlotHole plotHole in plot.PlantingHoles)
             {
                 var plotOb = objectTable.SearchById(plotHole.GameObjectId);
                 if (plotOb == null)
                 {
                     throw new Exception($"Plot with objectdId {plotHole.GameObjectId} was not found in the object table");
                 }
+                plotHole.Initialize(plotOb);
                 taskManager.Enqueue(() => TargetObject(plotOb));
                 taskManager.Enqueue(() => commands.InteractWithTargetPlot(), "InteractWithPlot", DefConfig);
                 taskManager.Enqueue(() => commands.SetPlantTypeFromDialogue(plotHole), "Extract plant type", DefConfig);
@@ -72,6 +95,8 @@ namespace Autogardener.Modules
                     .GetGardeningOptionStringLocalized(GlobalData.GardeningOption.Quit)), "Select Quit", DefConfig);
                 taskManager.EnqueueDelay(new Random().Next(200, 300));
             }
+
+            taskManager.Enqueue(() => {saveManager.WriteSave(state);});
         }
 
         private bool TargetObject(IGameObject ob)

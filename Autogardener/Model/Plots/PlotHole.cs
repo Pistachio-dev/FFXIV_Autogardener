@@ -1,3 +1,5 @@
+using Dalamud.Game.ClientState.Objects.Types;
+
 namespace Autogardener.Model.Plots
 {
     public class PlotHole
@@ -11,6 +13,14 @@ namespace Autogardener.Model.Plots
             Location = location;
         }
 
+        public void Initialize(IGameObject ob)
+        {
+            GameObjectId = ob.GameObjectId;
+            EntityId = ob.EntityId;
+            ObjectIndex = ob.ObjectIndex;
+            DataId = ob.DataId;
+            Location = ob.Position;
+        }
         public uint DesignatedPlant { get; set; } //ItemId
         public uint DesignatedSoil { get; set; } //ItemId
 

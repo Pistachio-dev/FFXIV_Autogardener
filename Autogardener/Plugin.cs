@@ -72,7 +72,7 @@ public sealed class Plugin : IDalamudPlugin
     {
         IServiceCollection serviceCollection = new ServiceCollection();
         serviceCollection.AddAllDalamudBasicsServices<Configuration>(pluginInterface);
-        string saveFileName = Path.Combine(pluginInterface.GetPluginConfigDirectory(), "SavedData");
+        string saveFileName = Path.Combine(pluginInterface.GetPluginConfigDirectory(), "SavedData.json");
         serviceCollection.AddSingleton<ISaveManager<SaveState>>((sp) => new SaveManager<SaveState>(saveFileName, logService));
         serviceCollection.AddSingleton<StringDebugUtils>();
         serviceCollection.AddSingleton<UtilOld>();

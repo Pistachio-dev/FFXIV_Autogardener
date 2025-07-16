@@ -113,7 +113,7 @@ namespace Autogardener.Modules
             }
             else
             {
-                logService.Warning("No talk addon found");
+                //logService.Warning("No talk addon found");
                 return false;
             }
         }
@@ -153,7 +153,7 @@ namespace Autogardener.Modules
             }
             else
             {
-                logService.Warning("No talk addon found");
+                //logService.Warning("No talk addon found");
                 return false;
             }
         }
@@ -182,7 +182,7 @@ namespace Autogardener.Modules
             }
             else
             {
-                logService.Warning("No SelectString addon found");
+                //logService.Warning("No SelectString addon found");
                 return false;
             }
         }
