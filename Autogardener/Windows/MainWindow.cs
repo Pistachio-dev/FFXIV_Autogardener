@@ -13,8 +13,10 @@ namespace Autogardener.Windows;
 
 public class MainWindow : PluginWindowBase, IDisposable
 {
-    Commands commands;
+    UtilOld oldUtil;
     PlotWatcher plotWatcher;
+    GlobalData globalData;
+    Commands commands;
     public MainWindow(ILogService logService, IServiceProvider serviceProvider)
         : base(logService, "Autogardener", ImGuiWindowFlags.AlwaysAutoResize)
     {
@@ -24,27 +26,29 @@ public class MainWindow : PluginWindowBase, IDisposable
             MaximumSize = new Vector2(float.MaxValue, float.MaxValue)
         };
 
-        commands = serviceProvider.GetRequiredService<Commands>();
+        oldUtil = serviceProvider.GetRequiredService<UtilOld>();
         plotWatcher = serviceProvider.GetRequiredService<PlotWatcher>();
+        globalData = serviceProvider.GetRequiredService<GlobalData>();
+        commands = serviceProvider.GetRequiredService<Commands>();
     }
 
     public void Dispose() { }
 
     protected override unsafe void SafeDraw()
     {
-        DrawActionButton(() => commands.DescribeTarget(), "Describe target");
+        DrawActionButton(() => oldUtil.DescribeTarget(), "Describe target");
         DrawActionButton(() => commands.InteractWithTargetPlot(), "Interact with plot");
-        DrawActionButton(() => commands.ListCurrentMenuOptions(), "List current menu options");
-        DrawActionButton(() => commands.SelectEntry("Quit"), "Select Quit");
-        DrawActionButton(() => commands.SelectEntry("Harvest Crop"), "Select Harvest Crop");
-        DrawActionButton(() => commands.SelectEntry("Plant Seeds"), "Select Plant Seeds");
-        DrawActionButton(() => commands.TryDetectGardeningWindow(out var _), "Detect gardening window");
-        DrawActionButton(() => commands.GetTextButtonText(), "Click cancel in gardening window");
-        DrawActionButton(() => commands.GetSoilDragAndDropEntries(), "Get soil entries");
+        DrawActionButton(() => oldUtil.ListCurrentMenuOptions(), "List current menu options");
+        DrawActionButton(() => oldUtil.SelectEntry("Quit"), "Select Quit");
+        DrawActionButton(() => oldUtil.SelectEntry("Harvest Crop"), "Select Harvest Crop");
+        DrawActionButton(() => oldUtil.SelectEntry("Plant Seeds"), "Select Plant Seeds");
+        DrawActionButton(() => oldUtil.TryDetectGardeningWindow(out var _), "Detect gardening window");
+        DrawActionButton(() => oldUtil.GetTextButtonText(), "Click cancel in gardening window");
+        DrawActionButton(() => oldUtil.GetSoilDragAndDropEntries(), "Get soil entries");
         //DrawActionButton(() => commands.UseFishmeal(), "Fertilize");
-        DrawActionButton(() => commands.UseItem(15865), "Use Firelight Seeds");
-        DrawActionButton(() => commands.EnumerateInventory(), "Enumerate inventory");
-        DrawActionButton(() => commands.ClickFertilizer(), "Click fertilizer");
+        DrawActionButton(() => oldUtil.UseItem(15865), "Use Firelight Seeds");
+        DrawActionButton(() => oldUtil.EnumerateInventory(), "Enumerate inventory");
+        DrawActionButton(() => oldUtil.ClickFertilizer(), "Click fertilizer");
         ImGui.Separator();
         DrawActionButton(() => commands.FullPlantSeedsInteraction(), "Execute interaction");
         DrawActionButton(() => commands.SkipDialogueIfNeeded(), "SkipDialogue");
@@ -57,6 +61,7 @@ public class MainWindow : PluginWindowBase, IDisposable
         DrawActionButton(() => plotWatcher.ListNearbyPlots(), "List nearby plots");
         DrawActionButton(() => plotWatcher.UpdatePlotList(), "Scan for plots");
         DrawActionButton(() => plotWatcher.ToggleDrawHighlights(), "Toggle display highlights");
+        DrawActionButton(() => logService.Info(globalData.GetGardeningOptionStringLocalized(GlobalData.GardeningOption.Purple)), "GetLocalizedString");
         plotWatcher.HighlightPlots();
 
     }

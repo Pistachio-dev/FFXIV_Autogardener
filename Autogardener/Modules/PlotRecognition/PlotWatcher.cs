@@ -97,7 +97,7 @@ namespace Autogardener.Modules.PlotRecognition
             List<Plot> foundPlots = new();
             Plot? plotInConstruction = null;
             List<IGameObject> plotHoleObjects = objectTable
-                .Where(o => o != null && GlobalItemIds.GardenPlotDataIds.Contains(o.DataId)).OrderBy(o => o.GameObjectId).ToList();
+                .Where(o => o != null && GlobalData.GardenPlotDataIds.Contains(o.DataId)).OrderBy(o => o.GameObjectId).ToList();
             log.Info("Total planting holes discovered: " + plotHoleObjects.Count);
             int plotNumber = 1;
             foreach (IGameObject plotHole in plotHoleObjects)

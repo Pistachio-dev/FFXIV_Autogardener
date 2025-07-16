@@ -75,10 +75,12 @@ public sealed class Plugin : IDalamudPlugin
         IServiceCollection serviceCollection = new ServiceCollection();
         serviceCollection.AddAllDalamudBasicsServices<Configuration>(pluginInterface);
         serviceCollection.AddSingleton<StringDebugUtils>();
-        serviceCollection.AddSingleton<Commands>();
+        serviceCollection.AddSingleton<UtilOld>();
         serviceCollection.AddSingleton<Utils>();
         serviceCollection.AddSingleton<PlotWatcher>();
         serviceCollection.AddSingleton<TaskManager>();
+        serviceCollection.AddSingleton<GlobalData>();
+        serviceCollection.AddSingleton<Commands>();
 
         return serviceCollection.BuildServiceProvider();
     }
