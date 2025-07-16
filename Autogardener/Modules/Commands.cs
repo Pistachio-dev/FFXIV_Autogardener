@@ -1,3 +1,4 @@
+using Autogardener.Model.Plots;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin.Services;
 using DalamudBasics.Chat.ClientOnlyDisplay;
@@ -14,6 +15,7 @@ using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using Lumina.Excel.Sheets;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace Autogardener.Modules
 {
@@ -25,10 +27,10 @@ namespace Autogardener.Modules
         private readonly Utils utils;
         private readonly IGameGui gameGui;
         private readonly IClientChatGui clientChatGui;
-        private TaskManager taskManager;
+        private readonly TaskManager taskManager;
 
         public Commands(ILogService logService, IClientState clientState, GlobalData globalData,
-            Utils utils, IGameGui gameGui, IClientChatGui clientChatGui)
+            Utils utils, IGameGui gameGui, IClientChatGui clientChatGui, TaskManager taskManager)
         {
             this.logService = logService;
             this.clientState = clientState;
@@ -36,6 +38,7 @@ namespace Autogardener.Modules
             this.utils = utils;
             this.gameGui = gameGui;
             this.clientChatGui = clientChatGui;
+            this.taskManager = taskManager;
         }
 
         private bool _gardening = false;
@@ -87,6 +90,55 @@ namespace Autogardener.Modules
                     return;
                 }
             }
+        }
+
+        public unsafe bool SetPlantTypeFromDialogue(PlotHole plotHole)
+        {
+            if (TryGetAddonByName<AddonTalk>("Talk", out var addonTalk)
+                && addonTalk->AtkUnitBase.IsVisible)
+            {
+                var am = new AddonMaster.Talk((nint)addonTalk);
+                addonTalk->AtkValues->GetValueAsString();
+                string dialogueText = addonTalk->AtkTextNode228->NodeText.ToString();
+                logService.Info("Text node 228: " + dialogueText);
+                (uint id, string seedName) = ExtractPlantNameAndId(dialogueText);
+                if (id != 0)
+                {
+                    plotHole.CurrentPlant = id;
+                    logService.Info($"Seed registered: {id}-{seedName}");
+                }
+                logService.Warning("Talk addon FOUND");
+                taskManager.InsertDelay(100);
+                return true;
+            }
+            else
+            {
+                logService.Warning("No talk addon found");
+                return false;
+            }
+        }
+
+        private (uint id, string name) ExtractPlantNameAndId(string dialogueText)
+        {
+            var matches = new Regex("([\\w ]{4,})").Matches(dialogueText);
+            if (matches.Count < 2)
+            {
+                logService.Info("Scaned plot was empty");
+                return (0, "Empty");
+            }
+            string plantName = matches[0].Groups[0].Value;
+
+            try
+            {
+                var seedDictionaryEntry = globalData.Seeds.First(s => s.Value.Name.ToString().Contains(plantName, StringComparison.OrdinalIgnoreCase));
+                return (seedDictionaryEntry.Key, seedDictionaryEntry.Value.Name.ToString());
+            }
+            catch (InvalidOperationException)
+            {
+                logService.Warning($"No seed matching the plant {plantName} found");
+                return (0, "Empty");
+            }
+
         }
 
         public unsafe bool SkipDialogueIfNeeded()

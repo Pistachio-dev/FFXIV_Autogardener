@@ -2,12 +2,12 @@ using Autogardener.Model.Plots;
 using Dalamud.Interface.Utility;
 using Dalamud.Plugin.Services;
 using DalamudBasics.Logging;
-using ECommons.Automation.LegacyTaskManager;
+using ECommons.Automation.NeoTaskManager;
 using System.Linq;
 
 namespace Autogardener.Modules
 {
-    internal class PlotWatcher
+    public class PlotWatcher
     {
         private static readonly uint HighlightColor = ImGui.GetColorU32(new Vector4(0, 1, 0, 1));
         private readonly ILogService log;
@@ -16,16 +16,17 @@ namespace Autogardener.Modules
         private readonly IFramework framework;
         private readonly IGameGui gameGui;
         private readonly TaskManager taskManager;
-        private List<Plot> plots = new();
+        public List<Plot> Plots { get; set; } = new();
         private bool drawHighlights = true;
 
-        public PlotWatcher(ILogService log, IObjectTable objectTable, IClientState clientState, IFramework framework, IGameGui gameGui)
+        public PlotWatcher(ILogService log, IObjectTable objectTable, IClientState clientState, IFramework framework, IGameGui gameGui, TaskManager taskManager)
         {
             this.log = log;
             this.objectTable = objectTable;
             this.clientState = clientState;
             this.framework = framework;
             this.gameGui = gameGui;
+            this.taskManager = taskManager;
             this.framework.RunOnFrameworkThread(UpdatePlotList);
             // Add an "scan" button.
         }
@@ -38,7 +39,7 @@ namespace Autogardener.Modules
         public void HighlightPlots()
         {
             List<PlotHighlightData> points = new();
-            foreach (var plot in plots)
+            foreach (var plot in Plots)
             {
                 if (gameGui.WorldToScreen(plot.Location, out var screenPos))
                 {
@@ -73,7 +74,7 @@ namespace Autogardener.Modules
 
         public void ListNearbyPlots()
         {
-            foreach (var plot in plots)
+            foreach (var plot in Plots)
             {
                 log.Info($"{plot.Alias} =========================");
                 foreach (var hole in plot.PlantingHoles)
@@ -92,7 +93,7 @@ namespace Autogardener.Modules
 
         public void UpdatePlotList()
         {
-            plots = DiscoverPlots();
+            Plots = DiscoverPlots();
         }
 
         public List<Plot> DiscoverPlots()

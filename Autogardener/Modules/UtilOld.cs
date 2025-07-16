@@ -5,7 +5,7 @@ using DalamudBasics.Chat.ClientOnlyDisplay;
 using DalamudBasics.Logging;
 using DalamudBasics.Targeting;
 using ECommons.Automation;
-using ECommons.Automation.LegacyTaskManager;
+using ECommons.Automation.NeoTaskManager;
 using ECommons.Automation.UIInput;
 using ECommons.GameFunctions;
 using ECommons.GameHelpers;

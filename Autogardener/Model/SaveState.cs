@@ -1,6 +1,6 @@
 namespace Autogardener.Model
 {
-    internal class SaveState
+    public class SaveState
     {
         // The key is the character full name "John Smith@Omega"
         public Dictionary<string, CharacterSaveState> SaveStates { get; set; } = new();

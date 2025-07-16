@@ -11,6 +11,7 @@ public class MainWindow : PluginWindowBase, IDisposable
     private PlotWatcher plotWatcher;
     private GlobalData globalData;
     private Commands commands;
+    private PlayerActions playerActions;
 
     public MainWindow(ILogService logService, IServiceProvider serviceProvider)
         : base(logService, "Autogardener", ImGuiWindowFlags.AlwaysAutoResize)
@@ -25,6 +26,7 @@ public class MainWindow : PluginWindowBase, IDisposable
         plotWatcher = serviceProvider.GetRequiredService<PlotWatcher>();
         globalData = serviceProvider.GetRequiredService<GlobalData>();
         commands = serviceProvider.GetRequiredService<Commands>();
+        playerActions = serviceProvider.GetRequiredService<PlayerActions>();
     }
 
     public void Dispose()
@@ -36,6 +38,10 @@ public class MainWindow : PluginWindowBase, IDisposable
         {
             if (ImGui.BeginTabItem("Plots"))
             {
+                if (ImGui.Button("Register nearest plot"))
+                {
+                    playerActions.RegisterNearestPlot();
+                }
                 plotWatcher.HighlightPlots();
                 ImGui.EndTabItem();
             }

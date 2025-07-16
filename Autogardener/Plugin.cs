@@ -1,3 +1,4 @@
+using Autogardener.Model;
 using Autogardener.Modules;
 using Autogardener.Windows;
 using Dalamud.Game.Command;
@@ -7,8 +8,10 @@ using DalamudBasics.Debugging;
 using DalamudBasics.DependencyInjection;
 using DalamudBasics.Interop;
 using DalamudBasics.Logging;
-using ECommons.Automation.LegacyTaskManager;
+using DalamudBasics.SaveGames;
+using ECommons.Automation.NeoTaskManager;
 using Microsoft.Extensions.DependencyInjection;
+using System.IO;
 
 namespace Autogardener;
 
@@ -69,6 +72,8 @@ public sealed class Plugin : IDalamudPlugin
     {
         IServiceCollection serviceCollection = new ServiceCollection();
         serviceCollection.AddAllDalamudBasicsServices<Configuration>(pluginInterface);
+        string saveFileName = Path.Combine(pluginInterface.GetPluginConfigDirectory(), "SavedData");
+        serviceCollection.AddSingleton<ISaveManager<SaveState>>((sp) => new SaveManager<SaveState>(saveFileName, logService));
         serviceCollection.AddSingleton<StringDebugUtils>();
         serviceCollection.AddSingleton<UtilOld>();
         serviceCollection.AddSingleton<Utils>();
@@ -76,6 +81,7 @@ public sealed class Plugin : IDalamudPlugin
         serviceCollection.AddSingleton<TaskManager>();
         serviceCollection.AddSingleton<GlobalData>();
         serviceCollection.AddSingleton<Commands>();
+        serviceCollection.AddSingleton<PlayerActions>();
 
         return serviceCollection.BuildServiceProvider();
     }
