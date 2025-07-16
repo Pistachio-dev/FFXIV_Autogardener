@@ -37,7 +37,7 @@ public class MainWindow : PluginWindowBase, IDisposable
             if (ImGui.BeginTabItem("Plots"))
             {
                 plotWatcher.HighlightPlots();
-                ImGui.EndTabBar();
+                ImGui.EndTabItem();
             }
             if (ImGui.BeginTabItem("Designs"))
             {

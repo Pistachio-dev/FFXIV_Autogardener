@@ -17,7 +17,7 @@ namespace Autogardener.Modules
         private readonly IGameGui gameGui;
         private readonly TaskManager taskManager;
         private List<Plot> plots = new();
-        private bool drawHighlights = false;
+        private bool drawHighlights = true;
 
         public PlotWatcher(ILogService log, IObjectTable objectTable, IClientState clientState, IFramework framework, IGameGui gameGui)
         {
