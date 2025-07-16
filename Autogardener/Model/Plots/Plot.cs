@@ -18,5 +18,21 @@ namespace Autogardener.Model.Plots
         public List<PlotHole> PlantingHoles { get; set; } = new();
 
         public Vector3 Location => PlantingHoles.FirstOrDefault()?.Location ?? Vector3.Zero;
+
+        public override bool Equals(object? otherPlotObject)
+        {
+            if (otherPlotObject == null || !(otherPlotObject is Plot otherPlot))
+            {
+                return false; ;
+            }
+            if (!(otherPlot.PlantingHoles.Count == PlantingHoles.Count))
+            {
+                return false;
+            }
+
+            ulong lowerGameObjectId = PlantingHoles.Select(p => p.GameObjectId).OrderBy(goid => goid).First();
+            ulong otherPlotLowerGameObjectId = otherPlot.PlantingHoles.Select(p => p.GameObjectId).OrderBy(goid => goid).First();
+            return lowerGameObjectId == otherPlotLowerGameObjectId;
+        }
     }
 }
