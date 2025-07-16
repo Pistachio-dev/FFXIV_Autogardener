@@ -1,5 +1,4 @@
 using Autogardener.Modules;
-using Autogardener.Modules.PlotRecognition;
 using DalamudBasics.GUI.Windows;
 using DalamudBasics.Logging;
 using ECommons.ChatMethods;

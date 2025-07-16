@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Autogardener.Modules.PlotRecognition
+namespace Autogardener.Model.Plot.Plot
 {
     public enum PlantStatus
     {

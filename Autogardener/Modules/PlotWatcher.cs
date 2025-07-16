@@ -1,3 +1,5 @@
+using Autogardener.Model;
+using Autogardener.Model.Plot;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Interface.Utility;
 using Dalamud.Plugin.Services;
@@ -5,7 +7,7 @@ using DalamudBasics.Logging;
 using ECommons.Automation.LegacyTaskManager;
 using System.Linq;
 
-namespace Autogardener.Modules.PlotRecognition
+namespace Autogardener.Modules
 {
     internal class PlotWatcher
     {
@@ -40,7 +42,7 @@ namespace Autogardener.Modules.PlotRecognition
             List<(Vector2,string)> points = new();
             foreach (var plot in plots)
             {
-                if (gameGui.WorldToScreen(plot.Location, out Vector2 screenPos))
+                if (gameGui.WorldToScreen(plot.Location, out var screenPos))
                 {
                     points.Add((screenPos, plot.Alias));
                 }
@@ -89,18 +91,18 @@ namespace Autogardener.Modules.PlotRecognition
 
         public void UpdatePlotList()
         {
-            this.plots = DiscoverPlots();
+            plots = DiscoverPlots();
         }
 
         public List<Plot> DiscoverPlots()
         {
             List<Plot> foundPlots = new();
             Plot? plotInConstruction = null;
-            List<IGameObject> plotHoleObjects = objectTable
+            var plotHoleObjects = objectTable
                 .Where(o => o != null && GlobalData.GardenPlotDataIds.Contains(o.DataId)).OrderBy(o => o.GameObjectId).ToList();
             log.Info("Total planting holes discovered: " + plotHoleObjects.Count);
-            int plotNumber = 1;
-            foreach (IGameObject plotHole in plotHoleObjects)
+            var plotNumber = 1;
+            foreach (var plotHole in plotHoleObjects)
             {
                 if (plotInConstruction == null 
                     || plotInConstruction?.PlantingHoles.Last().ObjectIndex + 1 != plotHole.ObjectIndex)
@@ -116,7 +118,7 @@ namespace Autogardener.Modules.PlotRecognition
                     plotNumber++;
                 }
 
-                PlotHole newHole = new PlotHole(plotHole.GameObjectId, plotHole.EntityId,
+                var newHole = new PlotHole(plotHole.GameObjectId, plotHole.EntityId,
                                                     plotHole.ObjectIndex, plotHole.DataId, plotHole.Position);
                 plotInConstruction?.PlantingHoles.Add(newHole);
 

@@ -12,7 +12,6 @@ using System;
 using Autogardener.Windows;
 using ECommons;
 using Autogardener.Modules;
-using Autogardener.Modules.PlotRecognition;
 using ECommons.Automation.LegacyTaskManager;
 
 namespace Autogardener;

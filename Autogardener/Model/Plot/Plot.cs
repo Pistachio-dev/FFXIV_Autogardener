@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Autogardener.Modules.PlotRecognition
+namespace Autogardener.Model.Plot
 {
-    internal class Plot
+    public class Plot
     {
         public Plot(string alias)
         {
