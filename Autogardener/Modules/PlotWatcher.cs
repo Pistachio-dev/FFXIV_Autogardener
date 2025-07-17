@@ -1,7 +1,9 @@
+using Autogardener.Model;
 using Autogardener.Model.Plots;
 using Dalamud.Interface.Utility;
 using Dalamud.Plugin.Services;
 using DalamudBasics.Logging;
+using DalamudBasics.SaveGames;
 using ECommons.Automation.NeoTaskManager;
 using System.Linq;
 
@@ -16,17 +18,22 @@ namespace Autogardener.Modules
         private readonly IFramework framework;
         private readonly IGameGui gameGui;
         private readonly TaskManager taskManager;
-        public List<Plot> Plots { get; set; } = new();
+        private readonly ISaveManager<CharacterSaveState> saveManager;
+        private readonly CharacterSaveState state;
         private bool drawHighlights = true;
 
-        public PlotWatcher(ILogService log, IObjectTable objectTable, IClientState clientState, IFramework framework, IGameGui gameGui, TaskManager taskManager)
-        {
+        public PlotWatcher(ILogService log, IObjectTable objectTable, IClientState clientState,
+            IFramework framework, IGameGui gameGui, TaskManager taskManager, ISaveManager<CharacterSaveState> saveManager,
+            CharacterSaveState state)
+        {        
             this.log = log;
             this.objectTable = objectTable;
             this.clientState = clientState;
             this.framework = framework;
             this.gameGui = gameGui;
             this.taskManager = taskManager;
+            this.saveManager = saveManager;
+            this.state = state;
             this.framework.RunOnFrameworkThread(UpdatePlotList);
             // Add an "scan" button.
         }
@@ -39,7 +46,7 @@ namespace Autogardener.Modules
         public void HighlightPlots()
         {
             List<PlotHighlightData> points = new();
-            foreach (var plot in Plots)
+            foreach (var plot in state.Plots)
             {
                 if (gameGui.WorldToScreen(plot.Location, out var screenPos))
                 {
@@ -74,7 +81,7 @@ namespace Autogardener.Modules
 
         public void ListNearbyPlots()
         {
-            foreach (var plot in Plots)
+            foreach (var plot in state.Plots)
             {
                 log.Info($"{plot.Alias} =========================");
                 foreach (var hole in plot.PlantingHoles)
@@ -93,7 +100,49 @@ namespace Autogardener.Modules
 
         public void UpdatePlotList()
         {
-            Plots = DiscoverPlots();
+            var discoveredPlots = DiscoverPlots();
+            List<Plot> combinedPlots = MergePlotLists(state.Plots, discoveredPlots);
+            bool saveToFile = HavePlotsChanged(state.Plots, combinedPlots);
+            state.Plots = combinedPlots;
+            if (saveToFile)
+            {
+                saveManager.WriteCharacterSave(state);
+            }
+        }
+
+        private bool HavePlotsChanged(List<Plot> original, List<Plot> newCombined)
+        {
+            if (original.Count != newCombined.Count) return true;
+            for (int i = 0; i < original.Count; i++)
+            {
+                if (!original[i].Equals(newCombined[i])) return true;
+            }
+
+            return false;
+        }
+        private List<Plot> MergePlotLists(List<Plot> known, List<Plot> scanned)
+        {
+            List<Plot> combinedPlots = new List<Plot>(known);
+            foreach (var plot in known)
+            {
+                log.Info("Known: " + plot.Alias + " " + plot.PlantingHoles.Count);
+            }
+            foreach (var plot in scanned)
+            {
+                log.Info("Scanned: " + plot.Alias + " " + plot.PlantingHoles.Count);
+            }
+            foreach (var plot in scanned)
+            {
+                if (!known.Any(p => p.Equals(plot)))
+                {
+                    combinedPlots.Add(plot);
+                }
+            }
+            foreach (var plot in combinedPlots)
+            {
+                log.Info("Combined: " + plot.Alias + " " + plot.PlantingHoles.Count);
+            }
+            return combinedPlots;
         }
 
         public List<Plot> DiscoverPlots()
@@ -104,11 +153,13 @@ namespace Autogardener.Modules
                 .Where(o => o != null && GlobalData.GardenPlotDataIds.Contains(o.DataId)).OrderBy(o => o.GameObjectId).ToList();
             log.Info("Total planting holes discovered: " + plotHoleObjects.Count);
             var plotNumber = 1;
+            int plotHoleCounter = 0;
             foreach (var plotHole in plotHoleObjects)
             {
                 log.Debug($"Building plant hole {plotHole.GameObjectId}");
                 if (plotInConstruction == null
-                    || Math.Abs((decimal)(plotInConstruction?.PlantingHoles.Last().GameObjectId ?? 0) - plotHole.GameObjectId) != 1) //Discontiguous id
+                    || Math.Abs((decimal)(plotInConstruction?.PlantingHoles.Last().GameObjectId ?? 0) - plotHole.GameObjectId) != 1 //Discontiguous id
+                    || plotHoleCounter == 8)
                 {
                     log.Debug("New Plot object created");
                     // Discontiguous, or first hole. Create new plot.
@@ -124,6 +175,7 @@ namespace Autogardener.Modules
                 var newHole = new PlotHole(plotHole.GameObjectId, plotHole.EntityId,
                                                     plotHole.ObjectIndex, plotHole.DataId, plotHole.Position);
                 plotInConstruction?.PlantingHoles.Add(newHole);
+                plotHoleCounter++;
             }
 
             if (plotInConstruction != null)

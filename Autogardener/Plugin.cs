@@ -19,6 +19,7 @@ public sealed class Plugin : IDalamudPlugin
 {
     private const string CommandName = "/autog";
 
+    public CharacterSaveState State { get; private set; } = new CharacterSaveState();
     public Configuration Configuration { get; init; }
 
     public readonly WindowSystem WindowSystem = new("Autogardener");
@@ -29,6 +30,8 @@ public sealed class Plugin : IDalamudPlugin
 
     private IClientState clientState { get; set; }
 
+    private ISaveManager<CharacterSaveState> saveManager { get; set; }
+
     public Plugin(IDalamudPluginInterface pluginInterface)
     {
         ECommonsMain.Init(pluginInterface, this);
@@ -36,9 +39,10 @@ public sealed class Plugin : IDalamudPlugin
         serviceProvider = BuildServiceProvider(pluginInterface);
         logService = serviceProvider.GetRequiredService<ILogService>();
         clientState = serviceProvider.GetRequiredService<IClientState>();
+        saveManager = serviceProvider.GetRequiredService<ISaveManager<CharacterSaveState>>();
 
         InitializeServices(serviceProvider);
-
+        
         var scarecrowPicturePath = Path.Combine(pluginInterface.AssemblyLocation.Directory?.FullName!, "Scarecrow.png");
         ConfigWindow = new ConfigWindow(logService, serviceProvider);
         MainWindow = new MainWindow(logService, serviceProvider, scarecrowPicturePath);
@@ -61,6 +65,16 @@ public sealed class Plugin : IDalamudPlugin
         pluginInterface.UiBuilder.OpenMainUi += ToggleMainUI;
     }
 
+    private void MakeSaveReady(IFramework framework)
+    {
+        if (State != null || clientState.LocalPlayer == null)
+        {
+            return;
+        }
+
+        State = saveManager.GetCharacterSaveInMemory();
+    }
+
     public void Dispose()
     {
         serviceProvider.GetRequiredService<HookManager>().Dispose();
@@ -70,6 +84,8 @@ public sealed class Plugin : IDalamudPlugin
         MainWindow.Dispose();
 
         serviceProvider.GetRequiredService<ICommandManager>().RemoveHandler(CommandName);
+
+        serviceProvider.GetRequiredService<IFramework>().Update -= MakeSaveReady;
     }
 
     private IServiceProvider BuildServiceProvider(IDalamudPluginInterface pluginInterface)
@@ -88,6 +104,7 @@ public sealed class Plugin : IDalamudPlugin
         serviceCollection.AddSingleton<Commands>();
         serviceCollection.AddSingleton<PlayerActions>();
         serviceCollection.AddSingleton<DesignManager>();
+        serviceCollection.AddSingleton<CharacterSaveState>((sp) => this.State);
         return serviceCollection.BuildServiceProvider();
     }
 
@@ -96,6 +113,7 @@ public sealed class Plugin : IDalamudPlugin
         IFramework framework = serviceProvider.GetRequiredService<IFramework>();
         serviceProvider.GetRequiredService<ILogService>().AttachToGameLogicLoop(framework);
         serviceProvider.GetRequiredService<IChatListener>().InitializeAndRun("[AG]");
+        framework.Update += MakeSaveReady;
         ActionWatcher.SetLogService(logService);
     }
 

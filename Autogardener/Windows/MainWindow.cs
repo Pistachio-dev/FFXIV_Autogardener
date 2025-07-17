@@ -62,11 +62,19 @@ public class MainWindow : PluginWindowBase, IDisposable
             var save = saveManager.GetCharacterSaveInMemory();
             if (ImGui.BeginTabItem("Plots"))
             {
-                if (ImGui.Button("Register nearest plot"))
+                
+                var nearestPlot = playerActions.GetNearestPlot();
+                if (nearestPlot != null)
                 {
-                    playerActions.RegisterNearestPlot();
-                    currentPlot = save.Plots.Count - 1;
+                    ImGui.TextUnformatted("Nearest plot:");
+                    ImGui.TextColored(NeutralGreen, nearestPlot.Alias);
+                    if (ImGui.Button("Scan"))
+                    {
+                        playerActions.RegisterNearestPlot();
+                        currentPlot = Math.Max(0, save.Plots.IndexOf(p => p.Id == playerActions.GetNearestPlot()?.Id));
+                    }
                 }
+
                 if (save.Plots.Any())
                 {
                     ImGui.Combo("Plot", ref currentPlot, save.Plots.Select(p => p.Alias).ToArray(), save.Plots.Count);

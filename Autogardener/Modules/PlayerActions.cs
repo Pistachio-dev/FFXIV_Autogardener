@@ -24,10 +24,11 @@ namespace Autogardener.Modules
         private readonly IObjectTable objectTable;
         private readonly ITargetManager targetManager;
         private readonly TaskManager taskManager;
+        private readonly CharacterSaveState state;
 
         public PlayerActions(ILogService logService, IChatGui chatGui, ISaveManager<CharacterSaveState> saveManager,
             GlobalData globalData, PlotWatcher plotWatcher, Commands commands, Utils utils, IClientState clientState,
-            IObjectTable objectTable, ITargetManager targetManager, TaskManager taskManager)
+            IObjectTable objectTable, ITargetManager targetManager, TaskManager taskManager, CharacterSaveState state)
         {
             this.logService = logService;
             this.chatGui = chatGui;
@@ -40,6 +41,7 @@ namespace Autogardener.Modules
             this.objectTable = objectTable;
             this.targetManager = targetManager;
             this.taskManager = taskManager;
+            this.state = state;
         }
 
         public void RegisterNearestPlot()
@@ -53,7 +55,6 @@ namespace Autogardener.Modules
             }
 
             var charState = saveManager.GetCharacterSaveInMemory();
-            logService.Info(System.Text.Json.JsonSerializer.Serialize(charState));
 
             Plot? plot = GetNearestPlot();
             if (plot == null)
@@ -104,7 +105,7 @@ namespace Autogardener.Modules
             targetManager.Target = ob;
             return true;
         }
-        private Plot? GetNearestPlot()
+        public Plot? GetNearestPlot()
         {
             plotWatcher.UpdatePlotList();
             Vector3 playerLocation = clientState.LocalPlayer?.Position ?? Vector3.Zero;
@@ -115,7 +116,7 @@ namespace Autogardener.Modules
             }
 
             IEnumerable<(Plot plot, float distance)> plotsWithDistances
-                = plotWatcher.Plots.Select(x => (x, Vector3.Distance(x.Location, playerLocation)));
+                = state.Plots.Select(x => (x, Vector3.Distance(x.Location, playerLocation)));
 
             try
             {
