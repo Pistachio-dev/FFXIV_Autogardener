@@ -39,8 +39,9 @@ public sealed class Plugin : IDalamudPlugin
 
         InitializeServices(serviceProvider);
 
+        var scarecrowPicturePath = Path.Combine(pluginInterface.AssemblyLocation.Directory?.FullName!, "Scarecrow.png");
         ConfigWindow = new ConfigWindow(logService, serviceProvider);
-        MainWindow = new MainWindow(logService, serviceProvider);
+        MainWindow = new MainWindow(logService, serviceProvider, scarecrowPicturePath);
 
         WindowSystem.AddWindow(ConfigWindow);
         WindowSystem.AddWindow(MainWindow);

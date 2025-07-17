@@ -10,7 +10,12 @@
   <ItemGroup>
     <PackageReference Include="Humanizer.Core" Version="2.14.1" />
   </ItemGroup>
-
+    <ItemGroup>
+        <Content Include="..\Data\Scarecrow.png">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <Visible>false</Visible>
+        </Content>
+    </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DalamudBasics\DalamudBasics\DalamudBasics.csproj" />
     <ProjectReference Include="..\DalamudBasics\ECommons\ECommons\ECommons.csproj" />

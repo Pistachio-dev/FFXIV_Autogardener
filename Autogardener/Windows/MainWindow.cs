@@ -1,11 +1,14 @@
 using Autogardener.Model;
 using Autogardener.Model.Plots;
 using Autogardener.Modules;
+using Dalamud.Plugin.Services;
 using DalamudBasics.GUI.Windows;
 using DalamudBasics.Logging;
 using DalamudBasics.SaveGames;
+
 using Humanizer;
 using Microsoft.Extensions.DependencyInjection;
+using System;
 using System.Linq;
 
 namespace Autogardener.Windows;
@@ -18,7 +21,7 @@ public class MainWindow : PluginWindowBase, IDisposable
     private Commands commands;
     private PlayerActions playerActions;
     private ISaveManager<CharacterSaveState> saveManager;
-
+    private ITextureProvider textureProvider;
     private static readonly Vector4 LightGreen = new Vector4(0.769f, 0.9f, 0.6f, 1);
     private static readonly Vector4 MidLightGreen = new Vector4(0.58f, 0.75f, 0.37f, 1);
     private static readonly Vector4 NeutralGreen = new Vector4(0.42f, 0.6f, 0.2f, 1);
@@ -26,8 +29,9 @@ public class MainWindow : PluginWindowBase, IDisposable
     private static readonly Vector4 DarkGreen = new Vector4(0.161f, 0.302f, 0, 1);
     private static readonly Vector4 NeutralBrown = new Vector4(0.651f, 0.49f, 0.196f, 1);
     private static readonly Vector4 MidDarkBrown = new Vector4(0.494f, 0.341f, 0.067f, 1);
+    private readonly string scarecrowPicturePath;
 
-    public MainWindow(ILogService logService, IServiceProvider serviceProvider)
+    public MainWindow(ILogService logService, IServiceProvider serviceProvider, string scarecrowPicturePath)
         : base(logService, "Autogardener", ImGuiWindowFlags.AlwaysAutoResize)
     {
         SizeConstraints = new WindowSizeConstraints
@@ -42,6 +46,8 @@ public class MainWindow : PluginWindowBase, IDisposable
         commands = serviceProvider.GetRequiredService<Commands>();
         playerActions = serviceProvider.GetRequiredService<PlayerActions>();
         saveManager = serviceProvider.GetRequiredService<ISaveManager<CharacterSaveState>>();
+        textureProvider = serviceProvider.GetRequiredService<ITextureProvider>();
+        this.scarecrowPicturePath = scarecrowPicturePath;
     }
 
     public void Dispose()
@@ -71,9 +77,24 @@ public class MainWindow : PluginWindowBase, IDisposable
                         plot.Alias = plotName; saveManager.WriteSave(save);
                     }
 
-                    foreach (var plotHole in plot.PlantingHoles)
+                    int[][] displayLayout = [
+                        [7, 6, 5],
+                        [0, 9 ,4],
+                        [1, 2, 3]];
+                    foreach (int[] row in displayLayout)
                     {
-                        DrawPlotHoleStatus(plotHole);
+                        foreach (int index in row){
+                            if (index == 9) {
+                                DrawCenterHole();
+                            }
+                            else
+                            {
+                                DrawPlotHoleStatus(plot.PlantingHoles[index], (uint)index);
+                            }
+                                
+                            ImGui.SameLine();
+                        }
+                        ImGui.NewLine();                        
                     }
     
                     plotWatcher.HighlightPlots();
@@ -94,8 +115,11 @@ public class MainWindow : PluginWindowBase, IDisposable
         }
     }
 
-    private void DrawPlotHoleStatus(PlotHole hole)
+    private void DrawPlotHoleStatus(PlotHole hole, uint index)
     {
+        //ImGui.PushItemWidth(200);
+        ImGui.PushStyleVar(ImGuiStyleVar.FrameBorderSize, 1f);
+        ImGui.BeginChildFrame(index, new Vector2(200, 200));
         ImGui.TextColored(LightGreen, globalData.GetSeedStringName(hole.CurrentSeed));        
         ImGui.TextColored(NeutralBrown, globalData.GetSoilStringName(hole.CurrentSoil));
         ImGui.TextColored(NeutralGreen, $"Last tended: {GetHumanizedTimeElapsed(hole.LastTendedUtc)}");
@@ -108,7 +132,23 @@ public class MainWindow : PluginWindowBase, IDisposable
             ImGui.TextColored(MidLightGreen, globalData.GetSeedStringName(hole.Design.DesignatedSeed));
             ImGui.TextColored(MidDarkBrown, globalData.GetSoilStringName(hole.Design.DesignatedSoil));
             ImGui.TextColored(NeutralGreen, $"Harvest: {(hole.Design.DoNotHarvest ? "Keep grown" : "Yes")}");
-        }        
+        }
+        ImGui.PopStyleVar();
+        ImGui.EndChildFrame();
+        //ImGui.PopItemWidth();
+    }
+
+    private void DrawCenterHole()
+    {
+        ImGui.PushStyleVar(ImGuiStyleVar.FrameBorderSize, 1f);
+        ImGui.BeginChildFrame(9, new Vector2(200, 200));
+        var scarecrowPic = textureProvider.GetFromFile(scarecrowPicturePath).GetWrapOrDefault();
+        if (scarecrowPic != null)
+        {
+            ImGui.Image(scarecrowPic.ImGuiHandle, new Vector2(scarecrowPic.Width, scarecrowPic.Height));
+        }
+        ImGui.PopStyleVar();
+        ImGui.EndChildFrame();
     }
 
     private string GetHumanizedTimeElapsed(DateTime? dateTime)
