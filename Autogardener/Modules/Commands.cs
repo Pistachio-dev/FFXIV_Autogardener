@@ -103,7 +103,7 @@ namespace Autogardener.Modules
                 logService.Info("Text node 228: " + dialogueText);
                 (uint id, string seedName) = ExtractPlantNameAndId(dialogueText);
                 if (id != 0)
-                {
+                {                    
                     plotHole.CurrentPlant = id;
                     logService.Info($"Seed registered: {id}-{seedName}");
                 }

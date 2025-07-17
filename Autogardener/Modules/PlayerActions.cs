@@ -92,7 +92,7 @@ namespace Autogardener.Modules
                 taskManager.Enqueue(() => commands.SetPlantTypeFromDialogue(plotHole), "Extract plant type", DefConfig);
                 taskManager.Enqueue(() => commands.SkipDialogueIfNeeded(), "Skip dialogue", DefConfig);
                 taskManager.Enqueue(() => commands.SelectActionString(globalData
-                    .GetGardeningOptionStringLocalized(GlobalData.GardeningOption.Quit)), "Select Quit", DefConfig);
+                    .GetGardeningOptionStringLocalized(GlobalData.GardeningStrings.Quit)), "Select Quit", DefConfig);
                 taskManager.EnqueueDelay(new Random().Next(200, 300));
             }
 

@@ -44,29 +44,29 @@ namespace Autogardener.Modules
             AddonText = Svc.Data.GetExcelSheet<Addon>().ToDictionary(x => x.RowId, x => x);
         }
 
-        public string GetGardeningOptionStringLocalized(GardeningOption option)
+        public string GetGardeningOptionStringLocalized(GardeningStrings option)
         {
             return clientState.ClientLanguage switch
             {
-                Dalamud.Game.ClientLanguage.English => GardeningOptionsTextEnglish[option],
+                Dalamud.Game.ClientLanguage.English => GardeningStringsEnglish[option],
                 _ => throw new NotImplementedException()
             };
         }
 
-        private Dictionary<GardeningOption, string> GardeningOptionsTextEnglish = new()
+        private Dictionary<GardeningStrings, string> GardeningStringsEnglish = new()
         {
-            { GardeningOption.PlantSeeds, "Plant Seeds" },
-            { GardeningOption.Fertilize, "Fertilize Crop" },
-            { GardeningOption.TendCrop, "Tend Crop" },
-            { GardeningOption.RemoveCrop, "Remove Crop" },
-            { GardeningOption.HarvestCrop, "Harvest Crop" },
-            { GardeningOption.Quit, "Quit" },
-            { GardeningOption.Growing, "This crop is doing well." },// Has the plant name in the line above it
-            { GardeningOption.Purple, "This crop has seen better days." },
-            { GardeningOption.ReadyToHarvest, "This crop is ready to be harvested." }, // Has the plant name in the line above it
+            { GardeningStrings.PlantSeeds, "Plant Seeds" },
+            { GardeningStrings.Fertilize, "Fertilize Crop" },
+            { GardeningStrings.TendCrop, "Tend Crop" },
+            { GardeningStrings.RemoveCrop, "Remove Crop" },
+            { GardeningStrings.HarvestCrop, "Harvest Crop" },
+            { GardeningStrings.Quit, "Quit" },
+            { GardeningStrings.Growing, "This crop is doing well." },// Has the plant name in the line above it
+            { GardeningStrings.Purple, "This crop has seen better days." },
+            { GardeningStrings.ReadyToHarvest, "This crop is ready to be harvested." }, // Has the plant name in the line above it
         };
 
-        public enum GardeningOption
+        public enum GardeningStrings
         {
             PlantSeeds,
             Fertilize,

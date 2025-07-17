@@ -81,7 +81,7 @@ public class MainWindow : PluginWindowBase, IDisposable
         DrawActionButton(() => plotWatcher.ListNearbyPlots(), "List nearby plots");
         DrawActionButton(() => plotWatcher.UpdatePlotList(), "Scan for plots");
         DrawActionButton(() => plotWatcher.ToggleDrawHighlights(), "Toggle display highlights");
-        DrawActionButton(() => logService.Info(globalData.GetGardeningOptionStringLocalized(GlobalData.GardeningOption.Purple)), "GetLocalizedString");
+        DrawActionButton(() => logService.Info(globalData.GetGardeningOptionStringLocalized(GlobalData.GardeningStrings.Purple)), "GetLocalizedString");
         plotWatcher.HighlightPlots();
     }
 }
