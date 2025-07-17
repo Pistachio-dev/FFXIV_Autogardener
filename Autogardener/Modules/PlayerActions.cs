@@ -101,6 +101,7 @@ namespace Autogardener.Modules
 
         private bool TargetObject(IGameObject ob)
         {
+            logService.Debug($"Targeting {ob.GameObjectId}");
             targetManager.Target = ob;
             return true;
         }
@@ -120,6 +121,7 @@ namespace Autogardener.Modules
             try
             {
                 Plot nearestPlot = plotsWithDistances.OrderBy(t => t.distance).First().plot;
+                logService.Debug($"Nearest plot found with {nearestPlot.PlantingHoles.Count} slots");
                 return nearestPlot;
             }
             catch (InvalidOperationException)

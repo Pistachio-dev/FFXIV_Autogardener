@@ -49,7 +49,11 @@ public class MainWindow : PluginWindowBase, IDisposable
             {
                 ImGui.EndTabItem();
             }
-
+            if (ImGui.BeginTabItem("Other"))
+            {
+                DrawAssortedActions();
+                ImGui.EndTabItem();
+            }
             ImGui.EndTabBar();
         }
     }

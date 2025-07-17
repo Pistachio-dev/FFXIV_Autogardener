@@ -64,6 +64,8 @@ namespace Autogardener.Modules
             { GardeningStrings.Growing, "This crop is doing well." },// Has the plant name in the line above it
             { GardeningStrings.Purple, "This crop has seen better days." },
             { GardeningStrings.ReadyToHarvest, "This crop is ready to be harvested." }, // Has the plant name in the line above it
+            { GardeningStrings.Shard, "Shard" },
+            { GardeningStrings.xLight, "light" }, // Has the plant name in the line above it
         };
 
         public enum GardeningStrings
@@ -77,6 +79,8 @@ namespace Autogardener.Modules
             Growing,
             Purple,
             ReadyToHarvest,
+            Shard,
+            xLight,
         }
     }
 }

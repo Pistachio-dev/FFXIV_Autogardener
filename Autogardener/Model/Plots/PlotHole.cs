@@ -1,3 +1,4 @@
+using Autogardener.Model.Designs;
 using Dalamud.Game.ClientState.Objects.Types;
 
 namespace Autogardener.Model.Plots
@@ -21,14 +22,13 @@ namespace Autogardener.Model.Plots
             DataId = ob.DataId;
             Location = ob.Position;
         }
-        public uint DesignatedPlant { get; set; } //ItemId
-        public uint DesignatedSoil { get; set; } //ItemId
+
+        public PlotHolePlan? Design { get; set; } = null;
 
         public uint CurrentPlant { get; set; } //ItemId
 
         public DateTime? LastTendedUtc { get; set; } // That the plugin knows of. I it gets tended without the plugin, it won't know. But you can't overtend so, great.
         public DateTime? LastFertilized { get; set; } // Same as above
-        public bool DoNotHarvest { get; set; } // For those plants that you leave up, for interbreeding
         public ulong GameObjectId { get; set; }
         public uint EntityId { get; set; }
         public uint ObjectIndex { get; set; }

@@ -5,13 +5,16 @@ namespace Autogardener.Model.Plots
 {
     public class Plot
     {
+        
         public Plot(string alias)
         {
             Alias = alias;
         }
 
+        public Guid Id { get; set; } = Guid.NewGuid();
+
         public string DesignName => AppliedDesign?.PlanName ?? "Unassigned plan";
-        public PlotPlan AppliedDesign { get; set; } = null;
+        public PlotPlan? AppliedDesign { get; set; } = null;
 
         public string Alias { get; set; }
 

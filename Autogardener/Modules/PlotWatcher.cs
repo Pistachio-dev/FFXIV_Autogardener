@@ -106,9 +106,11 @@ namespace Autogardener.Modules
             var plotNumber = 1;
             foreach (var plotHole in plotHoleObjects)
             {
+                log.Debug($"Building plant hole {plotHole.GameObjectId}");
                 if (plotInConstruction == null
-                    || plotInConstruction?.PlantingHoles.Last().ObjectIndex + 1 != plotHole.ObjectIndex)
+                    || Math.Abs((decimal)(plotInConstruction?.PlantingHoles.Last().GameObjectId ?? 0) - plotHole.GameObjectId) != 1) //Discontiguous id
                 {
+                    log.Debug("New Plot object created");
                     // Discontiguous, or first hole. Create new plot.
                     if (plotInConstruction != null)
                     {

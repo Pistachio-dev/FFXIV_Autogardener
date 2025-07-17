@@ -27,12 +27,15 @@ public sealed class Plugin : IDalamudPlugin
     private IServiceProvider serviceProvider { get; init; }
     private ILogService logService { get; set; }
 
+    private IClientState clientState { get; set; }
+
     public Plugin(IDalamudPluginInterface pluginInterface)
     {
         ECommonsMain.Init(pluginInterface, this);
 
         serviceProvider = BuildServiceProvider(pluginInterface);
         logService = serviceProvider.GetRequiredService<ILogService>();
+        clientState = serviceProvider.GetRequiredService<IClientState>();
 
         InitializeServices(serviceProvider);
 
@@ -73,7 +76,8 @@ public sealed class Plugin : IDalamudPlugin
         IServiceCollection serviceCollection = new ServiceCollection();
         serviceCollection.AddAllDalamudBasicsServices<Configuration>(pluginInterface);
         string saveFileName = Path.Combine(pluginInterface.GetPluginConfigDirectory(), "SavedData.json");
-        serviceCollection.AddSingleton<ISaveManager<SaveState>>((sp) => new SaveManager<SaveState>(saveFileName, logService));
+        serviceCollection.AddSingleton<ISaveManager<CharacterSaveState>>(
+            (sp) => new SaveManager<CharacterSaveState>(saveFileName, logService, clientState));
         serviceCollection.AddSingleton<StringDebugUtils>();
         serviceCollection.AddSingleton<UtilOld>();
         serviceCollection.AddSingleton<Utils>();
@@ -82,6 +86,7 @@ public sealed class Plugin : IDalamudPlugin
         serviceCollection.AddSingleton<GlobalData>();
         serviceCollection.AddSingleton<Commands>();
         serviceCollection.AddSingleton<PlayerActions>();
+        serviceCollection.AddSingleton<DesignManager>();
 
         return serviceCollection.BuildServiceProvider();
     }
