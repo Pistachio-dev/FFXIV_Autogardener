@@ -23,6 +23,26 @@ namespace Autogardener.Modules
         private readonly ILogService logService;
         private readonly IClientState clientState;
 
+        public string GetSeedStringName(uint id)
+        {
+            if (Seeds.ContainsKey(id))
+            {
+                return Seeds[id].Name.ToString();
+            }
+
+            return "No/unknown seed";
+        }
+
+        public string GetSoilStringName(uint id)
+        {
+            if (Soils.ContainsKey(id))
+            {
+                return Soils[id].Name.ToString();
+            }
+
+            return "No/unknown soil";
+        }
+
         public Dictionary<uint, Item> Seeds { get; set; }
         public Dictionary<uint, Item> Soils { get; set; }
         public Dictionary<uint, Item> Fertilizers { get; set; }

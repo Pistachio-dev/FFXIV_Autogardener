@@ -25,10 +25,12 @@ namespace Autogardener.Model.Plots
 
         public PlotHolePlan? Design { get; set; } = null;
 
-        public uint CurrentPlant { get; set; } //ItemId
+        public uint CurrentSeed { get; set; } //ItemId
+
+        public uint CurrentSoil { get; set; }
 
         public DateTime? LastTendedUtc { get; set; } // That the plugin knows of. I it gets tended without the plugin, it won't know. But you can't overtend so, great.
-        public DateTime? LastFertilized { get; set; } // Same as above
+        public DateTime? LastFertilizedUtc { get; set; } // Same as above
         public ulong GameObjectId { get; set; }
         public uint EntityId { get; set; }
         public uint ObjectIndex { get; set; }

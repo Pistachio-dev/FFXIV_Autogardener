@@ -1,7 +1,12 @@
+using Autogardener.Model;
+using Autogardener.Model.Plots;
 using Autogardener.Modules;
 using DalamudBasics.GUI.Windows;
 using DalamudBasics.Logging;
+using DalamudBasics.SaveGames;
+using Humanizer;
 using Microsoft.Extensions.DependencyInjection;
+using System.Linq;
 
 namespace Autogardener.Windows;
 
@@ -12,6 +17,15 @@ public class MainWindow : PluginWindowBase, IDisposable
     private GlobalData globalData;
     private Commands commands;
     private PlayerActions playerActions;
+    private ISaveManager<CharacterSaveState> saveManager;
+
+    private static readonly Vector4 LightGreen = new Vector4(0.769f, 0.9f, 0.6f, 1);
+    private static readonly Vector4 MidLightGreen = new Vector4(0.58f, 0.75f, 0.37f, 1);
+    private static readonly Vector4 NeutralGreen = new Vector4(0.42f, 0.6f, 0.2f, 1);
+    private static readonly Vector4 MidDarkGreen = new Vector4(0.278f, 0.455f, 0.075f, 1);
+    private static readonly Vector4 DarkGreen = new Vector4(0.161f, 0.302f, 0, 1);
+    private static readonly Vector4 NeutralBrown = new Vector4(0.651f, 0.49f, 0.196f, 1);
+    private static readonly Vector4 MidDarkBrown = new Vector4(0.494f, 0.341f, 0.067f, 1);
 
     public MainWindow(ILogService logService, IServiceProvider serviceProvider)
         : base(logService, "Autogardener", ImGuiWindowFlags.AlwaysAutoResize)
@@ -27,22 +41,42 @@ public class MainWindow : PluginWindowBase, IDisposable
         globalData = serviceProvider.GetRequiredService<GlobalData>();
         commands = serviceProvider.GetRequiredService<Commands>();
         playerActions = serviceProvider.GetRequiredService<PlayerActions>();
+        saveManager = serviceProvider.GetRequiredService<ISaveManager<CharacterSaveState>>();
     }
 
     public void Dispose()
     { }
+    private string plotName;
+    private int currentPlot = 0;
 
     protected override unsafe void SafeDraw()
-    {
+    {        
         if (ImGui.BeginTabBar("MainTabBar"))
         {
+            var save = saveManager.GetCharacterSaveInMemory();
             if (ImGui.BeginTabItem("Plots"))
             {
                 if (ImGui.Button("Register nearest plot"))
                 {
                     playerActions.RegisterNearestPlot();
                 }
-                plotWatcher.HighlightPlots();
+                if (save.Plots.Any())
+                {
+                    var plot = save.Plots[currentPlot];
+                    plotName = plot.Alias;
+                    if(ImGui.InputText("Plot alias", ref plotName, 40))
+                    {
+                        plot.Alias = plotName; saveManager.WriteSave(save);
+                    }
+
+                    foreach (var plotHole in plot.PlantingHoles)
+                    {
+                        DrawPlotHoleStatus(plotHole);
+                    }
+    
+                    plotWatcher.HighlightPlots();
+                    
+                }
                 ImGui.EndTabItem();
             }
             if (ImGui.BeginTabItem("Designs"))
@@ -58,6 +92,32 @@ public class MainWindow : PluginWindowBase, IDisposable
         }
     }
 
+    private void DrawPlotHoleStatus(PlotHole hole)
+    {
+        ImGui.TextColored(LightGreen, globalData.GetSeedStringName(hole.CurrentSeed));        
+        ImGui.TextColored(NeutralBrown, globalData.GetSoilStringName(hole.CurrentSoil));
+        ImGui.TextColored(NeutralGreen, $"Last tended: {GetHumanizedTimeElapsed(hole.LastTendedUtc)}");
+        ImGui.TextColored(MidDarkGreen, $"Last fertilized: {GetHumanizedTimeElapsed(hole.LastFertilizedUtc)}");
+        
+        if (hole.Design != null)
+        {
+            ImGui.Separator();
+            ImGui.TextUnformatted("Plan:");
+            ImGui.TextColored(MidLightGreen, globalData.GetSeedStringName(hole.Design.DesignatedSeed));
+            ImGui.TextColored(MidDarkBrown, globalData.GetSoilStringName(hole.Design.DesignatedSoil));
+            ImGui.TextColored(NeutralGreen, $"Harvest: {(hole.Design.DoNotHarvest ? "Keep grown" : "Yes")}");
+        }        
+    }
+
+    private string GetHumanizedTimeElapsed(DateTime? dateTime)
+    {        
+        if (dateTime == null || dateTime == DateTime.MinValue){
+            return "Never";
+        }
+
+        TimeSpan timeSpan = (dateTime ?? DateTime.UtcNow) - DateTime.UtcNow;
+        return timeSpan.Humanize();
+    }
     private unsafe void DrawAssortedActions()
     {
         DrawActionButton(() => oldUtil.DescribeTarget(), "Describe target");

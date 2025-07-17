@@ -105,7 +105,7 @@ namespace Autogardener.Modules
                 (uint id, string seedName) = ExtractPlantNameAndId(dialogueText);
                 if (id != 0)
                 {                    
-                    plotHole.CurrentPlant = id;
+                    plotHole.CurrentSeed = id;
                     logService.Info($"Seed registered: {id}-{seedName}");
                 }
                 taskManager.InsertDelay(100);

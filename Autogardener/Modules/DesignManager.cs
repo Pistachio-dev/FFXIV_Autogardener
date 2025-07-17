@@ -65,7 +65,7 @@ namespace Autogardener.Modules
         {
             return new PlotHolePlan()
             {
-                DesignatedPlant = basePlotHole.CurrentPlant,
+                DesignatedSeed = basePlotHole.CurrentSeed,
                 DesignatedSoil = 0,
                 DoNotHarvest = false,
                 RelativeIndex = index

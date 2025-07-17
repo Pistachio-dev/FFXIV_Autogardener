@@ -15,7 +15,7 @@ namespace Autogardener.Modules
     {
         private readonly ILogService logService;
         private readonly IChatGui chatGui;
-        private readonly ISaveManager<SaveState> saveManager;
+        private readonly ISaveManager<CharacterSaveState> saveManager;
         private readonly GlobalData globalData;
         private readonly PlotWatcher plotWatcher;
         private readonly Commands commands;
@@ -25,7 +25,7 @@ namespace Autogardener.Modules
         private readonly ITargetManager targetManager;
         private readonly TaskManager taskManager;
 
-        public PlayerActions(ILogService logService, IChatGui chatGui, ISaveManager<SaveState> saveManager,
+        public PlayerActions(ILogService logService, IChatGui chatGui, ISaveManager<CharacterSaveState> saveManager,
             GlobalData globalData, PlotWatcher plotWatcher, Commands commands, Utils utils, IClientState clientState,
             IObjectTable objectTable, ITargetManager targetManager, TaskManager taskManager)
         {
@@ -52,8 +52,7 @@ namespace Autogardener.Modules
                 return;
             }
 
-            var state = saveManager.LoadSave()!;
-            var charState = state.GetCharacterSaveState(player.GetFullName());
+            var charState = saveManager.GetCharacterSaveInMemory();
             logService.Info(System.Text.Json.JsonSerializer.Serialize(charState));
 
             Plot? plot = GetNearestPlot();
@@ -96,7 +95,7 @@ namespace Autogardener.Modules
                 taskManager.EnqueueDelay(new Random().Next(200, 300));
             }
 
-            taskManager.Enqueue(() => {saveManager.WriteSave(state);});
+            taskManager.Enqueue(() => {saveManager.WriteCharacterSave(charState);});
         }
 
         private bool TargetObject(IGameObject ob)
