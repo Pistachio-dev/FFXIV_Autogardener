@@ -59,12 +59,14 @@ public class MainWindow : PluginWindowBase, IDisposable
                 if (ImGui.Button("Register nearest plot"))
                 {
                     playerActions.RegisterNearestPlot();
+                    currentPlot = save.Plots.Count - 1;
                 }
                 if (save.Plots.Any())
                 {
+                    ImGui.Combo("Plot", ref currentPlot, save.Plots.Select(p => p.Alias).ToArray(), save.Plots.Count);
                     var plot = save.Plots[currentPlot];
                     plotName = plot.Alias;
-                    if(ImGui.InputText("Plot alias", ref plotName, 40))
+                    if(ImGui.InputText("Rename", ref plotName, 40))
                     {
                         plot.Alias = plotName; saveManager.WriteSave(save);
                     }

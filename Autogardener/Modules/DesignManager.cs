@@ -3,11 +3,6 @@ using Autogardener.Model.Designs;
 using Autogardener.Model.Plots;
 using DalamudBasics.Logging;
 using DalamudBasics.SaveGames;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Autogardener.Modules
 {
@@ -32,7 +27,7 @@ namespace Autogardener.Modules
                 newDesign.PlotHolePlans.Add(CreateFromPlotHole(basePlot.PlantingHoles[i], i));
             }
 
-            var save = saveManager.LoadCharacterSave();
+            var save = saveManager.GetCharacterSaveInMemory();
             save.Designs.Add(newDesign);
             saveManager.WriteSave(save);
         }
