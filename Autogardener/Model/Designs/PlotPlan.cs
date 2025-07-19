@@ -14,7 +14,7 @@ namespace Autogardener.Model.Designs
         }
         public Guid Id { get; set; } = Guid.NewGuid();
 
-        public string PlanName { get; set; } = "Unnamed plan";
+        public string PlanName { get; set; } = "New plan";
 
         public string PlanDescription { get; set; } = string.Empty;
 

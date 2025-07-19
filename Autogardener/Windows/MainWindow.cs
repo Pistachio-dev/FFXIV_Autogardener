@@ -8,7 +8,7 @@ using Dalamud.Plugin.Services;
 using DalamudBasics.GUI.Windows;
 using DalamudBasics.Logging;
 using DalamudBasics.SaveGames;
-
+using ECommons.Automation.NeoTaskManager;
 using Humanizer;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -24,6 +24,7 @@ public class MainWindow : PluginWindowBase, IDisposable
     private Commands commands;
     private PlayerActions playerActions;
     private ISaveManager<CharacterSaveState> saveManager;
+    private TaskManager taskManager;
     private ITextureProvider textureProvider;
     private IFramework framework;
 
@@ -61,6 +62,8 @@ public class MainWindow : PluginWindowBase, IDisposable
         GenerateOrderedCollection(globalData.Seeds, out seedIds, out seedNames);
         GenerateOrderedCollection(globalData.Soils, out soilIds, out soilNames);
         framework = serviceProvider.GetRequiredService<IFramework>();
+        taskManager = serviceProvider.GetRequiredService<TaskManager>();
+        
         framework.RunOnFrameworkThread(() =>
         {
             saveManager.GetCharacterSaveInMemory();
@@ -88,6 +91,18 @@ public class MainWindow : PluginWindowBase, IDisposable
 
     private bool toggleRenamePlot;
     private bool toggleRenameDesign;
+
+    private int GetCurrentDesignNumber(Plot plot, CharacterSaveState state)
+    {
+        if (plot.AppliedDesign == null)
+        {
+            return 0; // None
+        }
+
+        Guid designId = plot.AppliedDesign.Plan.Id;
+        return state.Designs.IndexOf(p => p.Id == designId);
+    }
+
     protected override unsafe void SafeDraw()
     {        
         if (ImGui.BeginTabBar("MainTabBar"))
@@ -127,6 +142,13 @@ public class MainWindow : PluginWindowBase, IDisposable
                         }
                     }
 
+                    int designForCurrentPlot = GetCurrentDesignNumber(plot, save);
+                    string[] designNames = save.Designs.Select(p => p.PlanName).ToArray();
+                    if (ImGui.Combo("Plan", ref designForCurrentPlot, designNames, designNames.Length))
+                    {
+                        plot.AppliedDesign = new AppliedPlotPlan(save.Designs[designForCurrentPlot]);
+                        taskManager.Enqueue(() => saveManager.WriteCharacterSave());
+                    }
                     if (plot.PlantingHoles.Count == 1)
                     {
                         DrawPlotHoleStatus(plot.PlantingHoles[0], 0);
@@ -171,10 +193,10 @@ public class MainWindow : PluginWindowBase, IDisposable
             if (ImGui.BeginTabItem("Designs"))
             {
                 if (ImGuiComponents.IconButtonWithText(FontAwesomeIcon.PaintBrush, "Create new design for nearest plot")) {
-                    var newIndex = playerActions.CreateNewDesign();
+                    currentDesign = playerActions.CreateNewDesign();
                 }
                 //logService.Info(save.Designs.Count.ToString());
-                if (save.Designs.Count > 0)
+                if (save.Designs.Count > 1)
                 {
                     ImGui.Combo("Design", ref currentDesign, save.Designs.Select(d => d.PlanName).ToArray(), save.Designs.Count);
                     ImGui.SameLine();
@@ -191,7 +213,11 @@ public class MainWindow : PluginWindowBase, IDisposable
                             saveManager.WriteCharacterSave();
                         }
                     }
-                    if (save.Designs[currentDesign].PlotHolePlans.Count == 1)
+                    if (save.Designs[currentDesign].PlotHolePlans.Count == 0)
+                    {
+
+                    }
+                    else if (save.Designs[currentDesign].PlotHolePlans.Count == 1)
                     {
                         DrawPlotHoleDesign(save.Designs[currentDesign].PlotHolePlans[0], 0);
                     }

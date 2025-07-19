@@ -7,6 +7,12 @@ namespace Autogardener.Model
     {
         public List<Plot> Plots { get; set; } = new();
 
-        public List<PlotPlan> Designs { get; set; } = new();
+        public List<PlotPlan> Designs { get; set; } = new()
+        {
+            new PlotPlan()
+            {
+                PlanName = "None",
+            }
+        };
     }
 }
