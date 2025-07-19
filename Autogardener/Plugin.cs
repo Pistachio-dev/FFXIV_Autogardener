@@ -1,6 +1,7 @@
 using Autogardener.Model;
 using Autogardener.Modules;
 using Autogardener.Windows;
+using Autogardener.Windows.MainWindow;
 using Dalamud.Game.Command;
 using Dalamud.Plugin.Services;
 using DalamudBasics.Chat.Listener;
