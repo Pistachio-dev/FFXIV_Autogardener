@@ -86,6 +86,8 @@ public class MainWindow : PluginWindowBase, IDisposable
     private int currentPlot = 0;
     private int currentDesign = 0;
 
+    private bool toggleRenamePlot;
+    private bool toggleRenameDesign;
     protected override unsafe void SafeDraw()
     {        
         if (ImGui.BeginTabBar("MainTabBar"))
@@ -111,10 +113,20 @@ public class MainWindow : PluginWindowBase, IDisposable
                     ImGui.Combo("Plot", ref currentPlot, save.Plots.Select(p => p.Alias).ToArray(), save.Plots.Count);
                     var plot = save.Plots[currentPlot];
                     plotName = plot.Alias;
-                    if (ImGui.InputText("Rename", ref plotName, 40))
+                    ImGui.SameLine();
+                    if (ImGuiComponents.IconButton(FontAwesomeIcon.Pen))
                     {
-                        plot.Alias = plotName; saveManager.WriteSave(save);
+                        toggleRenamePlot = !toggleRenamePlot;
                     }
+                    DrawTooltip("Rename");
+                    if (toggleRenamePlot)
+                    {
+                        if (ImGui.InputText("New name", ref plotName, 40))
+                        {
+                            plot.Alias = plotName; saveManager.WriteSave(save);
+                        }
+                    }
+
                     if (plot.PlantingHoles.Count == 1)
                     {
                         DrawPlotHoleStatus(plot.PlantingHoles[0], 0);
@@ -165,10 +177,19 @@ public class MainWindow : PluginWindowBase, IDisposable
                 if (save.Designs.Count > 0)
                 {
                     ImGui.Combo("Design", ref currentDesign, save.Designs.Select(d => d.PlanName).ToArray(), save.Designs.Count);
+                    ImGui.SameLine();
+                    if (ImGuiComponents.IconButton(FontAwesomeIcon.Pen))
+                    {
+                        toggleRenameDesign = !toggleRenameDesign;
+                    }
+                    DrawTooltip("Rename");
                     string designName = save.Designs[currentDesign].PlanName;
-                    if (ImGui.InputText("Rename", ref designName, 40)){
-                        save.Designs[currentDesign].PlanName = designName;
-                        saveManager.WriteCharacterSave();
+                    if (toggleRenameDesign) {
+                        if (ImGui.InputText("New name", ref designName, 40))
+                        {
+                            save.Designs[currentDesign].PlanName = designName;
+                            saveManager.WriteCharacterSave();
+                        }
                     }
                     if (save.Designs[currentDesign].PlotHolePlans.Count == 1)
                     {
