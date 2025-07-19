@@ -40,6 +40,7 @@ public partial class MainWindow : PluginWindowBase, IDisposable
     private static readonly Vector4 DarkGreen = new Vector4(0.161f, 0.302f, 0, 1);
     private static readonly Vector4 NeutralBrown = new Vector4(0.651f, 0.49f, 0.196f, 1);
     private static readonly Vector4 MidDarkBrown = new Vector4(0.494f, 0.341f, 0.067f, 1);
+    private static readonly Vector4 Red = new Vector4(0.55f, 0, 0, 1);
     private readonly string scarecrowPicturePath;
 
     public MainWindow(ILogService logService, IServiceProvider serviceProvider, string scarecrowPicturePath)

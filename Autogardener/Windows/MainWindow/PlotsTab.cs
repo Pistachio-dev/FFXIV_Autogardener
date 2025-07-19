@@ -25,7 +25,7 @@ namespace Autogardener.Windows.MainWindow
             {
                 ImGui.TextUnformatted("Nearest plot:");
                 ImGui.TextColored(NeutralGreen, nearestPlot.Alias);
-                if (ImGui.Button("Scan nearest"))
+                if (ImGui.Button("Scan the plot you're on"))
                 {
                     playerActions.RegisterNearestPlot();
                     currentPlot = Math.Max(0, save.Plots.IndexOf(p => p.Id == playerActions.GetNearestPlot()?.Id));
@@ -38,6 +38,7 @@ namespace Autogardener.Windows.MainWindow
                 ImGui.Combo("Plot", ref currentPlot, save.Plots.Select(p => p.Alias).ToArray(), save.Plots.Count);
                 var plot = save.Plots[currentPlot];
                 DrawPlotRenameButton(plot);
+                DrawForgetPlotButton(save.Plots, plot);
 
                 var designForCurrentPlot = GetCurrentDesignNumber(plot, save);
                 var designNames = save.Designs.Select(p => p.PlanName).ToArray();
@@ -69,6 +70,21 @@ namespace Autogardener.Windows.MainWindow
                 }
             }
         }
+        private void DrawForgetPlotButton(List<Plot> plots, Plot plot)
+        {
+            ImGui.SameLine();
+            bool buttonsPressed = ImGui.GetIO().KeyShift && ImGui.GetIO().KeyCtrl;
+
+            if (ImGuiComponents.IconButton(FontAwesomeIcon.SquareXmark, Red) && buttonsPressed)
+            {
+                plots.Remove(plot);
+                taskManager.Enqueue(() => saveManager.WriteCharacterSave());
+            }
+            
+            DrawTooltip("Ctrl+Shift to forget this plot\n(The plugin will stop tracking it)");
+
+        }
+
         private void DrawCurrentPlot(Plot plot)
         {
             if (plot.PlantingHoles.Count == 1)
