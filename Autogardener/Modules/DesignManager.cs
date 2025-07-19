@@ -44,7 +44,7 @@ namespace Autogardener.Modules
                 throw new Exception("Mismatched design and plot hole count");
             }
 
-            targetPlot.AppliedDesign = design;
+            targetPlot.AppliedDesign = new AppliedPlotPlan(design);
             for (int i = 0; i < design.PlotHolePlans.Count; i++)
             {
                 targetPlot.PlantingHoles[ApplyRotation(i, rotations)].Design = design.PlotHolePlans[i];
@@ -58,7 +58,7 @@ namespace Autogardener.Modules
 
         private PlotHolePlan CreateFromPlotHole(PlotHole basePlotHole, int index)
         {
-            return new PlotHolePlan()
+            return new PlotHolePlan(index)
             {
                 DesignatedSeed = basePlotHole.CurrentSeed,
                 DesignatedSoil = 0,

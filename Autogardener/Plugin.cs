@@ -104,7 +104,6 @@ public sealed class Plugin : IDalamudPlugin
         serviceCollection.AddSingleton<Commands>();
         serviceCollection.AddSingleton<PlayerActions>();
         serviceCollection.AddSingleton<DesignManager>();
-        serviceCollection.AddSingleton<CharacterSaveState>((sp) => this.State);
         return serviceCollection.BuildServiceProvider();
     }
 

@@ -4,8 +4,7 @@ using System.Linq;
 namespace Autogardener.Model.Plots
 {
     public class Plot
-    {
-        
+    {        
         public Plot(string alias)
         {
             Alias = alias;
@@ -13,8 +12,8 @@ namespace Autogardener.Model.Plots
 
         public Guid Id { get; set; } = Guid.NewGuid();
 
-        public string DesignName => AppliedDesign?.PlanName ?? "Unassigned plan";
-        public PlotPlan? AppliedDesign { get; set; } = null;
+        public string DesignName => AppliedDesign?.Plan.PlanName ?? "Unassigned plan";
+        public AppliedPlotPlan? AppliedDesign { get; set; } = null;
 
         public string Alias { get; set; }
 

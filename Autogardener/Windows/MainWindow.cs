@@ -1,6 +1,9 @@
 using Autogardener.Model;
+using Autogardener.Model.Designs;
 using Autogardener.Model.Plots;
 using Autogardener.Modules;
+using Dalamud.Interface;
+using Dalamud.Interface.Components;
 using Dalamud.Plugin.Services;
 using DalamudBasics.GUI.Windows;
 using DalamudBasics.Logging;
@@ -22,6 +25,13 @@ public class MainWindow : PluginWindowBase, IDisposable
     private PlayerActions playerActions;
     private ISaveManager<CharacterSaveState> saveManager;
     private ITextureProvider textureProvider;
+    private IFramework framework;
+
+    private uint[] seedIndexes;
+    private string[] seedNames;
+    private uint[] soilIndexes;
+    private string[] soilNames;
+
     private static readonly Vector4 LightGreen = new Vector4(0.769f, 0.9f, 0.6f, 1);
     private static readonly Vector4 MidLightGreen = new Vector4(0.58f, 0.75f, 0.37f, 1);
     private static readonly Vector4 NeutralGreen = new Vector4(0.42f, 0.6f, 0.2f, 1);
@@ -48,12 +58,23 @@ public class MainWindow : PluginWindowBase, IDisposable
         saveManager = serviceProvider.GetRequiredService<ISaveManager<CharacterSaveState>>();
         textureProvider = serviceProvider.GetRequiredService<ITextureProvider>();
         this.scarecrowPicturePath = scarecrowPicturePath;
+        seedIndexes = globalData.Seeds.Keys.ToArray();
+        seedNames = seedIndexes.Select(i => globalData.Seeds[i].Name.ToString()).ToArray();
+        soilIndexes = globalData.Soils.Keys.ToArray();
+        soilNames = soilIndexes.Select(i => globalData.Soils[i].Name.ToString()).ToArray();
+        framework = serviceProvider.GetRequiredService<IFramework>();
+        framework.RunOnFrameworkThread(() =>
+        {
+            saveManager.GetCharacterSaveInMemory();
+        });
+        
     }
 
     public void Dispose()
     { }
     private string plotName;
     private int currentPlot = 0;
+    private int currentDesign = 0;
 
     protected override unsafe void SafeDraw()
     {        
@@ -80,38 +101,93 @@ public class MainWindow : PluginWindowBase, IDisposable
                     ImGui.Combo("Plot", ref currentPlot, save.Plots.Select(p => p.Alias).ToArray(), save.Plots.Count);
                     var plot = save.Plots[currentPlot];
                     plotName = plot.Alias;
-                    if(ImGui.InputText("Rename", ref plotName, 40))
+                    if (ImGui.InputText("Rename", ref plotName, 40))
                     {
                         plot.Alias = plotName; saveManager.WriteSave(save);
                     }
-
-                    int[][] displayLayout = [
-                        [7, 6, 5],
-                        [0, 9 ,4],
-                        [1, 2, 3]];
-                    foreach (int[] row in displayLayout)
+                    if (plot.PlantingHoles.Count == 1)
                     {
-                        foreach (int index in row){
-                            if (index == 9) {
-                                DrawCenterHole();
-                            }
-                            else
-                            {
-                                DrawPlotHoleStatus(plot.PlantingHoles[index], (uint)index);
-                            }
-                                
-                            ImGui.SameLine();
-                        }
-                        ImGui.NewLine();                        
+                        DrawPlotHoleStatus(plot.PlantingHoles[0], 0);
                     }
-    
+                    else
+                    {
+                        int[][] displayLayout = [
+                            [7, 6, 5],
+                            [0, 9 ,4],
+                            [1, 2, 3]];
+                        foreach (int[] row in displayLayout)
+                        {
+                            foreach (int index in row)
+                            {
+                                if (index == 9)
+                                {
+                                    DrawCenterHole();
+                                }
+                                else
+                                {
+                                    if (index >= plot.PlantingHoles.Count)
+                                    {
+                                        logService.Warning($"Planting hole index {index} is out of bounds");
+                                    }
+                                    else
+                                    {
+                                        DrawPlotHoleStatus(plot.PlantingHoles[index], (uint)index);
+                                    }
+                                }
+
+                                ImGui.SameLine();
+                            }
+                            ImGui.NewLine();
+                        }
+                    }
+
                     plotWatcher.HighlightPlots();
-                    
+
                 }
                 ImGui.EndTabItem();
             }
             if (ImGui.BeginTabItem("Designs"))
             {
+                if (ImGuiComponents.IconButtonWithText(FontAwesomeIcon.PaintBrush, "Create new design for nearest plot")) {
+                    var newIndex = playerActions.CreateNewDesign();
+                }
+                //logService.Info(save.Designs.Count.ToString());
+                if (save.Designs.Count > 0)
+                {
+                    ImGui.Combo("Design", ref currentDesign, save.Designs.Select(d => d.PlanName).ToArray(), save.Designs.Count);
+                    if (save.Designs[currentDesign].PlotHolePlans.Count == 1)
+                    {
+                        DrawPlotHoleDesign(save.Designs[currentDesign].PlotHolePlans[0], 0);
+                    }
+                    else
+                    {
+                        int[][] displayLayout = [
+                                                [7, 6, 5],
+                                                [0, 9 ,4],
+                                                [1, 2, 3]];
+                        foreach (int[] row in displayLayout)
+                        {
+                            foreach (int index in row)
+                            {
+                                if (index == 9)
+                                {
+                                    DrawCenterHole();
+                                }
+                                else
+                                {
+                                    DrawPlotHoleDesign(save.Designs[currentDesign].PlotHolePlans[index], (uint)index);
+                                }
+
+                                ImGui.SameLine();
+                            }
+                            ImGui.NewLine();
+                        }
+                    }
+
+
+                }
+
+
                 ImGui.EndTabItem();
             }
             if (ImGui.BeginTabItem("Other"))
@@ -123,9 +199,13 @@ public class MainWindow : PluginWindowBase, IDisposable
         }
     }
 
+    private void DrawHoleGrid(Action drawHoleAction)
+    {
+
+    }
     private void DrawPlotHoleStatus(PlotHole hole, uint index)
     {
-        //ImGui.PushItemWidth(200);
+        ImGui.PushItemWidth(200);
         ImGui.PushStyleVar(ImGuiStyleVar.FrameBorderSize, 1f);
         ImGui.BeginChildFrame(index, new Vector2(200, 200));
         ImGui.TextColored(LightGreen, globalData.GetSeedStringName(hole.CurrentSeed));        
@@ -141,9 +221,38 @@ public class MainWindow : PluginWindowBase, IDisposable
             ImGui.TextColored(MidDarkBrown, globalData.GetSoilStringName(hole.Design.DesignatedSoil));
             ImGui.TextColored(NeutralGreen, $"Harvest: {(hole.Design.DoNotHarvest ? "Keep grown" : "Yes")}");
         }
-        ImGui.PopStyleVar();
         ImGui.EndChildFrame();
-        //ImGui.PopItemWidth();
+        ImGui.PopStyleVar();        
+        ImGui.PopItemWidth();
+    }
+
+    private void DrawPlotHoleDesign(PlotHolePlan design, uint index)
+    {
+        ImGui.PushStyleVar(ImGuiStyleVar.FrameBorderSize, 1f);
+        ImGui.BeginChildFrame(100 + index, new Vector2(200, 200));
+        var seedComboIndex = design.DesignatedSeed == 0 ? 0 : seedIndexes.IndexOf(design.DesignatedSeed);
+        if (ImGui.Combo($"Seed##design{index}", ref seedComboIndex, seedNames, seedNames.Length))
+        {
+            design.DesignatedSeed = seedIndexes[seedComboIndex];
+            saveManager.WriteCharacterSave();
+        }
+
+        var soilComboIndex = design.DesignatedSoil == 0 ? 0 : soilIndexes.IndexOf(design.DesignatedSoil);
+        if (ImGui.Combo($"Soil##design{index}", ref soilComboIndex, soilNames, soilNames.Length))
+        {
+            design.DesignatedSoil = soilIndexes[soilComboIndex];
+            saveManager.WriteCharacterSave();
+        }
+
+        bool keepWhenGrown = design.DoNotHarvest;
+        if (ImGui.Checkbox($"Keep when grown##{index}", ref keepWhenGrown))
+        {
+            design.DoNotHarvest = keepWhenGrown;
+            saveManager.WriteCharacterSave();
+        }
+
+        ImGui.EndChildFrame();
+        ImGui.PopStyleVar();
     }
 
     private void DrawCenterHole()
@@ -155,8 +264,9 @@ public class MainWindow : PluginWindowBase, IDisposable
         {
             ImGui.Image(scarecrowPic.ImGuiHandle, new Vector2(scarecrowPic.Width, scarecrowPic.Height));
         }
-        ImGui.PopStyleVar();
+        
         ImGui.EndChildFrame();
+        ImGui.PopStyleVar();
     }
 
     private string GetHumanizedTimeElapsed(DateTime? dateTime)

@@ -19,12 +19,10 @@ namespace Autogardener.Modules
         private readonly IGameGui gameGui;
         private readonly TaskManager taskManager;
         private readonly ISaveManager<CharacterSaveState> saveManager;
-        private readonly CharacterSaveState state;
         private bool drawHighlights = true;
 
         public PlotWatcher(ILogService log, IObjectTable objectTable, IClientState clientState,
-            IFramework framework, IGameGui gameGui, TaskManager taskManager, ISaveManager<CharacterSaveState> saveManager,
-            CharacterSaveState state)
+            IFramework framework, IGameGui gameGui, TaskManager taskManager, ISaveManager<CharacterSaveState> saveManager)
         {        
             this.log = log;
             this.objectTable = objectTable;
@@ -33,7 +31,6 @@ namespace Autogardener.Modules
             this.gameGui = gameGui;
             this.taskManager = taskManager;
             this.saveManager = saveManager;
-            this.state = state;
             this.framework.RunOnFrameworkThread(UpdatePlotList);
             // Add an "scan" button.
         }
@@ -45,6 +42,7 @@ namespace Autogardener.Modules
 
         public void HighlightPlots()
         {
+            var state = saveManager.GetCharacterSaveInMemory();
             List<PlotHighlightData> points = new();
             foreach (var plot in state.Plots)
             {
@@ -81,6 +79,7 @@ namespace Autogardener.Modules
 
         public void ListNearbyPlots()
         {
+            var state = saveManager.GetCharacterSaveInMemory();
             foreach (var plot in state.Plots)
             {
                 log.Info($"{plot.Alias} =========================");
@@ -100,6 +99,7 @@ namespace Autogardener.Modules
 
         public void UpdatePlotList()
         {
+            var state = saveManager.GetCharacterSaveInMemory();
             var discoveredPlots = DiscoverPlots();
             List<Plot> combinedPlots = MergePlotLists(state.Plots, discoveredPlots);
             bool saveToFile = HavePlotsChanged(state.Plots, combinedPlots);
@@ -123,14 +123,6 @@ namespace Autogardener.Modules
         private List<Plot> MergePlotLists(List<Plot> known, List<Plot> scanned)
         {
             List<Plot> combinedPlots = new List<Plot>(known);
-            foreach (var plot in known)
-            {
-                log.Info("Known: " + plot.Alias + " " + plot.PlantingHoles.Count);
-            }
-            foreach (var plot in scanned)
-            {
-                log.Info("Scanned: " + plot.Alias + " " + plot.PlantingHoles.Count);
-            }
             foreach (var plot in scanned)
             {
                 if (!known.Any(p => p.Equals(plot)))
@@ -138,10 +130,7 @@ namespace Autogardener.Modules
                     combinedPlots.Add(plot);
                 }
             }
-            foreach (var plot in combinedPlots)
-            {
-                log.Info("Combined: " + plot.Alias + " " + plot.PlantingHoles.Count);
-            }
+
             return combinedPlots;
         }
 
@@ -151,7 +140,6 @@ namespace Autogardener.Modules
             Plot? plotInConstruction = null;
             var plotHoleObjects = objectTable
                 .Where(o => o != null && GlobalData.GardenPlotDataIds.Contains(o.DataId)).OrderBy(o => o.GameObjectId).ToList();
-            log.Info("Total planting holes discovered: " + plotHoleObjects.Count);
             var plotNumber = 1;
             int plotHoleCounter = 0;
             foreach (var plotHole in plotHoleObjects)
@@ -166,6 +154,7 @@ namespace Autogardener.Modules
                     if (plotInConstruction != null)
                     {
                         foundPlots.Add(plotInConstruction);
+                        plotHoleCounter = 0;
                     }
 
                     plotInConstruction = new Plot($"Plot {plotNumber}");
@@ -182,8 +171,6 @@ namespace Autogardener.Modules
             {
                 foundPlots.Add(plotInConstruction);
             }
-
-            log.Info("Total plots formed: " + foundPlots.Count);
 
             return foundPlots;
         }

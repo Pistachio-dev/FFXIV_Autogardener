@@ -1,4 +1,5 @@
 using Autogardener.Model;
+using Autogardener.Model.Designs;
 using Autogardener.Model.Plots;
 using Dalamud.Game.ClientState.Objects;
 using Dalamud.Game.ClientState.Objects.Types;
@@ -24,11 +25,10 @@ namespace Autogardener.Modules
         private readonly IObjectTable objectTable;
         private readonly ITargetManager targetManager;
         private readonly TaskManager taskManager;
-        private readonly CharacterSaveState state;
 
         public PlayerActions(ILogService logService, IChatGui chatGui, ISaveManager<CharacterSaveState> saveManager,
             GlobalData globalData, PlotWatcher plotWatcher, Commands commands, Utils utils, IClientState clientState,
-            IObjectTable objectTable, ITargetManager targetManager, TaskManager taskManager, CharacterSaveState state)
+            IObjectTable objectTable, ITargetManager targetManager, TaskManager taskManager)
         {
             this.logService = logService;
             this.chatGui = chatGui;
@@ -41,7 +41,6 @@ namespace Autogardener.Modules
             this.objectTable = objectTable;
             this.targetManager = targetManager;
             this.taskManager = taskManager;
-            this.state = state;
         }
 
         public void RegisterNearestPlot()
@@ -105,8 +104,20 @@ namespace Autogardener.Modules
             targetManager.Target = ob;
             return true;
         }
+
+        public int CreateNewDesign()
+        {
+            var state = saveManager.GetCharacterSaveInMemory();
+            var index = state.Designs.Count;
+            var slots = GetNearestPlot()?.PlantingHoles.Count ?? 9;
+            state.Designs.Add(PlotPlan.CreateEmptyWithSlots(slots));
+            logService.Info($"Current design count: {state.Designs.Count}");
+            saveManager.WriteCharacterSave(state);
+            return index;
+        }
         public Plot? GetNearestPlot()
         {
+            var state = saveManager.GetCharacterSaveInMemory();
             plotWatcher.UpdatePlotList();
             Vector3 playerLocation = clientState.LocalPlayer?.Position ?? Vector3.Zero;
             if (playerLocation == Vector3.Zero)
