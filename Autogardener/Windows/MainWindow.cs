@@ -58,10 +58,8 @@ public class MainWindow : PluginWindowBase, IDisposable
         saveManager = serviceProvider.GetRequiredService<ISaveManager<CharacterSaveState>>();
         textureProvider = serviceProvider.GetRequiredService<ITextureProvider>();
         this.scarecrowPicturePath = scarecrowPicturePath;
-        seedIds = globalData.Seeds.Keys.ToArray();
-        seedNames = seedIds.Select(i => globalData.Seeds[i].Name.ToString()).ToArray();
-        soilIds = globalData.Soils.Keys.ToArray();
-        soilNames = soilIds.Select(i => globalData.Soils[i].Name.ToString()).ToArray();
+        GenerateOrderedCollection(globalData.Seeds, out seedIds, out seedNames);
+        GenerateOrderedCollection(globalData.Soils, out soilIds, out soilNames);
         framework = serviceProvider.GetRequiredService<IFramework>();
         framework.RunOnFrameworkThread(() =>
         {
@@ -69,7 +67,19 @@ public class MainWindow : PluginWindowBase, IDisposable
         });
         
     }
-
+    private void GenerateOrderedCollection(Dictionary<uint, Lumina.Excel.Sheets.Item> original, out uint[] idArray, out string[] nameArray)
+    {
+        IEnumerable<(uint id, string name)> orderedEnum = original.Select(e => (e.Key, e.Value.Name.ToString())).OrderBy(t => t.Item2);
+        idArray = new uint[original.Count];
+        nameArray = new string[original.Count];
+        int i = 0;
+        foreach (var tuple in orderedEnum)
+        {
+            idArray[i] = tuple.id;
+            nameArray[i] = tuple.name;
+            i++;
+        }
+    }
     public void Dispose()
     { }
     private string plotName;
