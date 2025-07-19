@@ -155,6 +155,11 @@ public class MainWindow : PluginWindowBase, IDisposable
                 if (save.Designs.Count > 0)
                 {
                     ImGui.Combo("Design", ref currentDesign, save.Designs.Select(d => d.PlanName).ToArray(), save.Designs.Count);
+                    string designName = save.Designs[currentDesign].PlanName;
+                    if (ImGui.InputText("Rename", ref designName, 40)){
+                        save.Designs[currentDesign].PlanName = designName;
+                        saveManager.WriteCharacterSave();
+                    }
                     if (save.Designs[currentDesign].PlotHolePlans.Count == 1)
                     {
                         DrawPlotHoleDesign(save.Designs[currentDesign].PlotHolePlans[0], 0);
@@ -199,10 +204,6 @@ public class MainWindow : PluginWindowBase, IDisposable
         }
     }
 
-    private void DrawHoleGrid(Action drawHoleAction)
-    {
-
-    }
     private void DrawPlotHoleStatus(PlotHole hole, uint index)
     {
         ImGui.PushItemWidth(200);
@@ -250,6 +251,9 @@ public class MainWindow : PluginWindowBase, IDisposable
             design.DoNotHarvest = keepWhenGrown;
             saveManager.WriteCharacterSave();
         }
+        ImGui.SameLine();
+        ImGuiComponents.HelpMarker("For many interbreeding setups, you need a seed to be present,\n" +
+            "but gain nothing from harvesting it,\nso it's easier to let it stay fully grown");
 
         ImGui.EndChildFrame();
         ImGui.PopStyleVar();
