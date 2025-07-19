@@ -27,9 +27,9 @@ public class MainWindow : PluginWindowBase, IDisposable
     private ITextureProvider textureProvider;
     private IFramework framework;
 
-    private uint[] seedIndexes;
+    private uint[] seedIds;
     private string[] seedNames;
-    private uint[] soilIndexes;
+    private uint[] soilIds;
     private string[] soilNames;
 
     private static readonly Vector4 LightGreen = new Vector4(0.769f, 0.9f, 0.6f, 1);
@@ -58,10 +58,10 @@ public class MainWindow : PluginWindowBase, IDisposable
         saveManager = serviceProvider.GetRequiredService<ISaveManager<CharacterSaveState>>();
         textureProvider = serviceProvider.GetRequiredService<ITextureProvider>();
         this.scarecrowPicturePath = scarecrowPicturePath;
-        seedIndexes = globalData.Seeds.Keys.ToArray();
-        seedNames = seedIndexes.Select(i => globalData.Seeds[i].Name.ToString()).ToArray();
-        soilIndexes = globalData.Soils.Keys.ToArray();
-        soilNames = soilIndexes.Select(i => globalData.Soils[i].Name.ToString()).ToArray();
+        seedIds = globalData.Seeds.Keys.ToArray();
+        seedNames = seedIds.Select(i => globalData.Seeds[i].Name.ToString()).ToArray();
+        soilIds = globalData.Soils.Keys.ToArray();
+        soilNames = soilIds.Select(i => globalData.Soils[i].Name.ToString()).ToArray();
         framework = serviceProvider.GetRequiredService<IFramework>();
         framework.RunOnFrameworkThread(() =>
         {
@@ -231,17 +231,17 @@ public class MainWindow : PluginWindowBase, IDisposable
     {
         ImGui.PushStyleVar(ImGuiStyleVar.FrameBorderSize, 1f);
         ImGui.BeginChildFrame(100 + index, new Vector2(200, 200));
-        var seedComboIndex = design.DesignatedSeed == 0 ? 0 : seedIndexes.IndexOf(design.DesignatedSeed);
+        var seedComboIndex = design.DesignatedSeed == 0 ? 0 : seedIds.IndexOf(design.DesignatedSeed);
         if (ImGui.Combo($"Seed##design{index}", ref seedComboIndex, seedNames, seedNames.Length))
         {
-            design.DesignatedSeed = seedIndexes[seedComboIndex];
+            design.DesignatedSeed = seedIds[seedComboIndex];
             saveManager.WriteCharacterSave();
         }
 
-        var soilComboIndex = design.DesignatedSoil == 0 ? 0 : soilIndexes.IndexOf(design.DesignatedSoil);
+        var soilComboIndex = design.DesignatedSoil == 0 ? 0 : soilIds.IndexOf(design.DesignatedSoil);
         if (ImGui.Combo($"Soil##design{index}", ref soilComboIndex, soilNames, soilNames.Length))
         {
-            design.DesignatedSoil = soilIndexes[soilComboIndex];
+            design.DesignatedSoil = soilIds[soilComboIndex];
             saveManager.WriteCharacterSave();
         }
 
