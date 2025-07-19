@@ -14,5 +14,7 @@ namespace Autogardener.Model
                 PlanName = "None",
             }
         };
+
+        public List<ulong> BlackList { get; set; } = new(); // Contains GameObjectIds
     }
 }

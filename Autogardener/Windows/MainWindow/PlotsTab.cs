@@ -38,7 +38,8 @@ namespace Autogardener.Windows.MainWindow
                 ImGui.Combo("Plot", ref currentPlot, save.Plots.Select(p => p.Alias).ToArray(), save.Plots.Count);
                 var plot = save.Plots[currentPlot];
                 DrawPlotRenameButton(plot);
-                DrawForgetPlotButton(save.Plots, plot);
+                DrawForgetPlotButton(save, plot);
+                DrawClearBlackListButton(save.BlackList);
 
                 var designForCurrentPlot = GetCurrentDesignNumber(plot, save);
                 var designNames = save.Designs.Select(p => p.PlanName).ToArray();
@@ -70,19 +71,37 @@ namespace Autogardener.Windows.MainWindow
                 }
             }
         }
-        private void DrawForgetPlotButton(List<Plot> plots, Plot plot)
+        private void DrawForgetPlotButton(CharacterSaveState save, Plot plot)
         {
             ImGui.SameLine();
             bool buttonsPressed = ImGui.GetIO().KeyShift && ImGui.GetIO().KeyCtrl;
 
             if (ImGuiComponents.IconButton(FontAwesomeIcon.SquareXmark, Red) && buttonsPressed)
             {
-                plots.Remove(plot);
+                save.Plots.Remove(plot);
+                if (plot.PlantingHoles.Count > 0)
+                {
+                    save.BlackList.Add(plot.PlantingHoles[0].GameObjectId);
+                }
                 taskManager.Enqueue(() => saveManager.WriteCharacterSave());
             }
             
-            DrawTooltip("Ctrl+Shift to forget this plot\n(The plugin will stop tracking it)");
+            DrawTooltip("Ctrl+Shift to blacklist this plot\n(The plugin will stop tracking it)");
 
+        }
+
+        private void DrawClearBlackListButton(List<ulong> blacklist)
+        {
+            ImGui.SameLine();
+            bool buttonsPressed = ImGui.GetIO().KeyShift && ImGui.GetIO().KeyCtrl;
+
+            if (ImGuiComponents.IconButton(FontAwesomeIcon.Binoculars, DarkGreen) && buttonsPressed)
+            {
+                blacklist.Clear();
+                taskManager.Enqueue(() => saveManager.WriteCharacterSave());
+            }
+
+            DrawTooltip("Ctrl+Shift to clear the blacklist");
         }
 
         private void DrawCurrentPlot(Plot plot)

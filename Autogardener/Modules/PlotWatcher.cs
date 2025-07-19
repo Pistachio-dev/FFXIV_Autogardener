@@ -136,6 +136,7 @@ namespace Autogardener.Modules
 
         public List<Plot> DiscoverPlots()
         {
+            var blackList = saveManager.GetCharacterSaveInMemory().BlackList;
             List<Plot> foundPlots = new();
             Plot? plotInConstruction = null;
             var plotHoleObjects = objectTable
@@ -172,6 +173,7 @@ namespace Autogardener.Modules
                 foundPlots.Add(plotInConstruction);
             }
 
+            foundPlots = foundPlots.Where(p => p.PlantingHoles.Count != 0 && !blackList.Contains(p.PlantingHoles[0].GameObjectId)).ToList();
             return foundPlots;
         }
     }
