@@ -20,6 +20,11 @@ namespace Autogardener.Windows.MainWindow
 
         private void DrawPlotsTab(CharacterSaveState save)
         {
+            if (save.BlackList.Any() && !save.Plots.Any())
+            {
+                DrawClearBlackListButton(save.BlackList);
+            }
+
             var nearestPlot = playerActions.GetNearestPlot();
             if (nearestPlot != null)
             {
@@ -40,7 +45,6 @@ namespace Autogardener.Windows.MainWindow
                 DrawPlotRenameButton(plot);
                 DrawForgetPlotButton(save, plot);
                 DrawClearBlackListButton(save.BlackList);
-
                 var designForCurrentPlot = GetCurrentDesignNumber(plot, save);
                 var designNames = save.Designs.Select(p => p.PlanName).ToArray();
                 if (ImGui.Combo("Plan", ref designForCurrentPlot, designNames, designNames.Length))
@@ -106,6 +110,10 @@ namespace Autogardener.Windows.MainWindow
 
         private void DrawCurrentPlot(Plot plot)
         {
+            if (plot.PlantingHoles.Count == 0)
+            {
+                return;
+            }
             if (plot.PlantingHoles.Count == 1)
             {
                 DrawPlotHoleStatus(plot.PlantingHoles[0], 0);

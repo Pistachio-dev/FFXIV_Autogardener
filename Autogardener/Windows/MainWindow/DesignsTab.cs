@@ -1,5 +1,6 @@
 using Autogardener.Model;
 using Autogardener.Model.Designs;
+using Autogardener.Model.Plots;
 using Dalamud.Interface;
 using Dalamud.Interface.Components;
 using System;
@@ -26,40 +27,39 @@ namespace Autogardener.Windows.MainWindow
             {
                 ImGui.Combo("Design", ref currentDesign, save.Designs.Select(d => d.PlanName).ToArray(), save.Designs.Count);
                 DrawDesignRenameButton(save.Designs);
+                DrawRemoveDesignButton(save.Designs, save.Designs[currentDesign]);
 
                 if (save.Designs[currentDesign].PlotHolePlans.Count == 0)
                 {
                     ImGui.TextUnformatted("This design has no plots defined");
+                    return;
                 }
-                else if (save.Designs[currentDesign].PlotHolePlans.Count == 1)
+                if (save.Designs[currentDesign].PlotHolePlans.Count == 1)
                 {
                     DrawPlotHoleDesign(save.Designs[currentDesign].PlotHolePlans[0], 0);
+                    return;
                 }
-                else
+
+                int[][] displayLayout = [[7, 6, 5],
+                                            [0, 9 ,4],
+                                            [1, 2, 3]];
+                foreach (var row in displayLayout)
                 {
-                    int[][] displayLayout = [[7, 6, 5],
-                                             [0, 9 ,4],
-                                             [1, 2, 3]];
-                    foreach (var row in displayLayout)
+                    foreach (var index in row)
                     {
-                        foreach (var index in row)
+                        if (index == 9)
                         {
-                            if (index == 9)
-                            {
-                                DrawCenterHole();
-                            }
-                            else
-                            {
-                                DrawPlotHoleDesign(save.Designs[currentDesign].PlotHolePlans[index], (uint)index);
-                            }
-
-                            ImGui.SameLine();
+                            DrawCenterHole();
                         }
-                        ImGui.NewLine();
+                        else
+                        {
+                            DrawPlotHoleDesign(save.Designs[currentDesign].PlotHolePlans[index], (uint)index);
+                        }
+
+                        ImGui.SameLine();
                     }
+                    ImGui.NewLine();
                 }
-
-
             }
         }
 
@@ -80,6 +80,21 @@ namespace Autogardener.Windows.MainWindow
                     saveManager.WriteCharacterSave();
                 }
             }
+        }
+
+        private void DrawRemoveDesignButton(List<PlotPlan> designs, PlotPlan design)
+        {
+            ImGui.SameLine();
+            bool buttonsPressed = ImGui.GetIO().KeyShift && ImGui.GetIO().KeyCtrl;
+
+            if (ImGuiComponents.IconButton(FontAwesomeIcon.SquareXmark, Red) && buttonsPressed)
+            {
+                designs.Remove(design);
+                taskManager.Enqueue(() => saveManager.WriteCharacterSave());
+            }
+
+            DrawTooltip("Ctrl+Shift to blacklist this plot\n(The plugin will stop tracking it)");
+
         }
         private void DrawPlotHoleDesign(PlotHolePlan design, uint index)
         {
