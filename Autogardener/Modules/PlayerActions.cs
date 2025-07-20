@@ -132,17 +132,18 @@ namespace Autogardener.Modules
             }
 
             IEnumerable<(Plot plot, float distance)> plotsWithDistances
-                = state.Plots.Select(x => (x, Vector3.Distance(x.Location, playerLocation)));
+                = state.Plots.Select(x => (x, Math.Abs(Vector3.Distance(x.Location, playerLocation))));
+                //.Where(tuple => tuple.Item2 < GlobalData.MaxScanDistance);
 
             try
             {
-                Plot nearestPlot = plotsWithDistances.OrderBy(t => t.distance).First().plot;
-                logService.Debug($"Nearest plot found with {nearestPlot.PlantingHoles.Count} slots");
+                (Plot nearestPlot, float distance) = plotsWithDistances.OrderBy(t => t.distance).First();
+                logService.Debug($"Nearest plot found with {nearestPlot.PlantingHoles.Count} slots at distance {distance}");
                 return nearestPlot;
             }
             catch (InvalidOperationException)
             {
-                logService.Debug("Could not register nearest plot: no plots in the area");
+                logService.Debug("Could not register nearest plot: no plots in the immediate area");
                 return null;
             }
         }

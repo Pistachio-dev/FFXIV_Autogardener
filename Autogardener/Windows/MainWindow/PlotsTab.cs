@@ -20,12 +20,6 @@ namespace Autogardener.Windows.MainWindow
 
         private void DrawPlotsTab(CharacterSaveState save)
         {
-            if (save.BlackList.Any() && !save.Plots.Any())
-            {
-                DrawClearBlackListButton(save.BlackList);
-                return;
-            }
-
             var nearestPlot = playerActions.GetNearestTrackedPlot(false);
             if (nearestPlot != null)
             {
@@ -53,8 +47,6 @@ namespace Autogardener.Windows.MainWindow
                 {
                     return;
                 }
-                ImGui.SameLine();
-                DrawClearBlackListButton(save.BlackList);
 
                 DrawDesignSelector(plot, save);
 
@@ -104,32 +96,15 @@ namespace Autogardener.Windows.MainWindow
             if (ImGuiComponents.IconButton(FontAwesomeIcon.SquareXmark, Red) && buttonsPressed)
             {
                 save.Plots.Remove(plot);
-                if (plot.PlantingHoles.Count > 0)
-                {
-                    save.BlackList.Add(plot.PlantingHoles[0].GameObjectId);
-                }
                 currentPlot = 0;
                 taskManager.Enqueue(() => saveManager.WriteCharacterSave());
                 return true;
             }
             
-            DrawTooltip("Ctrl+Shift to blacklist this plot\n(The plugin will stop tracking it)");
+            DrawTooltip("Ctrl+Shift to forget this plot\n(The plugin will stop tracking it)");
 
             return false;
 
-        }
-
-        private void DrawClearBlackListButton(List<ulong> blacklist)
-        {
-            bool buttonsPressed = ImGui.GetIO().KeyShift && ImGui.GetIO().KeyCtrl;
-
-            if (ImGuiComponents.IconButton(FontAwesomeIcon.Binoculars, DarkGreen) && buttonsPressed)
-            {
-                blacklist.Clear();
-                taskManager.Enqueue(() => saveManager.WriteCharacterSave());
-            }
-
-            DrawTooltip("Ctrl+Shift to clear the blacklist");
         }
 
         private void DrawCurrentPlot(Plot plot)

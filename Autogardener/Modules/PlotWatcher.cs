@@ -143,12 +143,11 @@ namespace Autogardener.Modules
                 return plots;
             }
 
-            return plots.Where(p => Math.Abs(Vector3.Distance(p.Location, playerPos ?? Vector3.Zero)) < maxDistance).ToList();
+            return plots.Where(p => Vector3.Distance(p.Location, playerPos ?? Vector3.Zero) < maxDistance).ToList();
         }
 
         public List<Plot> DiscoverPlots()
         {
-            var blackList = saveManager.GetCharacterSaveInMemory().BlackList;
             List<Plot> foundPlots = new();
             Plot? plotInConstruction = null;
             var plotHoleObjects = objectTable
@@ -185,7 +184,7 @@ namespace Autogardener.Modules
                 foundPlots.Add(plotInConstruction);
             }
 
-            foundPlots = foundPlots.Where(p => p.PlantingHoles.Count != 0 && !blackList.Contains(p.PlantingHoles[0].GameObjectId)).ToList();
+            foundPlots = foundPlots.Where(p => p.PlantingHoles.Count != 0).ToList();
             return foundPlots;
         }
     }
