@@ -26,16 +26,21 @@ namespace Autogardener.Windows.MainWindow
                 return;
             }
 
-            var nearestPlot = playerActions.GetNearestPlot();
+            var nearestPlot = playerActions.GetNearestTrackedPlot(false);
             if (nearestPlot != null)
             {
                 ImGui.TextUnformatted("Nearest plot:");
                 ImGui.TextColored(NeutralGreen, nearestPlot.Alias);
-                if (ImGui.Button("Scan the plot you're on"))
-                {
-                    playerActions.RegisterNearestPlot();
-                    currentPlot = Math.Max(0, save.Plots.IndexOf(p => p.Id == playerActions.GetNearestPlot()?.Id));
-                }
+            }
+            else
+            {
+                ImGui.TextUnformatted("Too far away from any registered plot");
+            }
+
+            if (ImGui.Button("Scan the plot you're on"))
+            {
+                playerActions.RegisterNearestPlot();
+                currentPlot = Math.Max(0, save.Plots.IndexOf(p => p.Id == playerActions.GetNearestTrackedPlot(false)?.Id));
                 DrawTooltip("Will check and save the plants of a plot. You need to be on it.");
             }
 
@@ -44,7 +49,7 @@ namespace Autogardener.Windows.MainWindow
                 ImGui.Combo("Plot", ref currentPlot, save.Plots.Select(p => p.Alias).ToArray(), save.Plots.Count);
                 var plot = save.Plots[currentPlot];
                 DrawPlotRenameButton(plot);
-                if(DrawForgetPlotButton(save, plot))
+                if (DrawForgetPlotButton(save, plot))
                 {
                     return;
                 }
@@ -53,7 +58,7 @@ namespace Autogardener.Windows.MainWindow
 
                 DrawDesignSelector(plot, save);
 
-                DrawCurrentPlot(save.Plots[currentPlot]);            
+                DrawCurrentPlot(save.Plots[currentPlot]);
 
                 plotWatcher.HighlightPlots();
             }
@@ -192,7 +197,9 @@ namespace Autogardener.Windows.MainWindow
             }
 
             var designId = plot.AppliedDesign.Plan.Id;
-            return state.Designs.IndexOf(p => p.Id == designId);
+            int index = state.Designs.IndexOf(p => p.Id == designId);
+            if (index == -1) { return 0; }
+            return index;
         }
 
         private string GetHumanizedTimeElapsed(DateTime? dateTime)

@@ -55,7 +55,7 @@ namespace Autogardener.Modules
 
             var charState = saveManager.GetCharacterSaveInMemory();
 
-            Plot? plot = GetNearestPlot();
+            Plot? plot = GetNearestTrackedPlot(true);
             if (plot == null)
             {
                 logService.Warning("No plot is near");
@@ -92,6 +92,7 @@ namespace Autogardener.Modules
                 taskManager.Enqueue(() => commands.SkipDialogueIfNeeded(), "Skip dialogue", DefConfig);
                 taskManager.Enqueue(() => commands.SelectActionString(globalData
                     .GetGardeningOptionStringLocalized(GlobalData.GardeningStrings.Quit)), "Select Quit", DefConfig);
+                taskManager.Enqueue(() => chatGui.Print("Scan complete! o7"));
                 taskManager.EnqueueDelay(new Random().Next(200, 300));
             }
 
@@ -109,16 +110,20 @@ namespace Autogardener.Modules
         {
             var state = saveManager.GetCharacterSaveInMemory();
             var index = state.Designs.Count;
-            var slots = GetNearestPlot()?.PlantingHoles.Count ?? 9;
+            var slots = GetNearestTrackedPlot(false)?.PlantingHoles.Count ?? 9;
             state.Designs.Add(PlotPlan.CreateEmptyWithSlots(slots));
             logService.Info($"Current design count: {state.Designs.Count}");
             saveManager.WriteCharacterSave(state);
             return index;
         }
-        public Plot? GetNearestPlot()
+        public Plot? GetNearestTrackedPlot(bool addNewPlots)
         {
             var state = saveManager.GetCharacterSaveInMemory();
-            plotWatcher.UpdatePlotList();
+            if (addNewPlots)
+            {
+                plotWatcher.UpdatePlotList();
+            }
+
             Vector3 playerLocation = clientState.LocalPlayer?.Position ?? Vector3.Zero;
             if (playerLocation == Vector3.Zero)
             {

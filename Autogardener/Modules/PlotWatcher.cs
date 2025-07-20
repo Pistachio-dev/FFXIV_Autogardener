@@ -31,7 +31,7 @@ namespace Autogardener.Modules
             this.gameGui = gameGui;
             this.taskManager = taskManager;
             this.saveManager = saveManager;
-            this.framework.RunOnFrameworkThread(UpdatePlotList);
+            //this.framework.RunOnFrameworkThread(UpdatePlotList);
             // Add an "scan" button.
         }
 
@@ -101,6 +101,7 @@ namespace Autogardener.Modules
         {
             var state = saveManager.GetCharacterSaveInMemory();
             var discoveredPlots = DiscoverPlots();
+            discoveredPlots = FilterByDistance(discoveredPlots, GlobalData.MaxScanDistance);
             List<Plot> combinedPlots = MergePlotLists(state.Plots, discoveredPlots);
             bool saveToFile = HavePlotsChanged(state.Plots, combinedPlots);
             state.Plots = combinedPlots;
@@ -132,6 +133,17 @@ namespace Autogardener.Modules
             }
 
             return combinedPlots;
+        }
+
+        public List<Plot> FilterByDistance(List<Plot> plots, float maxDistance)
+        {
+            var playerPos = clientState.LocalPlayer?.Position;
+            if (playerPos == null)
+            {
+                return plots;
+            }
+
+            return plots.Where(p => Math.Abs(Vector3.Distance(p.Location, playerPos ?? Vector3.Zero)) < maxDistance).ToList();
         }
 
         public List<Plot> DiscoverPlots()

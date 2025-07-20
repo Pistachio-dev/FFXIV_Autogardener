@@ -17,6 +17,8 @@ namespace Autogardener.Modules
         public const uint GladeFlowerpotDataId = 197052;
         public const uint OasisFlowerpotDataId = 197053;
 
+        public const float MaxScanDistance = 4;
+
         public static readonly List<uint> GardenPlotDataIds
             = new List<uint> { OutdoorPatchDataId, RivieraFlowerpotDataId, GladeFlowerpotDataId, OasisFlowerpotDataId };
 

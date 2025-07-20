@@ -78,6 +78,10 @@ namespace Autogardener.Modules
 
             logService.Info($"Name: [{target.Name}] GameObjectId [{target.GameObjectId}] EntityId [{target.EntityId}] DataId [{target.DataId}]");
             logService.Info($" OwnerId [{target.OwnerId}] ObjectIndex [{target.ObjectIndex}] ObjectKind [{target.ObjectKind}] SubKind [{target.SubKind}]");
+            if (clientState.LocalPlayer != null)
+            {
+                logService.Info($"Distance: {Math.Abs(Vector3.Distance(clientState.LocalPlayer.Position, target.Position))}");
+            }
         }
 
         public unsafe void ListCurrentMenuOptions()
