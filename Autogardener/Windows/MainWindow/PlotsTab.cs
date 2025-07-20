@@ -50,18 +50,27 @@ namespace Autogardener.Windows.MainWindow
                 }
                 ImGui.SameLine();
                 DrawClearBlackListButton(save.BlackList);
-  
-                var designForCurrentPlot = GetCurrentDesignNumber(plot, save);
-                var designNames = save.Designs.Select(p => p.PlanName).ToArray();
-                if (ImGui.Combo("Plan", ref designForCurrentPlot, designNames, designNames.Length))
-                {
-                    plot.AppliedDesign = new AppliedPlotPlan(save.Designs[designForCurrentPlot]);
-                    taskManager.Enqueue(() => saveManager.WriteCharacterSave());
-                }
+
+                DrawDesignSelector(plot, save);
 
                 DrawCurrentPlot(save.Plots[currentPlot]);            
 
                 plotWatcher.HighlightPlots();
+            }
+        }
+
+        private void DrawDesignSelector(Plot plot, CharacterSaveState save)
+        {
+            var designForCurrentPlot = GetCurrentDesignNumber(plot, save);
+            var designNames = save.Designs.Select(p => p.PlanName).ToArray();
+            if (ImGui.Combo("Plan", ref designForCurrentPlot, designNames, designNames.Length))
+            {
+                if (!playerActions.ApplyDesign(ref plot, save.Designs[designForCurrentPlot]))
+                {
+                    return;
+                }
+                plot.AppliedDesign = new AppliedPlotPlan(save.Designs[designForCurrentPlot]);
+                taskManager.Enqueue(() => saveManager.WriteCharacterSave());
             }
         }
 

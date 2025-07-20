@@ -142,6 +142,21 @@ namespace Autogardener.Modules
             }
         }
 
+        public bool ApplyDesign(ref Plot plot, PlotPlan design)
+        {
+            if (plot.PlantingHoles.Count != design.PlotHolePlans.Count)
+            {
+                chatGui.PrintError("Plot and design do not match!");
+                return false;
+            }
+            for (var i = 0; i < plot.PlantingHoles.Count; i++){
+                var plotHole = plot.PlantingHoles[i];
+                var plotHolePlan = design.PlotHolePlans[i];
+                plotHole.Design = plotHolePlan;
+            }
+
+            return true;
+        }
         private static TaskManagerConfiguration DefConfig = new TaskManagerConfiguration()
         {
             ShowDebug = true,
