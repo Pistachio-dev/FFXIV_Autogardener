@@ -186,7 +186,7 @@ namespace Autogardener.Modules
             Vector3 playerLocation = clientState.LocalPlayer?.Position ?? Vector3.Zero;
             if (playerLocation == Vector3.Zero)
             {
-                logService.Error("Player location is null. Can't register nearest plot.");
+                logService.Debug("Player location is null. Can't register nearest plot.");
                 return null;
             }
 
