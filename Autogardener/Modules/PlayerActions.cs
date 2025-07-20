@@ -137,7 +137,7 @@ namespace Autogardener.Modules
             }
             catch (InvalidOperationException)
             {
-                logService.Error("Could not register nearest plot: no plots in the area");
+                logService.Debug("Could not register nearest plot: no plots in the area");
                 return null;
             }
         }

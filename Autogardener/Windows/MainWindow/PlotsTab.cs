@@ -23,6 +23,7 @@ namespace Autogardener.Windows.MainWindow
             if (save.BlackList.Any() && !save.Plots.Any())
             {
                 DrawClearBlackListButton(save.BlackList);
+                return;
             }
 
             var nearestPlot = playerActions.GetNearestPlot();
@@ -43,8 +44,13 @@ namespace Autogardener.Windows.MainWindow
                 ImGui.Combo("Plot", ref currentPlot, save.Plots.Select(p => p.Alias).ToArray(), save.Plots.Count);
                 var plot = save.Plots[currentPlot];
                 DrawPlotRenameButton(plot);
-                DrawForgetPlotButton(save, plot);
+                if(DrawForgetPlotButton(save, plot))
+                {
+                    return;
+                }
+                ImGui.SameLine();
                 DrawClearBlackListButton(save.BlackList);
+  
                 var designForCurrentPlot = GetCurrentDesignNumber(plot, save);
                 var designNames = save.Designs.Select(p => p.PlanName).ToArray();
                 if (ImGui.Combo("Plan", ref designForCurrentPlot, designNames, designNames.Length))
@@ -69,13 +75,14 @@ namespace Autogardener.Windows.MainWindow
             DrawTooltip("Rename");
             if (toggleRenamePlot)
             {
+                var plotName = plot.Alias;
                 if (ImGui.InputText("New name", ref plotName, 40))
                 {
                     plot.Alias = plotName; saveManager.WriteCharacterSave();
                 }
             }
         }
-        private void DrawForgetPlotButton(CharacterSaveState save, Plot plot)
+        private bool DrawForgetPlotButton(CharacterSaveState save, Plot plot)
         {
             ImGui.SameLine();
             bool buttonsPressed = ImGui.GetIO().KeyShift && ImGui.GetIO().KeyCtrl;
@@ -87,16 +94,19 @@ namespace Autogardener.Windows.MainWindow
                 {
                     save.BlackList.Add(plot.PlantingHoles[0].GameObjectId);
                 }
+                currentPlot = 0;
                 taskManager.Enqueue(() => saveManager.WriteCharacterSave());
+                return true;
             }
             
             DrawTooltip("Ctrl+Shift to blacklist this plot\n(The plugin will stop tracking it)");
+
+            return false;
 
         }
 
         private void DrawClearBlackListButton(List<ulong> blacklist)
         {
-            ImGui.SameLine();
             bool buttonsPressed = ImGui.GetIO().KeyShift && ImGui.GetIO().KeyCtrl;
 
             if (ImGuiComponents.IconButton(FontAwesomeIcon.Binoculars, DarkGreen) && buttonsPressed)
@@ -112,43 +122,34 @@ namespace Autogardener.Windows.MainWindow
         {
             if (plot.PlantingHoles.Count == 0)
             {
+                ImGui.TextUnformatted("This plot has no planting slots, somehow. This is strange.");
                 return;
             }
-            if (plot.PlantingHoles.Count == 1)
+            int[][] displayLayout = GetPlotLayout(plot.PlantingHoles.Count);
+            foreach (var row in displayLayout)
             {
-                DrawPlotHoleStatus(plot.PlantingHoles[0], 0);
-            }
-            else
-            {
-                int[][] displayLayout = [
-                        [7, 6, 5],
-                            [0, 9 ,4],
-                            [1, 2, 3]];
-                foreach (var row in displayLayout)
+                foreach (var index in row)
                 {
-                    foreach (var index in row)
+                    if (index == 9)
                     {
-                        if (index == 9)
+                        DrawCenterHole();
+                    }
+                    else
+                    {
+                        if (index >= plot.PlantingHoles.Count)
                         {
-                            DrawCenterHole();
+                            logService.Warning($"Planting hole index {index} is out of bounds");
                         }
                         else
                         {
-                            if (index >= plot.PlantingHoles.Count)
-                            {
-                                logService.Warning($"Planting hole index {index} is out of bounds");
-                            }
-                            else
-                            {
-                                DrawPlotHoleStatus(plot.PlantingHoles[index], (uint)index);
-                            }
+                            DrawPlotHoleStatus(plot.PlantingHoles[index], (uint)index);
                         }
-
-                        ImGui.SameLine();
                     }
-                    ImGui.NewLine();
+
+                    ImGui.SameLine();
                 }
-            }
+                ImGui.NewLine();
+            }           
         }
 
         private void DrawPlotHoleStatus(PlotHole hole, uint index)

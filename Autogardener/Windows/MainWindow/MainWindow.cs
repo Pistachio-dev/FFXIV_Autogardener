@@ -27,6 +27,7 @@ public partial class MainWindow : PluginWindowBase, IDisposable
     private TaskManager taskManager;
     private ITextureProvider textureProvider;
     private IFramework framework;
+    private IChatGui chatGui;
 
     private uint[] seedIds;
     private string[] seedNames;
@@ -64,6 +65,7 @@ public partial class MainWindow : PluginWindowBase, IDisposable
         GenerateOrderedCollection(globalData.Soils, out soilIds, out soilNames);
         framework = serviceProvider.GetRequiredService<IFramework>();
         taskManager = serviceProvider.GetRequiredService<TaskManager>();
+        chatGui = serviceProvider.GetRequiredService<IChatGui>();
         
         framework.RunOnFrameworkThread(() =>
         {
@@ -121,6 +123,25 @@ public partial class MainWindow : PluginWindowBase, IDisposable
             idArray[i] = tuple.id;
             nameArray[i] = tuple.name;
             i++;
+        }
+    }
+
+    private int[][] GetPlotLayout(int plotCount)
+    {
+        switch (plotCount)
+        {
+            case 1:
+                return [[1]]; // Pot
+            case 4:
+                return [[1, 2], [3, 4]]; // Round garden patch
+            case 6:
+                return [[1, 2, 3], [4, 5, 6]]; // Oblong garden patch
+            case 8:
+                return [[7, 6, 5],
+                            [0, 9 ,4],
+                            [1, 2, 3]];
+            default:
+                return [];
         }
     }
     public void Dispose()

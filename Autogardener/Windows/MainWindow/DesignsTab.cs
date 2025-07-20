@@ -21,28 +21,25 @@ namespace Autogardener.Windows.MainWindow
             if (ImGuiComponents.IconButtonWithText(FontAwesomeIcon.PaintBrush, "Create new design for nearest plot"))
             {
                 currentDesign = playerActions.CreateNewDesign();
+                return;
             }
             //logService.Info(save.Designs.Count.ToString());
             if (save.Designs.Count > 1)
             {
                 ImGui.Combo("Design", ref currentDesign, save.Designs.Select(d => d.PlanName).ToArray(), save.Designs.Count);
                 DrawDesignRenameButton(save.Designs);
-                DrawRemoveDesignButton(save.Designs, save.Designs[currentDesign]);
+                if (DrawRemoveDesignButton(save.Designs, save.Designs[currentDesign]))
+                {
+                    return;
+                }
 
                 if (save.Designs[currentDesign].PlotHolePlans.Count == 0)
                 {
                     ImGui.TextUnformatted("This design has no plots defined");
                     return;
                 }
-                if (save.Designs[currentDesign].PlotHolePlans.Count == 1)
-                {
-                    DrawPlotHoleDesign(save.Designs[currentDesign].PlotHolePlans[0], 0);
-                    return;
-                }
 
-                int[][] displayLayout = [[7, 6, 5],
-                                            [0, 9 ,4],
-                                            [1, 2, 3]];
+                int[][] displayLayout = GetPlotLayout(save.Designs[currentDesign].PlotHolePlans.Count);
                 foreach (var row in displayLayout)
                 {
                     foreach (var index in row)
@@ -82,18 +79,25 @@ namespace Autogardener.Windows.MainWindow
             }
         }
 
-        private void DrawRemoveDesignButton(List<PlotPlan> designs, PlotPlan design)
+        private bool DrawRemoveDesignButton(List<PlotPlan> designs, PlotPlan design)
         {
             ImGui.SameLine();
             bool buttonsPressed = ImGui.GetIO().KeyShift && ImGui.GetIO().KeyCtrl;
 
             if (ImGuiComponents.IconButton(FontAwesomeIcon.SquareXmark, Red) && buttonsPressed)
             {
+                if (design == designs[0])
+                {
+                    chatGui.PrintError("Can't delete the default design.");
+                    return false;
+                }
                 designs.Remove(design);
                 taskManager.Enqueue(() => saveManager.WriteCharacterSave());
+                return true;
             }
 
             DrawTooltip("Ctrl+Shift to blacklist this plot\n(The plugin will stop tracking it)");
+            return false;
 
         }
         private void DrawPlotHoleDesign(PlotHolePlan design, uint index)
