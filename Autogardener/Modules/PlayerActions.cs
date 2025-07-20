@@ -95,11 +95,11 @@ namespace Autogardener.Modules
                 taskManager.Enqueue(() => commands.SetPlantTypeFromDialogue(plotHole), "Extract plant type", DefConfig);
                 taskManager.Enqueue(() => commands.SkipDialogueIfNeeded(), "Skip dialogue", DefConfig);
                 taskManager.Enqueue(() => commands.SelectActionString(globalData
-                    .GetGardeningOptionStringLocalized(GlobalData.GardeningStrings.Quit)), "Select Quit", DefConfig);
-                taskManager.Enqueue(() => chatGui.Print("Scan complete! o7"));
+                    .GetGardeningOptionStringLocalized(GlobalData.GardeningStrings.Quit)), "Select Quit", DefConfig);                
                 taskManager.EnqueueDelay(new Random().Next(200, 300));
             }
 
+            taskManager.Enqueue(() => chatGui.Print("Scan complete! o7"));
             taskManager.Enqueue(() => {saveManager.WriteCharacterSave(charState);});
         }
 
