@@ -9,10 +9,7 @@ namespace Autogardener.Model
 
         public List<PlotPlan> Designs { get; set; } = new()
         {
-            new PlotPlan()
-            {
-                PlanName = "None",
-            }
+            PlotPlan.CreateEmptyWithSlots(8, "Default")
         };
     }
 }

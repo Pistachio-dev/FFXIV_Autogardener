@@ -18,10 +18,22 @@ namespace Autogardener.Windows.MainWindow
 
         private void DrawDesignsTab(CharacterSaveState save)
         {
-            if (ImGuiComponents.IconButtonWithText(FontAwesomeIcon.PaintBrush, "Create new design for nearest plot"))
+            var nearestPlot = playerActions.GetNearestTrackedPlot(false);
+            if (nearestPlot == null)
+            {
+                ImGui.BeginDisabled();
+            }
+            string newDesignButtonText = nearestPlot == null
+                ? "Create new design for nearest plot"
+                : $"Create new design for {nearestPlot.Alias}";
+            if (ImGuiComponents.IconButtonWithText(FontAwesomeIcon.PaintBrush, newDesignButtonText))
             {
                 currentDesign = playerActions.CreateNewDesign();
                 return;
+            }
+            if (nearestPlot == null)
+            {
+                ImGui.EndDisabled();
             }
             //logService.Info(save.Designs.Count.ToString());
             if (save.Designs.Count > 1)
@@ -92,11 +104,12 @@ namespace Autogardener.Windows.MainWindow
                     return false;
                 }
                 designs.Remove(design);
+                currentDesign = 0;
                 taskManager.Enqueue(() => saveManager.WriteCharacterSave());
                 return true;
             }
 
-            DrawTooltip("Ctrl+Shift to blacklist this plot\n(The plugin will stop tracking it)");
+            DrawTooltip("Ctrl+Shift to delete this design");
             return false;
 
         }

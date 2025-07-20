@@ -2,7 +2,7 @@ namespace Autogardener.Model.Designs
 {
     public class PlotPlan
     {
-        public static PlotPlan CreateEmptyWithSlots(int slots)
+        public static PlotPlan CreateEmptyWithSlots(int slots, string name)
         {
             var plotPlan = new PlotPlan();
             for (int i = 0; i < slots; i++)
@@ -10,8 +10,10 @@ namespace Autogardener.Model.Designs
                 plotPlan.PlotHolePlans.Add(new PlotHolePlan(i));
             }
 
+            plotPlan.PlanName = name;
             return plotPlan;
         }
+
         public Guid Id { get; set; } = Guid.NewGuid();
 
         public string PlanName { get; set; } = "New plan";

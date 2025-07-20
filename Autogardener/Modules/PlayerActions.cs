@@ -1,10 +1,11 @@
 using Autogardener.Model;
 using Autogardener.Model.Designs;
 using Autogardener.Model.Plots;
+using Autogardener.Model.ResourcesCheck;
 using Dalamud.Game.ClientState.Objects;
 using Dalamud.Game.ClientState.Objects.Types;
+using Dalamud.Game.Inventory;
 using Dalamud.Plugin.Services;
-using DalamudBasics.Extensions;
 using DalamudBasics.Logging;
 using DalamudBasics.SaveGames;
 using ECommons.Automation.NeoTaskManager;
@@ -25,10 +26,11 @@ namespace Autogardener.Modules
         private readonly IObjectTable objectTable;
         private readonly ITargetManager targetManager;
         private readonly TaskManager taskManager;
+        private readonly IGameInventory gameInventory;
 
         public PlayerActions(ILogService logService, IChatGui chatGui, ISaveManager<CharacterSaveState> saveManager,
             GlobalData globalData, PlotWatcher plotWatcher, Commands commands, Utils utils, IClientState clientState,
-            IObjectTable objectTable, ITargetManager targetManager, TaskManager taskManager)
+            IObjectTable objectTable, ITargetManager targetManager, TaskManager taskManager, IGameInventory gameInventory)
         {
             this.logService = logService;
             this.chatGui = chatGui;
@@ -41,6 +43,7 @@ namespace Autogardener.Modules
             this.objectTable = objectTable;
             this.targetManager = targetManager;
             this.taskManager = taskManager;
+            this.gameInventory = gameInventory;
         }
 
         public void RegisterNearestPlot()
@@ -111,12 +114,67 @@ namespace Autogardener.Modules
         {
             var state = saveManager.GetCharacterSaveInMemory();
             var index = state.Designs.Count;
-            var slots = GetNearestTrackedPlot(false)?.PlantingHoles.Count ?? 9;
-            state.Designs.Add(PlotPlan.CreateEmptyWithSlots(slots));
+            var slots = GetNearestTrackedPlot(false)?.PlantingHoles.Count ?? 8;
+            state.Designs.Add(PlotPlan.CreateEmptyWithSlots(slots, "New plan"));
             logService.Info($"Current design count: {state.Designs.Count}");
             saveManager.WriteCharacterSave(state);
             return index;
         }
+
+        private Dictionary<uint, int> GetExpectedItemAmounts(PlotPlan design, bool fertilize)
+        {
+            Dictionary<uint, int> expectedItems = new(); // ItemId, quantity expected
+            if (fertilize)
+            {
+                expectedItems.Add(GlobalData.FishmealId, design.PlotHolePlans.Count);
+
+            }
+            foreach (var plan in design.PlotHolePlans)
+            {
+                expectedItems.IncrementOrSet(plan.DesignatedSeed);
+                expectedItems.IncrementOrSet(plan.DesignatedSoil);
+            }
+            expectedItems.Remove(0);
+
+            return expectedItems;
+        }
+        public ResourcesCheckResult CheckResourceAvailability(PlotPlan design, bool fertilize)
+        {
+            var expectedItems = GetExpectedItemAmounts(design, fertilize);
+
+            Dictionary<uint, int> presentItems = new Dictionary<uint, int>();
+
+            GameInventoryType[] inventories = [GameInventoryType.Inventory1, GameInventoryType.Inventory2,
+                                                GameInventoryType.Inventory3, GameInventoryType.Inventory4];
+
+            foreach (GameInventoryType type in inventories)
+            {
+                var subInv = gameInventory.GetInventoryItems(type);
+                for (int i = 0; i < subInv.Length; i++)
+                {
+                    GameInventoryItem slot = subInv[i];
+                    if (expectedItems.ContainsKey(slot.ItemId))
+                    {
+                        presentItems.Add(slot.ItemId, slot.Quantity);
+                    }
+                }
+            }
+
+            var result = new ResourcesCheckResult();
+            foreach (var keyvaluepair in expectedItems)
+            {
+                result.Entries.Add(new ResourcesCheckEntry()
+                {
+                    ItemId = keyvaluepair.Key,
+                    ItemName = globalData.GetGardeningItemName(keyvaluepair.Key),
+                    ExpectedAmount = keyvaluepair.Value,
+                    ActualAmount = presentItems.ContainsKey(keyvaluepair.Key) ? presentItems[keyvaluepair.Key] : 0
+                });
+            }
+
+            return result;
+        }
+
         public Plot? GetNearestTrackedPlot(bool addNewPlots)
         {
             var state = saveManager.GetCharacterSaveInMemory();

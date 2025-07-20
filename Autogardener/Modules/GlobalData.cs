@@ -17,6 +17,8 @@ namespace Autogardener.Modules
         public const uint GladeFlowerpotDataId = 197052;
         public const uint OasisFlowerpotDataId = 197053;
 
+        public const uint FishmealId = 7767;
+
         public const float MaxScanDistance = 4;
 
         public static readonly List<uint> GardenPlotDataIds
@@ -24,7 +26,7 @@ namespace Autogardener.Modules
 
         private readonly ILogService logService;
         private readonly IClientState clientState;
-
+        
         public string GetSeedStringName(uint id)
         {
             if (Seeds.ContainsKey(id))
@@ -43,6 +45,22 @@ namespace Autogardener.Modules
             }
 
             return "No/unknown soil";
+        }
+
+        public string GetGardeningItemName(uint id)
+        {
+            string errorString = "No/unknown";
+            var name = GetSeedStringName(id);
+            if (name.StartsWith(errorString))
+            {
+                name = GetSoilStringName(id);
+                if (name.StartsWith(errorString))
+                {
+                    return "Fishmeal";
+                }
+            }
+
+            return name;
         }
 
         public Dictionary<uint, Item> Seeds { get; set; }

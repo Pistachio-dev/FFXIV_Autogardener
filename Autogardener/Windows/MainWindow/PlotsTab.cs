@@ -49,11 +49,28 @@ namespace Autogardener.Windows.MainWindow
                 }
 
                 DrawDesignSelector(plot, save);
-
+                if (plot.AppliedDesign?.Plan != null)
+                {
+                    DrawDesignItems(plot.AppliedDesign.Plan);
+                }
+                
                 DrawCurrentPlot(save.Plots[currentPlot]);
 
                 plotWatcher.HighlightPlots();
             }
+        }
+
+        private void DrawDesignItems(PlotPlan plotPlan)
+        {
+            var checkResult = playerActions.CheckResourceAvailability(plotPlan, true);
+            foreach (var item in checkResult.Entries)
+            {
+                var color = item.ActualAmount >= item.ExpectedAmount ? MidDarkGreen : Red;
+                ImGui.TextColored(color, $"{item.ItemName} {item.ActualAmount}/{item.ExpectedAmount}");
+                ImGui.SameLine();
+            }
+
+            ImGui.NewLine();
         }
 
         private void DrawDesignSelector(Plot plot, CharacterSaveState save)
