@@ -86,6 +86,7 @@ namespace Autogardener.Modules
                     throw new Exception($"Plot with objectdId {plotHole.GameObjectId} was not found in the object table");
                 }
                 plotHole.Initialize(plotOb);
+                taskManager.Enqueue(() => chatGui.Print("Starting scan"));
                 taskManager.Enqueue(() => TargetObject(plotOb));
                 taskManager.Enqueue(() => commands.InteractWithTargetPlot(), "InteractWithPlot", DefConfig);
                 taskManager.Enqueue(() => commands.SetPlantTypeFromDialogue(plotHole), "Extract plant type", DefConfig);
@@ -132,8 +133,8 @@ namespace Autogardener.Modules
             }
 
             IEnumerable<(Plot plot, float distance)> plotsWithDistances
-                = state.Plots.Select(x => (x, Math.Abs(Vector3.Distance(x.Location, playerLocation))));
-                //.Where(tuple => tuple.Item2 < GlobalData.MaxScanDistance);
+                = state.Plots.Select(x => (x, Math.Abs(Vector3.Distance(x.Location, playerLocation))))
+                .Where(tuple => tuple.Item2 < GlobalData.MaxScanDistance);
 
             try
             {

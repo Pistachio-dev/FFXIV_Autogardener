@@ -107,7 +107,7 @@ namespace Autogardener.Modules
             state.Plots = combinedPlots;
             if (saveToFile)
             {
-                saveManager.WriteCharacterSave(state);
+                saveManager.WriteCharacterSave();
             }
         }
 
@@ -143,7 +143,8 @@ namespace Autogardener.Modules
                 return plots;
             }
 
-            return plots.Where(p => Vector3.Distance(p.Location, playerPos ?? Vector3.Zero) < maxDistance).ToList();
+            var result = plots.Where(p => Vector3.Distance(p.Location, playerPos ?? Vector3.Zero) < maxDistance).ToList();
+            return result;
         }
 
         public List<Plot> DiscoverPlots()
