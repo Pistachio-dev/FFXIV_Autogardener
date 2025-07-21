@@ -28,8 +28,8 @@ namespace Autogardener.Windows.MainWindow
             DrawActionButton(() => commands.FullPlantSeedsInteraction(), "Execute interaction");
             DrawActionButton(() => commands.SkipDialogueIfNeeded(), "SkipDialogue");
             DrawActionButton(() => commands.SelectActionString("Plant seeds"), "Select plant seeds");
-            DrawActionButton(() => commands.SeedPlot(), "Fill seeds and soil");
-            DrawActionButton(() => commands.ClickConfirmOnHousingGardening(), "Confirm plant seeds");
+            DrawActionButton(() => commands.PickSeedsAndSoil(), "Fill seeds and soil");
+            DrawActionButton(() => commands.ClickConfirmOnHousingGardeningAddon(), "Confirm plant seeds");
             DrawActionButton(() => commands.ConfirmYes(), "Click yes on dialog");
             ImGui.Separator();
             DrawActionButton(() => commands.Fertilize(), "Fertilize");

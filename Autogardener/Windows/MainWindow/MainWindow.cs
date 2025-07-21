@@ -22,7 +22,7 @@ public partial class MainWindow : PluginWindowBase, IDisposable
     private PlotWatcher plotWatcher;
     private GlobalData globalData;
     private Commands commands;
-    private PlayerActions playerActions;
+    private StoredDataActions playerActions;
     private ISaveManager<CharacterSaveState> saveManager;
     private TaskManager taskManager;
     private ITextureProvider textureProvider;
@@ -57,7 +57,7 @@ public partial class MainWindow : PluginWindowBase, IDisposable
         plotWatcher = serviceProvider.GetRequiredService<PlotWatcher>();
         globalData = serviceProvider.GetRequiredService<GlobalData>();
         commands = serviceProvider.GetRequiredService<Commands>();
-        playerActions = serviceProvider.GetRequiredService<PlayerActions>();
+        playerActions = serviceProvider.GetRequiredService<StoredDataActions>();
         saveManager = serviceProvider.GetRequiredService<ISaveManager<CharacterSaveState>>();
         textureProvider = serviceProvider.GetRequiredService<ITextureProvider>();
         this.scarecrowPicturePath = scarecrowPicturePath;

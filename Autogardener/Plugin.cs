@@ -103,7 +103,7 @@ public sealed class Plugin : IDalamudPlugin
         serviceCollection.AddSingleton<TaskManager>();
         serviceCollection.AddSingleton<GlobalData>();
         serviceCollection.AddSingleton<Commands>();
-        serviceCollection.AddSingleton<PlayerActions>();
+        serviceCollection.AddSingleton<StoredDataActions>();
         serviceCollection.AddSingleton<DesignManager>();
         return serviceCollection.BuildServiceProvider();
     }

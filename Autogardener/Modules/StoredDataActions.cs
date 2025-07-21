@@ -13,7 +13,8 @@ using System.Linq;
 
 namespace Autogardener.Modules
 {
-    public class PlayerActions
+    // Actions that do not directly interact witht he plots.
+    public class StoredDataActions
     {
         private readonly ILogService logService;
         private readonly IChatGui chatGui;
@@ -27,10 +28,13 @@ namespace Autogardener.Modules
         private readonly ITargetManager targetManager;
         private readonly TaskManager taskManager;
         private readonly IGameInventory gameInventory;
+        private readonly InGameActions inGameActions;
 
-        public PlayerActions(ILogService logService, IChatGui chatGui, ISaveManager<CharacterSaveState> saveManager,
+        
+        public StoredDataActions(ILogService logService, IChatGui chatGui, ISaveManager<CharacterSaveState> saveManager,
             GlobalData globalData, PlotWatcher plotWatcher, Commands commands, Utils utils, IClientState clientState,
-            IObjectTable objectTable, ITargetManager targetManager, TaskManager taskManager, IGameInventory gameInventory)
+            IObjectTable objectTable, ITargetManager targetManager, TaskManager taskManager, IGameInventory gameInventory,
+            InGameActions ingameActions)
         {
             this.logService = logService;
             this.chatGui = chatGui;
@@ -44,6 +48,7 @@ namespace Autogardener.Modules
             this.targetManager = targetManager;
             this.taskManager = taskManager;
             this.gameInventory = gameInventory;
+            this.inGameActions = ingameActions;
         }
 
         public void RegisterNearestPlot()
@@ -81,33 +86,7 @@ namespace Autogardener.Modules
                 return;
             }
 
-            foreach (PlotHole plotHole in plot.PlantingHoles)
-            {
-                var plotOb = objectTable.SearchById(plotHole.GameObjectId);
-                if (plotOb == null)
-                {
-                    throw new Exception($"Plot with objectdId {plotHole.GameObjectId} was not found in the object table");
-                }
-                plotHole.Initialize(plotOb);
-                taskManager.Enqueue(() => chatGui.Print("Starting scan"));
-                taskManager.Enqueue(() => TargetObject(plotOb));
-                taskManager.Enqueue(() => commands.InteractWithTargetPlot(), "InteractWithPlot", DefConfig);
-                taskManager.Enqueue(() => commands.SetPlantTypeFromDialogue(plotHole), "Extract plant type", DefConfig);
-                taskManager.Enqueue(() => commands.SkipDialogueIfNeeded(), "Skip dialogue", DefConfig);
-                taskManager.Enqueue(() => commands.SelectActionString(globalData
-                    .GetGardeningOptionStringLocalized(GlobalData.GardeningStrings.Quit)), "Select Quit", DefConfig);                
-                taskManager.EnqueueDelay(new Random().Next(200, 300));
-            }
-
-            taskManager.Enqueue(() => chatGui.Print("Scan complete! o7"));
-            taskManager.Enqueue(() => {saveManager.WriteCharacterSave(charState);});
-        }
-
-        private bool TargetObject(IGameObject ob)
-        {
-            logService.Debug($"Targeting {ob.GameObjectId}");
-            targetManager.Target = ob;
-            return true;
+            inGameActions.ScanPlot(plot);
         }
 
         public int CreateNewDesign()
@@ -121,23 +100,6 @@ namespace Autogardener.Modules
             return index;
         }
 
-        private Dictionary<uint, int> GetExpectedItemAmounts(PlotPlan design, bool fertilize)
-        {
-            Dictionary<uint, int> expectedItems = new(); // ItemId, quantity expected
-            if (fertilize)
-            {
-                expectedItems.Add(GlobalData.FishmealId, design.PlotHolePlans.Count);
-
-            }
-            foreach (var plan in design.PlotHolePlans)
-            {
-                expectedItems.IncrementOrSet(plan.DesignatedSeed);
-                expectedItems.IncrementOrSet(plan.DesignatedSoil);
-            }
-            expectedItems.Remove(0);
-
-            return expectedItems;
-        }
         public ResourcesCheckResult CheckResourceAvailability(PlotPlan design, bool fertilize)
         {
             var expectedItems = GetExpectedItemAmounts(design, fertilize);
@@ -173,6 +135,24 @@ namespace Autogardener.Modules
             }
 
             return result;
+        }
+
+        private Dictionary<uint, int> GetExpectedItemAmounts(PlotPlan design, bool fertilize)
+        {
+            Dictionary<uint, int> expectedItems = new(); // ItemId, quantity expected
+            if (fertilize)
+            {
+                expectedItems.Add(GlobalData.FishmealId, design.PlotHolePlans.Count);
+
+            }
+            foreach (var plan in design.PlotHolePlans)
+            {
+                expectedItems.IncrementOrSet(plan.DesignatedSeed);
+                expectedItems.IncrementOrSet(plan.DesignatedSoil);
+            }
+            expectedItems.Remove(0);
+
+            return expectedItems;
         }
 
         public Plot? GetNearestTrackedPlot(bool addNewPlots)
@@ -222,12 +202,5 @@ namespace Autogardener.Modules
 
             return true;
         }
-        private static TaskManagerConfiguration DefConfig = new TaskManagerConfiguration()
-        {
-            ShowDebug = true,
-            ShowError = true,
-            TimeLimitMS = 10000,
-            AbortOnTimeout = true
-        };
     }
 }

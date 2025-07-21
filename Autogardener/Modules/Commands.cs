@@ -1,4 +1,5 @@
 using Autogardener.Model.Plots;
+using Dalamud.Game.ClientState.Objects;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin.Services;
 using DalamudBasics.Chat.ClientOnlyDisplay;
@@ -29,9 +30,10 @@ namespace Autogardener.Modules
         private readonly IGameGui gameGui;
         private readonly IClientChatGui clientChatGui;
         private readonly TaskManager taskManager;
+        private readonly ITargetManager targetManager;
 
         public Commands(ILogService logService, IClientState clientState, GlobalData globalData,
-            Utils utils, IGameGui gameGui, IClientChatGui clientChatGui, TaskManager taskManager)
+            Utils utils, IGameGui gameGui, IClientChatGui clientChatGui, TaskManager taskManager, ITargetManager targetManager)
         {
             this.logService = logService;
             this.clientState = clientState;
@@ -40,32 +42,24 @@ namespace Autogardener.Modules
             this.gameGui = gameGui;
             this.clientChatGui = clientChatGui;
             this.taskManager = taskManager;
+            this.targetManager = targetManager;
         }
 
         private bool _gardening = false;
         public bool Gardening => _gardening && GlobalData.GardenPlotDataIds.Contains(clientState.LocalPlayer?.TargetObject?.DataId ?? 0);
 
-        public unsafe void FullPlantSeedsInteraction()
-        {
-            var tmconfig = new TaskManagerConfiguration()
-            {
-                ShowDebug = true,
-                ShowError = true,
-                TimeLimitMS = 10000,
-                AbortOnTimeout = true
-            };
 
-            taskManager.Enqueue(InteractWithTargetPlot, "Interact with plot", tmconfig);
-            taskManager.EnqueueDelay(300);
-            taskManager.Enqueue(SkipDialogueIfNeeded, "Skip dialogue", tmconfig);
-            taskManager.EnqueueDelay(100);
-            taskManager.Enqueue(() => SelectActionString("plant seeds"), "Select Plant Seeds", tmconfig);
-            taskManager.EnqueueDelay(100);
-            taskManager.Enqueue(SeedPlot, "Seed and soil", tmconfig);
-            taskManager.EnqueueDelay(100);
-            taskManager.Enqueue(ClickConfirmOnHousingGardening, "Click confirm", tmconfig);
-            taskManager.EnqueueDelay(100);
-            taskManager.Enqueue(ConfirmYes, "Click Yes", tmconfig);
+
+        public bool TargetObject(IGameObject ob)
+        {
+            logService.Debug($"Targeting {ob.GameObjectId}");
+            targetManager.Target = ob;
+            return true;
+        }
+
+        public unsafe bool IsItemPresentInInventory(uint itemId)
+        {
+            return TryGetItemSlotByItemId(itemId, out var _, out var _);
         }
 
         public unsafe void Fertilize()
@@ -115,53 +109,6 @@ namespace Autogardener.Modules
             {
                 //logService.Warning("No talk addon found");
                 return false;
-            }
-        }
-
-        private (uint id, string name) ExtractPlantNameAndId(string dialogueText)
-        {
-            var matches = new Regex("([\\w ]{4,})").Matches(dialogueText);
-            if (matches.Count < 2 || matches[0].Groups.Count == 0)
-            {
-                logService.Info("Scaned plot was empty");
-                return (0, "Empty");
-            }
-            string plantName = matches[0].Groups[0].Value;
-
-            (uint id, string name) result =  SearchSeed(plantName);
-            if (result.id == 0)
-            {
-                return ExtractXlightNameAndId(plantName);
-            }
-
-            return result;
-        }
-
-
-        // This does not work in french at all, but that's ok
-        private (uint id, string name) ExtractXlightNameAndId(string plantName)
-        {            
-            var regex = new Regex($"(\\w+)\\s{globalData.GetGardeningOptionStringLocalized(GlobalData.GardeningStrings.Shard)}");
-            Match match = regex.Match(plantName);
-            if (!match.Success || match.Groups.Count == 0)
-            {
-                return (0, "Empty");
-            }
-            var shardElement = match.Groups[0];
-            var seedName = $"{shardElement}{globalData.GetGardeningOptionStringLocalized(GlobalData.GardeningStrings.xLight)}";
-            return SearchSeed(seedName);
-        }
-        private (uint id, string name) SearchSeed(string seedPartialName)
-        {
-            try
-            {
-                var seedDictionaryEntry = globalData.Seeds.First(s => s.Value.Name.ToString().Contains(seedPartialName, StringComparison.OrdinalIgnoreCase));
-                return (seedDictionaryEntry.Key, seedDictionaryEntry.Value.Name.ToString());
-            }
-            catch (InvalidOperationException)
-            {
-                logService.Warning($"No seed matching the plant {seedPartialName} found");
-                return (0, "Empty");
             }
         }
 
@@ -215,20 +162,20 @@ namespace Autogardener.Modules
         private const uint WindlightSeedsId = 15867;
         private const uint FishmealId = 7767;
 
-        public unsafe bool SeedPlot()
+        public unsafe bool PickSeedsAndSoil(uint seedItemId, uint soilItemId)
         {
             if (!TryGetAddonByName<AtkUnitBase>("HousingGardening", out var gardeningAddon))
             {
                 return false;
             }
-            int soilIndex = GetIndexFromCollection(globalData.Soils.Keys.ToHashSet(), PottingSoilId);
-            int seedIndex = GetIndexFromCollection(globalData.Seeds.Keys.ToHashSet(), WindlightSeedsId);
+            int seedIndex = GetIndexFromCollection(globalData.Seeds.Keys.ToHashSet(), seedItemId);
+            int soilIndex = GetIndexFromCollection(globalData.Soils.Keys.ToHashSet(), soilItemId);            
             logService.Info($"Soil: {soilIndex} Seed: {seedIndex}");
 
             return ChooseGardeningItems(soilIndex, seedIndex, gardeningAddon);
         }
 
-        public unsafe bool ClickConfirmOnHousingGardening()
+        public unsafe bool ClickConfirmOnHousingGardeningAddon()
         {
             if (!TryGetAddonByName<AtkUnitBase>("HousingGardening", out var gardeningAddon))
             {
@@ -239,6 +186,53 @@ namespace Autogardener.Modules
             taskManager.InsertDelay(100);
 
             return true;
+        }
+
+        private (uint id, string name) ExtractPlantNameAndId(string dialogueText)
+        {
+            var matches = new Regex("([\\w ]{4,})").Matches(dialogueText);
+            if (matches.Count < 2 || matches[0].Groups.Count == 0)
+            {
+                logService.Info("Scaned plot was empty");
+                return (0, "Empty");
+            }
+            string plantName = matches[0].Groups[0].Value;
+
+            (uint id, string name) result = SearchSeed(plantName);
+            if (result.id == 0)
+            {
+                return ExtractXlightNameAndId(plantName);
+            }
+
+            return result;
+        }
+
+
+        // This does not work in french at all, but that's ok
+        private (uint id, string name) ExtractXlightNameAndId(string plantName)
+        {
+            var regex = new Regex($"(\\w+)\\s{globalData.GetGardeningOptionStringLocalized(GlobalData.GardeningStrings.Shard)}");
+            Match match = regex.Match(plantName);
+            if (!match.Success || match.Groups.Count == 0)
+            {
+                return (0, "Empty");
+            }
+            var shardElement = match.Groups[0];
+            var seedName = $"{shardElement}{globalData.GetGardeningOptionStringLocalized(GlobalData.GardeningStrings.xLight)}";
+            return SearchSeed(seedName);
+        }
+        private (uint id, string name) SearchSeed(string seedPartialName)
+        {
+            try
+            {
+                var seedDictionaryEntry = globalData.Seeds.First(s => s.Value.Name.ToString().Contains(seedPartialName, StringComparison.OrdinalIgnoreCase));
+                return (seedDictionaryEntry.Key, seedDictionaryEntry.Value.Name.ToString());
+            }
+            catch (InvalidOperationException)
+            {
+                logService.Warning($"No seed matching the plant {seedPartialName} found");
+                return (0, "Empty");
+            }
         }
 
         private unsafe bool ChooseGardeningItems(int soilIndex, int seedIndex, AtkUnitBase* gardeningAddon)
@@ -278,18 +272,9 @@ namespace Autogardener.Modules
             return false;
         }
 
-        private unsafe InventoryContainer*[] GetCombinedInventories()
-        {
-            var im = InventoryManager.Instance();
-            var inv1 = im->GetInventoryContainer(InventoryType.Inventory1);
-            var inv2 = im->GetInventoryContainer(InventoryType.Inventory2);
-            var inv3 = im->GetInventoryContainer(InventoryType.Inventory3);
-            var inv4 = im->GetInventoryContainer(InventoryType.Inventory4);
-            InventoryContainer*[] container = { inv1, inv2, inv3, inv4 };
-            return container;
-        }
 
-        private unsafe bool TryGetItemSlotByItemId(uint itemId, out InventoryContainer* container, out int slotNumber)
+
+        public unsafe bool TryGetItemSlotByItemId(uint itemId, out InventoryContainer* container, out int slotNumber)
         {
             InventoryContainer*[] inventories = GetCombinedInventories();
             container = null;
@@ -312,6 +297,18 @@ namespace Autogardener.Modules
             return false;
         }
 
+        private unsafe InventoryContainer*[] GetCombinedInventories()
+        {
+            var im = InventoryManager.Instance();
+            var inv1 = im->GetInventoryContainer(InventoryType.Inventory1);
+            var inv2 = im->GetInventoryContainer(InventoryType.Inventory2);
+            var inv3 = im->GetInventoryContainer(InventoryType.Inventory3);
+            var inv4 = im->GetInventoryContainer(InventoryType.Inventory4);
+            InventoryContainer*[] container = { inv1, inv2, inv3, inv4 };
+            return container;
+        }
+
+        // This returned index is the index within the popup that appears when clicking the request slot, not an inventory index.
         private unsafe int GetIndexFromCollection(HashSet<uint> idCollection, uint targetId)
         {
             InventoryContainer*[] container = GetCombinedInventories();
@@ -336,14 +333,6 @@ namespace Autogardener.Modules
             }
 
             return -1;
-        }
-
-        private unsafe void FertilizePlot()
-        {
-        }
-
-        private unsafe void TendToCrop()
-        {
         }
 
         public unsafe bool InteractWithTargetPlot()
