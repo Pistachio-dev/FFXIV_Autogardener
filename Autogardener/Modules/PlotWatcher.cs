@@ -122,7 +122,7 @@ namespace Autogardener.Modules
             return false;
         }
         private List<Plot> MergePlotLists(List<Plot> known, List<Plot> scanned)
-        {
+        {            
             List<Plot> combinedPlots = new List<Plot>(known);
             foreach (var plot in scanned)
             {
@@ -175,7 +175,7 @@ namespace Autogardener.Modules
                 }
 
                 var newHole = new PlotHole(plotHole.GameObjectId, plotHole.EntityId,
-                                                    plotHole.ObjectIndex, plotHole.DataId, plotHole.Position);
+                                                    plotHole.ObjectIndex, plotHole.DataId, new SerializableVector3(plotHole.Position));
                 plotInConstruction?.PlantingHoles.Add(newHole);
                 plotHoleCounter++;
             }

@@ -19,7 +19,7 @@ namespace Autogardener.Model.Plots
 
         public List<PlotHole> PlantingHoles { get; set; } = new();
 
-        public Vector3 Location => PlantingHoles.FirstOrDefault()?.Location ?? Vector3.Zero;
+        public Vector3 Location => PlantingHoles.FirstOrDefault()?.Location.AsVector3() ?? Vector3.Zero;
 
         public override bool Equals(object? otherPlotObject)
         {

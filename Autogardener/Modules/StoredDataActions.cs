@@ -157,7 +157,7 @@ namespace Autogardener.Modules
 
         public Plot? GetNearestTrackedPlot(bool addNewPlots)
         {
-            var state = saveManager.GetCharacterSaveInMemory();
+            var state = saveManager.GetCharacterSaveInMemory();            
             if (addNewPlots)
             {
                 plotWatcher.UpdatePlotList();

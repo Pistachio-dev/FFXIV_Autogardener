@@ -75,7 +75,7 @@ public partial class MainWindow : PluginWindowBase, IDisposable
     }
 
     protected override unsafe void SafeDraw()
-    {        
+    {
         if (ImGui.BeginTabBar("MainTabBar"))
         {
             var save = saveManager.GetCharacterSaveInMemory();

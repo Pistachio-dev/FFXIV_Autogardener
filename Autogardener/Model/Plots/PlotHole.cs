@@ -5,7 +5,7 @@ namespace Autogardener.Model.Plots
 {
     public class PlotHole
     {
-        public PlotHole(ulong gameObjectId, uint entityId, uint objectIndex, uint dataId, Vector3 location)
+        public PlotHole(ulong gameObjectId, uint entityId, uint objectIndex, uint dataId, SerializableVector3 location)
         {
             GameObjectId = gameObjectId;
             EntityId = entityId;
@@ -20,7 +20,7 @@ namespace Autogardener.Model.Plots
             EntityId = ob.EntityId;
             ObjectIndex = ob.ObjectIndex;
             DataId = ob.DataId;
-            Location = ob.Position;
+            Location = new SerializableVector3(ob.Position.X, ob.Position.Y, ob.Position.Z);
         }
 
         public PlotHolePlan? Design { get; set; } = null;
@@ -37,6 +37,6 @@ namespace Autogardener.Model.Plots
 
         public uint DataId { get; set; }
 
-        public Vector3 Location { get; set; }
+        public SerializableVector3 Location { get; set; }
     }
 }
