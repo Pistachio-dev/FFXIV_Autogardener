@@ -105,6 +105,7 @@ public sealed class Plugin : IDalamudPlugin
         serviceCollection.AddSingleton<Commands>();
         serviceCollection.AddSingleton<StoredDataActions>();
         serviceCollection.AddSingleton<DesignManager>();
+        serviceCollection.AddSingleton<InGameActions>();
         return serviceCollection.BuildServiceProvider();
     }
 

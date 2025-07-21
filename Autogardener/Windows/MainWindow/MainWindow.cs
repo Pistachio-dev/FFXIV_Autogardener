@@ -1,17 +1,12 @@
 using Autogardener.Model;
-using Autogardener.Model.Designs;
-using Autogardener.Model.Plots;
 using Autogardener.Modules;
-using Dalamud.Interface;
-using Dalamud.Interface.Components;
 using Dalamud.Plugin.Services;
+using DalamudBasics.Configuration;
 using DalamudBasics.GUI.Windows;
 using DalamudBasics.Logging;
 using DalamudBasics.SaveGames;
 using ECommons.Automation.NeoTaskManager;
-using Humanizer;
 using Microsoft.Extensions.DependencyInjection;
-using System;
 using System.Linq;
 
 namespace Autogardener.Windows.MainWindow;
@@ -23,11 +18,13 @@ public partial class MainWindow : PluginWindowBase, IDisposable
     private GlobalData globalData;
     private Commands commands;
     private StoredDataActions playerActions;
+    InGameActions inGameActions;
     private ISaveManager<CharacterSaveState> saveManager;
     private TaskManager taskManager;
     private ITextureProvider textureProvider;
     private IFramework framework;
     private IChatGui chatGui;
+    public IConfigurationService<Configuration> configService;
 
     private uint[] seedIds;
     private string[] seedNames;
@@ -58,6 +55,7 @@ public partial class MainWindow : PluginWindowBase, IDisposable
         globalData = serviceProvider.GetRequiredService<GlobalData>();
         commands = serviceProvider.GetRequiredService<Commands>();
         playerActions = serviceProvider.GetRequiredService<StoredDataActions>();
+
         saveManager = serviceProvider.GetRequiredService<ISaveManager<CharacterSaveState>>();
         textureProvider = serviceProvider.GetRequiredService<ITextureProvider>();
         this.scarecrowPicturePath = scarecrowPicturePath;
@@ -66,6 +64,8 @@ public partial class MainWindow : PluginWindowBase, IDisposable
         framework = serviceProvider.GetRequiredService<IFramework>();
         taskManager = serviceProvider.GetRequiredService<TaskManager>();
         chatGui = serviceProvider.GetRequiredService<IChatGui>();
+        configService = serviceProvider.GetRequiredService<IConfigurationService<Configuration>>();
+        inGameActions = serviceProvider.GetRequiredService<InGameActions>();
         
         framework.RunOnFrameworkThread(() =>
         {

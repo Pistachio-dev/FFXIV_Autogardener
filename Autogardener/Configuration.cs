@@ -11,4 +11,8 @@ public class Configuration : IConfiguration
     public bool LogOutgoingChatOutput { get; set; } = true;
     public bool LogClientOnlyChatOutput { get; set; } = true;
     public int LimitedChatChannelsMessageDelayInMs { get; set; } = 1000;
+
+    public bool UseFertilizer { get; set; } = true;
+
+    public bool Replant { get; set; } = true;
 }

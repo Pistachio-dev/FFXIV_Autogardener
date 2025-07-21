@@ -74,33 +74,32 @@ namespace Autogardener.Modules
             taskManager.Enqueue(() => { saveManager.WriteCharacterSave(); });
         }
 
+        public void PlotPatchCare(Plot plot, bool fertilize, bool replant)
+        {
+            foreach (var plotHole in plot.PlantingHoles)
+            {
+                BeginPlotCare(plotHole, fertilize, replant);
+            }
+        }
+
+        private void BeginPlotCare(PlotHole plotHole, bool fertilize, bool replant)
+        {
+            taskManager.Enqueue(() => TargetPlotGameObjectId(plotHole));
+            taskManager.Enqueue(commands.SkipDialogueIfNeeded, "Skip dialogue", DefConfig);
+            taskManager.Enqueue(() => SelectOption(plotHole, fertilize, replant));
+        }
+
         private bool TargetPlotGameObjectId(PlotHole plotHole)
         {
             var plotOb = objectTable.SearchById(plotHole.GameObjectId);
             if (plotOb == null)
             {
                 throw new Exception($"Plot with objectdId {plotHole.GameObjectId} was not found in the object table");
+                chatGui.PrintError("Can't access plot. Did you move away?");
             }
-
+            
             commands.TargetObject(plotOb);
             return true;
-        }
-
-        public unsafe void FullPlantSeedsInteraction()
-        {
-
-
-            taskManager.Enqueue(commands.InteractWithTargetPlot, "Interact with plot", DefConfig);
-            taskManager.EnqueueDelay(300);
-            taskManager.Enqueue(commands.SkipDialogueIfNeeded, "Skip dialogue", DefConfig);
-            taskManager.EnqueueDelay(100);
-            taskManager.Enqueue(() => commands.SelectActionString("plant seeds"), "Select Plant Seeds", DefConfig);
-            taskManager.EnqueueDelay(100);
-            taskManager.Enqueue(commands.PickSeedsAndSoil, "Seed and soil", DefConfig);
-            taskManager.EnqueueDelay(100);
-            taskManager.Enqueue(commands.ClickConfirmOnHousingGardeningAddon, "Click confirm", DefConfig);
-            taskManager.EnqueueDelay(100);
-            taskManager.Enqueue(commands.ConfirmYes, "Click Yes", DefConfig);
         }
 
         public void SeedTargetPlot(PlotHole plotHoleData)
@@ -135,14 +134,6 @@ namespace Autogardener.Modules
             });
         }
 
-
-        public void BeginPlotCare(PlotHole plotHole, bool fertilize, bool replant)
-        {
-            taskManager.Enqueue(() => TargetPlotGameObjectId(plotHole));
-            taskManager.Enqueue(commands.SkipDialogueIfNeeded, "Skip dialogue", DefConfig);
-            taskManager.Enqueue(() => SelectOption(plotHole, fertilize, replant));
-        }
-
         private unsafe bool SelectOption(PlotHole plotHole, bool fertilize, bool replant)
         {
             if (TryGetAddonByName<AddonSelectString>("SelectString", out var addonSelectString)
@@ -151,7 +142,10 @@ namespace Autogardener.Modules
                 var entries = new AddonMaster.SelectString(addonSelectString).Entries.Select(x => x.ToString()).ToList();
                 if (entries.Any(e => e?.Contains("Harvest Crop") ?? false))
                 {
-                    taskManager.Enqueue(() => HarvestTargetPlot(plotHole, replant));
+                    if (!(plotHole.Design?.DoNotHarvest ?? false))
+                    {
+                        taskManager.Enqueue(() => HarvestTargetPlot(plotHole, replant));
+                    }                    
                 }
                 if (entries.Any(e => e?.Contains("Fertilize Crop") ?? false) && fertilize)
                 {

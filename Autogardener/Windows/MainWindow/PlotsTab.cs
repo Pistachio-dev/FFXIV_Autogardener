@@ -4,11 +4,7 @@ using Autogardener.Model.Plots;
 using Dalamud.Interface;
 using Dalamud.Interface.Components;
 using Humanizer;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Autogardener.Windows.MainWindow
 {
@@ -18,6 +14,7 @@ namespace Autogardener.Windows.MainWindow
         private int currentPlot = 0;
         private bool toggleRenamePlot;
 
+
         private void DrawPlotsTab(CharacterSaveState save)
         {
             var nearestPlot = playerActions.GetNearestTrackedPlot(false);
@@ -25,13 +22,15 @@ namespace Autogardener.Windows.MainWindow
             {
                 ImGui.TextUnformatted("Nearest plot:");
                 ImGui.TextColored(NeutralGreen, nearestPlot.Alias);
+                ImGui.NewLine();
+                DrawTendButtonAndParameters(nearestPlot);
             }
             else
             {
                 ImGui.TextUnformatted("Too far away from any registered plot");
             }
 
-            if (ImGui.Button("Scan the plot you're on"))
+            if (ImGuiComponents.IconButtonWithText(FontAwesomeIcon.Search, "Scan nearest plot"))
             {
                 playerActions.RegisterNearestPlot();
                 currentPlot = Math.Max(0, save.Plots.IndexOf(p => p.Id == playerActions.GetNearestTrackedPlot(false)?.Id));
@@ -58,6 +57,30 @@ namespace Autogardener.Windows.MainWindow
 
                 plotWatcher.HighlightPlots();
             }
+        }
+        private void DrawTendButtonAndParameters(Plot nearestPlot)
+        {
+            var config = configService.GetConfiguration();
+            if (ImGuiComponents.IconButtonWithText(FontAwesomeIcon.Leaf, "Tend to plot"))
+            {
+
+                inGameActions.PlotPatchCare(nearestPlot, config.UseFertilizer, config.Replant);
+            }
+            bool useFertilizer = config.UseFertilizer;
+            if (ImGui.Checkbox("Use fertilizer", ref useFertilizer))
+            {
+                config.UseFertilizer = useFertilizer;
+                configService.SaveConfiguration();
+            }
+            DrawTooltip("Will use fertilizer if available before tending to de crop");
+            bool rePlant = config.Replant;
+            if (ImGui.Checkbox("Replant after harvest", ref rePlant))
+            {
+                config.Replant = rePlant;
+                configService.SaveConfiguration();
+            }
+            DrawTooltip("After harvesting a plant, will plant the seeds given in the design.");
+
         }
 
         private void DrawDesignItems(PlotPlan plotPlan)
