@@ -1,13 +1,8 @@
 using Autogardener.Model;
 using Autogardener.Model.Designs;
-using Autogardener.Model.Plots;
 using Dalamud.Interface;
 using Dalamud.Interface.Components;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Autogardener.Windows.MainWindow
 {
@@ -15,10 +10,15 @@ namespace Autogardener.Windows.MainWindow
     {
         private bool toggleRenameDesign;
         private int currentDesign = 0;
+        private uint[] seedIds;
+        private string[] seedNames;
+        private uint[] soilIds;
+        private string[] soilNames;
 
         private void DrawDesignsTab(CharacterSaveState save)
         {
-            var nearestPlot = playerActions.GetNearestTrackedPlot(false);
+            UpdateSelectorData(configService.GetConfiguration().ShowOnlyItemsInInventory);
+            var nearestPlot = storedDataActions.GetNearestTrackedPlot(false);
             if (nearestPlot == null)
             {
                 ImGui.BeginDisabled();
@@ -28,7 +28,7 @@ namespace Autogardener.Windows.MainWindow
                 : $"Create new design for {nearestPlot.Alias}";
             if (ImGuiComponents.IconButtonWithText(FontAwesomeIcon.PaintBrush, newDesignButtonText))
             {
-                currentDesign = playerActions.CreateNewDesign();
+                currentDesign = storedDataActions.CreateNewDesign();
                 return;
             }
             if (nearestPlot == null)
@@ -49,6 +49,14 @@ namespace Autogardener.Windows.MainWindow
                 {
                     ImGui.TextUnformatted("This design has no plots defined");
                     return;
+                }
+
+                bool showOnlyInInventory = configService.GetConfiguration().ShowOnlyItemsInInventory;
+                if (ImGui.Checkbox("Show only items in inventory", ref showOnlyInInventory))
+                {
+                    var config = configService.GetConfiguration();
+                    config.ShowOnlyItemsInInventory = showOnlyInInventory;
+                    configService.SaveConfiguration();
                 }
 
                 int[][] displayLayout = GetPlotLayout(save.Designs[currentDesign].PlotHolePlans.Count);
@@ -143,6 +151,39 @@ namespace Autogardener.Windows.MainWindow
 
             ImGui.EndChildFrame();
             ImGui.PopStyleVar();
+        }
+
+        private void UpdateSelectorData(bool showOnlyInPossession)
+        {
+            HashSet<uint>? filter = null;
+            if (showOnlyInPossession)
+            {
+                filter = storedDataActions.GetItemIdsOfSoilsAndSeedsInInventory();
+            }
+
+            GenerateOrderedCollection(globalData.Seeds, out seedIds, out seedNames, filter);
+            GenerateOrderedCollection(globalData.Soils, out soilIds, out soilNames, filter);
+        }
+
+        private void GenerateOrderedCollection(Dictionary<uint, Lumina.Excel.Sheets.Item> original,
+                                                out uint[] idArray,
+                                                out string[] nameArray,
+                                                HashSet<uint>? filter = null)
+        {
+            Dictionary<uint, Lumina.Excel.Sheets.Item> filtered = filter == null
+                ? original
+                : original.Where(entry => filter.Contains(entry.Key)).ToDictionary();
+
+            IEnumerable<(uint id, string name)> orderedEnum = filtered.Select(e => (e.Key, e.Value.Name.ToString())).OrderBy(t => t.Item2);
+            idArray = new uint[filtered.Count];
+            nameArray = new string[filtered.Count];
+            var i = 0;
+            foreach (var tuple in orderedEnum)
+            {
+                idArray[i] = tuple.id;
+                nameArray[i] = tuple.name;
+                i++;
+            }
         }
     }
 }

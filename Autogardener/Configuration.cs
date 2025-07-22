@@ -15,4 +15,6 @@ public class Configuration : IConfiguration
     public bool UseFertilizer { get; set; } = true;
 
     public bool Replant { get; set; } = true;
+
+    public bool ShowOnlyItemsInInventory { get; set; } = true;
 }

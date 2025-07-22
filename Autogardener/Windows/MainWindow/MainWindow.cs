@@ -17,7 +17,7 @@ public partial class MainWindow : PluginWindowBase, IDisposable
     private PlotWatcher plotWatcher;
     private GlobalData globalData;
     private Commands commands;
-    private StoredDataActions playerActions;
+    private StoredDataActions storedDataActions;
     InGameActions inGameActions;
     private ISaveManager<CharacterSaveState> saveManager;
     private TaskManager taskManager;
@@ -25,11 +25,6 @@ public partial class MainWindow : PluginWindowBase, IDisposable
     private IFramework framework;
     private IChatGui chatGui;
     public IConfigurationService<Configuration> configService;
-
-    private uint[] seedIds;
-    private string[] seedNames;
-    private uint[] soilIds;
-    private string[] soilNames;
 
     private static readonly Vector4 LightGreen = new Vector4(0.769f, 0.9f, 0.6f, 1);
     private static readonly Vector4 MidLightGreen = new Vector4(0.58f, 0.75f, 0.37f, 1);
@@ -54,13 +49,11 @@ public partial class MainWindow : PluginWindowBase, IDisposable
         plotWatcher = serviceProvider.GetRequiredService<PlotWatcher>();
         globalData = serviceProvider.GetRequiredService<GlobalData>();
         commands = serviceProvider.GetRequiredService<Commands>();
-        playerActions = serviceProvider.GetRequiredService<StoredDataActions>();
+        storedDataActions = serviceProvider.GetRequiredService<StoredDataActions>();
 
         saveManager = serviceProvider.GetRequiredService<ISaveManager<CharacterSaveState>>();
         textureProvider = serviceProvider.GetRequiredService<ITextureProvider>();
         this.scarecrowPicturePath = scarecrowPicturePath;
-        GenerateOrderedCollection(globalData.Seeds, out seedIds, out seedNames);
-        GenerateOrderedCollection(globalData.Soils, out soilIds, out soilNames);
         framework = serviceProvider.GetRequiredService<IFramework>();
         taskManager = serviceProvider.GetRequiredService<TaskManager>();
         chatGui = serviceProvider.GetRequiredService<IChatGui>();
@@ -110,20 +103,6 @@ public partial class MainWindow : PluginWindowBase, IDisposable
         
         ImGui.EndChildFrame();
         ImGui.PopStyleVar();
-    }
-
-    private void GenerateOrderedCollection(Dictionary<uint, Lumina.Excel.Sheets.Item> original, out uint[] idArray, out string[] nameArray)
-    {
-        IEnumerable<(uint id, string name)> orderedEnum = original.Select(e => (e.Key, e.Value.Name.ToString())).OrderBy(t => t.Item2);
-        idArray = new uint[original.Count];
-        nameArray = new string[original.Count];
-        var i = 0;
-        foreach (var tuple in orderedEnum)
-        {
-            idArray[i] = tuple.id;
-            nameArray[i] = tuple.name;
-            i++;
-        }
     }
 
     private int[][] GetPlotLayout(int plotCount)

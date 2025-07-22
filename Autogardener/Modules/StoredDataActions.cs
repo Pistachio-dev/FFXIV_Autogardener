@@ -202,5 +202,28 @@ namespace Autogardener.Modules
 
             return true;
         }
+
+        public HashSet<uint> GetItemIdsOfSoilsAndSeedsInInventory()
+        {
+            GameInventoryType[] inventories = [GameInventoryType.Inventory1, GameInventoryType.Inventory2,
+                                                GameInventoryType.Inventory3, GameInventoryType.Inventory4];
+
+            HashSet<uint> result = new();
+            foreach (GameInventoryType type in inventories)
+            {
+
+                var subInv = gameInventory.GetInventoryItems(type);
+                for (int i = 0; i < subInv.Length; i++)
+                {
+                    GameInventoryItem slot = subInv[i];
+                    if (globalData.Seeds.ContainsKey(slot.ItemId) || globalData.Soils.ContainsKey(slot.ItemId))
+                    {
+                        result.Add(slot.ItemId);
+                    }
+                }
+            }
+
+            return result;
+        }
     }
 }
