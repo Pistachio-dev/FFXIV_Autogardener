@@ -17,12 +17,16 @@ namespace Autogardener.Windows.MainWindow
 
         private void DrawPlotsTab(CharacterSaveState save)
         {
-            var nearestPlot = playerActions.GetNearestTrackedPlot(false);
+            if (ImGui.Button("Print current task"))
+            {
+                logService.Info(inGameActions.GetCurrentTaskName());
+            }
+            var nearestPlot = storedDataActions.GetNearestTrackedPlot(false);
             if (nearestPlot != null)
             {
                 ImGui.TextUnformatted("Nearest plot:");
+                ImGui.SameLine();
                 ImGui.TextColored(NeutralGreen, nearestPlot.Alias);
-                ImGui.NewLine();
                 DrawTendButtonAndParameters(nearestPlot);
             }
             else
@@ -32,8 +36,8 @@ namespace Autogardener.Windows.MainWindow
 
             if (ImGuiComponents.IconButtonWithText(FontAwesomeIcon.Search, "Scan nearest plot"))
             {
-                playerActions.RegisterNearestPlot();
-                currentPlot = Math.Max(0, save.Plots.IndexOf(p => p.Id == playerActions.GetNearestTrackedPlot(false)?.Id));
+                storedDataActions.RegisterNearestPlot();
+                currentPlot = Math.Max(0, save.Plots.IndexOf(p => p.Id == storedDataActions.GetNearestTrackedPlot(false)?.Id));
                 DrawTooltip("Will check and save the plants of a plot. You need to be on it.");
             }
 
@@ -61,10 +65,10 @@ namespace Autogardener.Windows.MainWindow
         private void DrawTendButtonAndParameters(Plot nearestPlot)
         {
             var config = configService.GetConfiguration();
-            if (ImGuiComponents.IconButtonWithText(FontAwesomeIcon.Leaf, "Tend to plot"))
+            if (ImGuiComponents.IconButtonWithText(FontAwesomeIcon.Leaf, "Tend to plot", MidDarkGreen, DarkGreen, MidDarkGreen))
             {
-
-                inGameActions.PlotPatchCare(nearestPlot, config.UseFertilizer, config.Replant);
+                //inGameActions.PlotPatchCare(nearestPlot, config.UseFertilizer, config.Replant);
+                inGameActions.TargetPlantingHoleCare(nearestPlot, config.UseFertilizer, config.Replant);
             }
             bool useFertilizer = config.UseFertilizer;
             if (ImGui.Checkbox("Use fertilizer", ref useFertilizer))
@@ -85,7 +89,7 @@ namespace Autogardener.Windows.MainWindow
 
         private void DrawDesignItems(PlotPlan plotPlan)
         {
-            var checkResult = playerActions.CheckResourceAvailability(plotPlan, true);
+            var checkResult = storedDataActions.CheckResourceAvailability(plotPlan, true);
             foreach (var item in checkResult.Entries)
             {
                 var color = item.ActualAmount >= item.ExpectedAmount ? MidDarkGreen : Red;
@@ -102,7 +106,7 @@ namespace Autogardener.Windows.MainWindow
             var designNames = save.Designs.Select(p => p.PlanName).ToArray();
             if (ImGui.Combo("Plan", ref designForCurrentPlot, designNames, designNames.Length))
             {
-                if (!playerActions.ApplyDesign(ref plot, save.Designs[designForCurrentPlot]))
+                if (!storedDataActions.ApplyDesign(ref plot, save.Designs[designForCurrentPlot]))
                 {
                     return;
                 }

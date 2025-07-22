@@ -50,6 +50,11 @@ namespace Autogardener.Modules
             this.gameInventory = gameInventory;
         }
 
+        public string GetCurrentTaskName()
+        {
+            return taskManager.CurrentTask?.Name ?? "None";
+        }
+
         public void ScanPlot(Plot plot)
         {
             foreach (PlotHole plotHole in plot.PlantingHoles)
@@ -82,11 +87,23 @@ namespace Autogardener.Modules
             }
         }
 
+        public void TargetPlantingHoleCare(Plot plot, bool fertilize, bool replant)
+        {
+            PlotHole? plotHole = plot.PlantingHoles.FirstOrDefault(p => p.GameObjectId == clientState.LocalPlayer?.TargetObject?.GameObjectId);
+            if (plotHole != null)
+            {
+                BeginPlotCare(plotHole, fertilize, replant);
+            }
+        }
+
         private void BeginPlotCare(PlotHole plotHole, bool fertilize, bool replant)
         {
-            taskManager.Enqueue(() => TargetPlotGameObjectId(plotHole));
+            taskManager.Enqueue(() => TargetPlotGameObjectId(plotHole), "Target plot");
+            taskManager.Enqueue(() => commands.InteractWithTargetPlot(), "Interact with plot");
+            taskManager.EnqueueDelay(new Random().Next(200, 300));
             taskManager.Enqueue(commands.SkipDialogueIfNeeded, "Skip dialogue", DefConfig);
-            taskManager.Enqueue(() => SelectOption(plotHole, fertilize, replant));
+            taskManager.EnqueueDelay(new Random().Next(200, 300));
+            taskManager.Enqueue(() => SelectOption(plotHole, fertilize, replant), "Select branching option");
         }
 
         private bool TargetPlotGameObjectId(PlotHole plotHole)
@@ -94,12 +111,19 @@ namespace Autogardener.Modules
             var plotOb = objectTable.SearchById(plotHole.GameObjectId);
             if (plotOb == null)
             {
-                throw new Exception($"Plot with objectdId {plotHole.GameObjectId} was not found in the object table");
                 chatGui.PrintError("Can't access plot. Did you move away?");
+                throw new Exception($"Plot with objectdId {plotHole.GameObjectId} was not found in the object table");                
             }
             
             commands.TargetObject(plotOb);
             return true;
+        }
+
+        private void PrintErrorAndSelectQuit(string errorMessage)
+        {
+            logService.Info(errorMessage);
+            chatGui.PrintError(errorMessage);
+            taskManager.Enqueue(() => commands.SelectActionString("Quit"), "Select 'Quit' option", DefConfig);
         }
 
         public void SeedTargetPlot(PlotHole plotHoleData)
@@ -107,18 +131,18 @@ namespace Autogardener.Modules
             var d = plotHoleData.Design;
             if (d == null || d.DesignatedSeed == 0 || d.DesignatedSoil == 0)
             {
-                logService.Info("No seed or soil designated for this plot. Please make and assign a design.");
+                PrintErrorAndSelectQuit("No seed or soil designated for this plot. Please make and assign a design.");
                 return;
             }
 
             if (!commands.IsItemPresentInInventory(d.DesignatedSeed))
             {
-                logService.Error($"Missing seed: {globalData.GetSeedStringName(d.DesignatedSeed)}. Can't plant.");
+                PrintErrorAndSelectQuit($"Missing seed: {globalData.GetSeedStringName(d.DesignatedSeed)}. Can't plant.");
                 return;
             }
             if (!commands.IsItemPresentInInventory(d.DesignatedSoil))
             {
-                logService.Error($"Missing soil: {globalData.GetSoilStringName(d.DesignatedSoil)}");
+                PrintErrorAndSelectQuit($"Missing soil: {globalData.GetSoilStringName(d.DesignatedSoil)}");
                 return;
             }
 
@@ -135,7 +159,7 @@ namespace Autogardener.Modules
         }
 
         private unsafe bool SelectOption(PlotHole plotHole, bool fertilize, bool replant)
-        {
+        {            
             if (TryGetAddonByName<AddonSelectString>("SelectString", out var addonSelectString)
                 && IsAddonReady(&addonSelectString->AtkUnitBase))
             {
@@ -144,20 +168,28 @@ namespace Autogardener.Modules
                 {
                     if (!(plotHole.Design?.DoNotHarvest ?? false))
                     {
-                        taskManager.Enqueue(() => HarvestTargetPlot(plotHole, replant));
+                        logService.Info("Option chosen: Harvest");
+                        taskManager.Enqueue(() => HarvestTargetPlot(plotHole, replant), DefConfig);
+                        return true;
                     }                    
                 }
                 if (entries.Any(e => e?.Contains("Fertilize Crop") ?? false) && fertilize)
                 {
-                    taskManager.Enqueue(() => FertilizeTargetPlot(plotHole));
+                    taskManager.Enqueue(() => FertilizeTargetPlot(plotHole), DefConfig);
+                    logService.Info("Option chosen: Fertilize Crop");
+                    return true;
                 }
                 if (entries.Any(e => e?.Contains("Tend Crop") ?? false))
                 {
-                    taskManager.Enqueue(() => TendTargetPlot(plotHole));
+                    taskManager.Enqueue(() => TendTargetPlot(plotHole), DefConfig);
+                    logService.Info("Option chosen: Tend Crop");
+                    return true;
                 }
                 if (entries.Any(e => e?.Contains("Plant Seeds") ?? false))
                 {
-                    taskManager.Enqueue(() => SeedTargetPlot(plotHole));
+                    taskManager.Enqueue(() => SeedTargetPlot(plotHole), DefConfig);
+                    logService.Info("Option chosen: Plant seeds");
+                    return true;
                 }
 
                 return true;
@@ -171,35 +203,56 @@ namespace Autogardener.Modules
         {
             if (!commands.IsItemPresentInInventory(GlobalData.FishmealId))
             {
-                logService.Error("Out of fertilizer!");
-                return;
+                PrintErrorAndSelectQuit("Out of fertilizer!");
+            }
+            else
+            {
+                taskManager.Enqueue(() => commands.SelectActionString(
+                        globalData.GetGardeningOptionStringLocalized(GlobalData.GardeningStrings.Fertilize)), 
+                        "Select 'Fertililze Crop' option", DefConfig);
+                taskManager.EnqueueDelay(new Random().Next(200, 300));
+
+                taskManager.Enqueue(() => commands.Fertilize(), DefConfig);
+
+                taskManager.Enqueue(() =>
+                {
+                    plotHole.LastFertilizedUtc = DateTime.UtcNow;
+                });
             }
 
-            taskManager.Enqueue(() => commands.SelectActionString("Fertilize Crop"), "Select 'Fertililze Crop' option", DefConfig);
-
-            taskManager.Enqueue(() => commands.Fertilize());
-
-            taskManager.Enqueue(() =>
-            {
-                plotHole.LastFertilizedUtc = DateTime.UtcNow;
-            });
+            taskManager.EnqueueDelay(new Random().Next(200, 300));
+            GetToOptionSelectMenu();
+            TendTargetPlot(plotHole);  
         }
 
         private void HarvestTargetPlot(PlotHole plotHole, bool replant)
         {
-            taskManager.Enqueue(() => commands.SelectActionString("Harvest Crop"), "Select 'Harvest Crop' option", DefConfig);
+            taskManager.Enqueue(() => commands.SelectActionString(
+                globalData.GetGardeningOptionStringLocalized(GlobalData.GardeningStrings.HarvestCrop)), "Select 'Harvest Crop' option", DefConfig);
+            taskManager.EnqueueDelay(new Random().Next(200, 300));
 
+            logService.Info("Action enqueued. Select harvest");
             if (replant)
             {
-                taskManager.Enqueue(() => commands.InteractWithTargetPlot());
-                taskManager.Enqueue(() => commands.SkipDialogueIfNeeded());
+                GetToOptionSelectMenu();
                 taskManager.Enqueue(() => SeedTargetPlot(plotHole));
             }
 
         }
+
+        private void GetToOptionSelectMenu()
+        {
+            taskManager.Enqueue(() => commands.InteractWithTargetPlot());
+            taskManager.EnqueueDelay(new Random().Next(200, 300));
+            taskManager.Enqueue(() => commands.SkipDialogueIfNeeded());
+            taskManager.EnqueueDelay(new Random().Next(200, 300));
+        }
+
         private void TendTargetPlot(PlotHole plot)
         {
-            taskManager.Enqueue(() => commands.SelectActionString("Tend Crop"), "Select 'Tend Crop' option", DefConfig);
+            taskManager.Enqueue(() => commands.SelectActionString(
+                globalData.GetGardeningOptionStringLocalized(GlobalData.GardeningStrings.TendCrop)), "Select 'Tend Crop' option", DefConfig);
+            taskManager.EnqueueDelay(new Random().Next(200, 300));
             taskManager.Enqueue(() =>
             {
                 plot.LastTendedUtc = DateTime.UtcNow;

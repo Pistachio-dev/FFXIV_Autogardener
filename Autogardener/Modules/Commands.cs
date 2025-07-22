@@ -129,15 +129,26 @@ namespace Autogardener.Modules
             }
         }
 
+        private bool TryGetMatchingEntry(AddonMaster.SelectString.Entry[] entries, string actionToSelect, out AddonMaster.SelectString.Entry entry)
+        {
+            Func<AddonMaster.SelectString.Entry, bool> condition = entry => entry.SeString.ToString().Contains(actionToSelect, StringComparison.OrdinalIgnoreCase);
+            if (entries.Any(condition))
+            {
+                entry = entries.First(condition);
+                return true;
+            }
+
+            entry = default;
+            return false;
+        }
         public unsafe bool SelectActionString(string actionToSelect)
         {
             if (TryGetAddonByName<AddonSelectString>("SelectString", out var addonSelectString)
                 && IsAddonReady(&addonSelectString->AtkUnitBase))
             {
+                logService.Info("SelectString addon found");
                 var entries = new AddonMaster.SelectString(addonSelectString).Entries;
-                var matchingEntry = entries.FirstOrDefault(e => e.SeString.ToString().Contains(actionToSelect, StringComparison.OrdinalIgnoreCase));
-                if (matchingEntry.Index != default)
-                {
+                if (TryGetMatchingEntry(entries, actionToSelect, out var matchingEntry)){
                     matchingEntry.Select();
                 }
                 else
@@ -147,6 +158,8 @@ namespace Autogardener.Modules
                     {
                         logService.Info("Entry: " + entry.SeString.ToString());
                     }
+
+                    return false;
                 }
 
                 return true;
