@@ -21,32 +21,21 @@ namespace Autogardener.Modules
         private readonly ISaveManager<CharacterSaveState> saveManager;
         private readonly GlobalData globalData;
         private readonly PlotWatcher plotWatcher;
-        private readonly Commands commands;
-        private readonly Utils utils;
         private readonly IClientState clientState;
-        private readonly IObjectTable objectTable;
-        private readonly ITargetManager targetManager;
-        private readonly TaskManager taskManager;
         private readonly IGameInventory gameInventory;
         private readonly InGameActions inGameActions;
 
         
         public StoredDataActions(ILogService logService, IChatGui chatGui, ISaveManager<CharacterSaveState> saveManager,
-            GlobalData globalData, PlotWatcher plotWatcher, Commands commands, Utils utils, IClientState clientState,
-            IObjectTable objectTable, ITargetManager targetManager, TaskManager taskManager, IGameInventory gameInventory,
-            InGameActions ingameActions)
+            GlobalData globalData, PlotWatcher plotWatcher, IClientState clientState,
+            IGameInventory gameInventory, InGameActions ingameActions)
         {
             this.logService = logService;
             this.chatGui = chatGui;
             this.saveManager = saveManager;
             this.globalData = globalData;
             this.plotWatcher = plotWatcher;
-            this.commands = commands;
-            this.utils = utils;
             this.clientState = clientState;
-            this.objectTable = objectTable;
-            this.targetManager = targetManager;
-            this.taskManager = taskManager;
             this.gameInventory = gameInventory;
             this.inGameActions = ingameActions;
         }
@@ -154,7 +143,7 @@ namespace Autogardener.Modules
 
             return expectedItems;
         }
-
+               
         public Plot? GetNearestTrackedPlot(bool addNewPlots)
         {
             var state = saveManager.GetCharacterSaveInMemory();            
