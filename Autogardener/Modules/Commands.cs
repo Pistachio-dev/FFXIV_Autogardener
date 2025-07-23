@@ -62,13 +62,13 @@ namespace Autogardener.Modules
             return TryGetItemSlotByItemId(itemId, out var _, out var _);
         }
 
-        public unsafe void Fertilize()
+        public unsafe bool Fertilize()
         {
             uint itemId = FishmealId;
             if (!TryGetItemSlotByItemId(itemId, out var container, out var itemSlotNumber))
             {
                 logService.Warning("Could not find item with id " + itemId);
-                return;
+                return true;
             }
 
             logService.Info($"Fertilizer found in slot {container->Type}:{itemSlotNumber}");
@@ -76,15 +76,17 @@ namespace Autogardener.Modules
             var addonId = AgentModule.Instance()->GetAgentByInternalId(AgentId.Inventory)->GetAddonId();
             ag->OpenForItemSlot(container->Type, itemSlotNumber, addonId);
             var contextMenu = (AtkUnitBase*)gameGui.GetAddonByName("ContextMenu", 1);
-            if (contextMenu == null) return;
+            if (contextMenu == null) return false;
             for (int p = 0; p <= contextMenu->AtkValuesCount; p++)
             {
                 if (ag->EventIds[p] == 7)
                 {
                     Callback.Fire(contextMenu, true, 0, p - 7, 0, 0, 0);
-                    return;
+                    return true;
                 }
             }
+
+            return false;
         }
 
         public unsafe bool SetPlantTypeFromDialogue(PlotHole plotHole)
@@ -118,7 +120,7 @@ namespace Autogardener.Modules
                 && addonTalk->AtkUnitBase.IsVisible)
             {
                 new AddonMaster.Talk((nint)addonTalk).Click();
-                logService.Warning("Talk addon FOUND");
+                //logService.Warning("Talk addon FOUND");
 
                 return true;
             }
