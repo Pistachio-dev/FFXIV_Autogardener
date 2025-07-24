@@ -1,7 +1,9 @@
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin.Services;
+using DalamudBasics.Configuration;
 using DalamudBasics.Logging;
 using ECommons.Automation.NeoTaskManager;
+using ECommons.Automation.NeoTaskManager.Tasks;
 using ECommons.Throttlers;
 using System;
 using System.Collections.Generic;
@@ -23,14 +25,17 @@ namespace Autogardener.Modules
         private readonly IFramework framework;
         private readonly IChatGui chatGui;
         private readonly ILogService logService;
+        private readonly IConfigurationService<Configuration> configService;
         private readonly TaskManager taskManager;
 
-        public GardeningTaskManager(IClientState clientState, IFramework framework, IChatGui chatGui, ILogService logService)
+        public GardeningTaskManager(IClientState clientState, IFramework framework, IChatGui chatGui, ILogService logService,
+            IConfigurationService<Configuration> configService)
         {
             this.clientState = clientState;
             this.framework = framework;
             this.chatGui = chatGui;
             this.logService = logService;
+            this.configService = configService;
             taskManager = new TaskManager();
         }
 
@@ -91,6 +96,7 @@ namespace Autogardener.Modules
                 logService.Warning($"Running {name}");
                 return function();
             };
+            currentTaskList.Add(new DelayTask(configService.GetConfiguration().StepDelayInMs));
             currentTaskList.Add(new TaskManagerTask(task, name, DefConfig));
         }
 
@@ -102,6 +108,7 @@ namespace Autogardener.Modules
                 logService.Warning($"Running {name}");
                 action();
             };
+            currentTaskList.Add(new DelayTask(configService.GetConfiguration().StepDelayInMs));
             currentTaskList.Add(new TaskManagerTask(action, name, DefConfig));
         }
 

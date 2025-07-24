@@ -88,6 +88,12 @@ namespace Autogardener.Windows.MainWindow
                 configService.SaveConfiguration();
             }
             DrawTooltip("After harvesting a plant, will plant the seeds given in the design.");
+            int delay = config.StepDelayInMs;
+            if (ImGui.DragInt("Delay between steps", ref delay, 1))
+            {
+                config.StepDelayInMs = delay;
+                configService.SaveConfiguration();
+            }
 
         }
 
