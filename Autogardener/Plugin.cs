@@ -97,7 +97,6 @@ public sealed class Plugin : IDalamudPlugin
         serviceCollection.AddSingleton<ISaveManager<CharacterSaveState>>(
             (sp) => new SaveManager<CharacterSaveState>(saveFileName, logService, clientState));
         serviceCollection.AddSingleton<StringDebugUtils>();
-        serviceCollection.AddSingleton<UtilOld>();
         serviceCollection.AddSingleton<Utils>();
         serviceCollection.AddSingleton<PlotWatcher>();
         serviceCollection.AddSingleton<TaskManager>();
@@ -120,7 +119,6 @@ public sealed class Plugin : IDalamudPlugin
         serviceProvider.GetRequiredService<ErrorMessageMonitor>().Attach();
         serviceProvider.GetRequiredService<MiniTA>().Attach();
         framework.Update += MakeSaveReady;
-        ActionWatcher.SetLogService(logService);
     }
 
     private void OnCommand(string command, string args)

@@ -26,5 +26,6 @@ public class ConfigWindow : PluginWindowBase, IDisposable
 
     protected override void SafeDraw()
     {
+        ImGui.TextUnformatted("There is no configuration menu in Ba Sing Se");
     }
 }

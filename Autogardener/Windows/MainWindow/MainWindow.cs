@@ -13,7 +13,6 @@ namespace Autogardener.Windows.MainWindow;
 
 public partial class MainWindow : PluginWindowBase, IDisposable
 {
-    private UtilOld oldUtil;
     private PlotWatcher plotWatcher;
     private GlobalData globalData;
     private Commands commands;
@@ -47,7 +46,6 @@ public partial class MainWindow : PluginWindowBase, IDisposable
             MaximumSize = new Vector2(float.MaxValue, float.MaxValue)
         };
 
-        oldUtil = serviceProvider.GetRequiredService<UtilOld>();
         plotWatcher = serviceProvider.GetRequiredService<PlotWatcher>();
         globalData = serviceProvider.GetRequiredService<GlobalData>();
         commands = serviceProvider.GetRequiredService<Commands>();
@@ -88,7 +86,6 @@ public partial class MainWindow : PluginWindowBase, IDisposable
             }
             if (ImGui.BeginTabItem("Other"))
             {
-                DrawAssortedActions();
                 ImGui.EndTabItem();
             }
             ImGui.EndTabBar();
