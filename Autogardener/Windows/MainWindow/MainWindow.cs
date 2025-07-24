@@ -25,7 +25,7 @@ public partial class MainWindow : PluginWindowBase, IDisposable
     private IFramework framework;
     private IChatGui chatGui;
     public IConfigurationService<Configuration> configService;
-
+    
     private static readonly Vector4 LightGreen = new Vector4(0.769f, 0.9f, 0.6f, 1);
     private static readonly Vector4 MidLightGreen = new Vector4(0.58f, 0.75f, 0.37f, 1);
     private static readonly Vector4 NeutralGreen = new Vector4(0.42f, 0.6f, 0.2f, 1);

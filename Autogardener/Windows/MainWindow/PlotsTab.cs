@@ -17,10 +17,6 @@ namespace Autogardener.Windows.MainWindow
 
         private void DrawPlotsTab(CharacterSaveState save)
         {
-            if (ImGui.Button("Print current task"))
-            {
-                logService.Info(inGameActions.GetCurrentTaskName());
-            }
             var nearestPlot = storedDataActions.GetNearestTrackedPlot(false);
             if (nearestPlot != null)
             {
