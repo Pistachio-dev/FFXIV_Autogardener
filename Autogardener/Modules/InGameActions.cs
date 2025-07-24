@@ -65,7 +65,7 @@ namespace Autogardener.Modules
                 plotHole.Initialize(plotOb);
                 taskManager.Enqueue(() => chatGui.Print("Starting scan"), "Scan start");
                 taskManager.Enqueue(() => commands.TargetObject(plotOb), "Target planting hole");
-                taskManager.Enqueue(() => commands.InteractWithTargetPlot(), "InteractWithPlot");
+                taskManager.Enqueue(() => commands.InteractWithPlot(), "InteractWithPlot");
                 taskManager.Enqueue(() => commands.SetPlantTypeFromDialogue(plotHole), "Extract plant type");
                 taskManager.Enqueue(() => commands.SkipDialogueIfNeeded(), "Skip dialogue");
                 taskManager.Enqueue(() => commands.SelectActionString(globalData
@@ -101,14 +101,28 @@ namespace Autogardener.Modules
 
         private void BeginPlotCare(PlotHole plotHole, bool fertilize, bool replant)
         {
-            taskManager.Enqueue(() => TargetPlotGameObjectId(plotHole), "Target plot");
-            taskManager.Enqueue(() => commands.InteractWithTargetPlot(), "Interact with plot");
+            //taskManager.Enqueue(() => TargetPlotGameObjectId(plotHole), "Target plot");
+            taskManager.Enqueue(() => TargetAndInteractWithPlot(plotHole), "Interact with plot");
             taskManager.EnqueueDelayMs(new Random().Next(200, 300));
             taskManager.Enqueue(commands.SkipDialogueIfNeeded, "Skip dialogue");
             taskManager.EnqueueDelayMs(new Random().Next(200, 300));
             taskManager.EnqueueSuperTask(() => SelectOption(plotHole, fertilize, replant), "Select branching option");
         }
 
+        private bool TargetAndInteractWithPlot(PlotHole plotHole)
+        {
+            var targetingResult = TargetPlotGameObjectId(plotHole);
+            if (targetingResult == false)
+            {
+                return false;
+            }
+
+            if (targetManager.Target?.GameObjectId != plotHole.GameObjectId){
+                return false;
+            }
+
+            return commands.InteractWithPlot();
+        }
         private bool TargetPlotGameObjectId(PlotHole plotHole)
         {
             var plotOb = objectTable.SearchById(plotHole.GameObjectId);
@@ -152,6 +166,7 @@ namespace Autogardener.Modules
             taskManager.Enqueue(() => commands.SelectActionString("plant seeds"), "Select 'Plant Seeds' option");
             taskManager.EnqueueSuperTask(() =>
                 commands.PickSeedsAndSoil(plotHoleData.Design!.DesignatedSeed, plotHoleData.Design.DesignatedSoil), "Pick seeds and soil");
+            taskManager.EnqueueDelayMs(300);
             taskManager.Enqueue(commands.ClickConfirmOnHousingGardeningAddon, "Click 'Confirm'");
             taskManager.Enqueue(commands.ConfirmYes, "Click 'Yes'");
             taskManager.Enqueue(() =>
@@ -228,7 +243,7 @@ namespace Autogardener.Modules
             }
 
             taskManager.EnqueueDelayMs(new Random().Next(200, 300));
-            GetToOptionSelectMenu();
+            GetToOptionSelectMenu(plotHole);
             TendTargetPlot(plotHole);  
         }
 
@@ -241,14 +256,14 @@ namespace Autogardener.Modules
             logService.Info("Action enqueued. Select harvest");
             if (replant)
             {
-                GetToOptionSelectMenu();
+                GetToOptionSelectMenu(plotHole);
                 SeedTargetPlot(plotHole);
             }
         }
 
-        private void GetToOptionSelectMenu()
+        private void GetToOptionSelectMenu(PlotHole plotHole)
         {
-            taskManager.Enqueue(() => commands.InteractWithTargetPlot(), "Interact with plot");
+            taskManager.Enqueue(() => TargetAndInteractWithPlot(plotHole), "Target and interact with plot");
             taskManager.EnqueueDelayMs(new Random().Next(200, 300));
             taskManager.Enqueue(() => commands.SkipDialogueIfNeeded(), "Skip dialog");
             taskManager.EnqueueDelayMs(new Random().Next(200, 300));

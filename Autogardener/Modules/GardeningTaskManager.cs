@@ -34,6 +34,17 @@ namespace Autogardener.Modules
             taskManager = new TaskManager();
         }
 
+        public bool IsBusy()
+        {
+            return taskManager.IsBusy;
+        }
+
+        public void Abort()
+        {
+            taskManager.Abort();
+            taskListStack.Clear();
+        }
+
         private LinkedList<TaskManagerTask> GetTopStackOrInitialize()
         {
             if (taskListStack.Count == 0)
@@ -75,12 +86,22 @@ namespace Autogardener.Modules
         public void Enqueue(Func<bool> function, string name)
         {
             logService.Info($"Enqueued function: {name}");
-            currentTaskList.Add(new TaskManagerTask(function, name, DefConfig));
+            Func<bool> task = () => 
+            {
+                logService.Warning($"Running {name}");
+                return function();
+            };
+            currentTaskList.Add(new TaskManagerTask(task, name, DefConfig));
         }
 
         public void Enqueue(Action action, string name)
         {
             logService.Info($"Enqueued action: {name}");
+            Action task = () =>
+            {
+                logService.Warning($"Running {name}");
+                action();
+            };
             currentTaskList.Add(new TaskManagerTask(action, name, DefConfig));
         }
 
@@ -92,7 +113,8 @@ namespace Autogardener.Modules
                 
                 string key = "Generic throttle";
                 if (!EzThrottler.ThrottleNames.Contains(key)){
-                    EzThrottler.Throttle(key, ms, false);
+                    EzThrottler.Throttle(key, ms, true);
+                    return false;
                 }
 
                 return EzThrottler.Check(key);

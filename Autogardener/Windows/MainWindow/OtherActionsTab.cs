@@ -12,7 +12,7 @@ namespace Autogardener.Windows.MainWindow
         private unsafe void DrawAssortedActions()
         {
             DrawActionButton(() => oldUtil.DescribeTarget(), "Describe target");
-            DrawActionButton(() => commands.InteractWithTargetPlot(), "Interact with plot");
+            DrawActionButton(() => commands.InteractWithPlot(), "Interact with plot");
             DrawActionButton(() => oldUtil.ListCurrentMenuOptions(), "List current menu options");
             DrawActionButton(() => oldUtil.SelectEntry("Quit"), "Select Quit");
             DrawActionButton(() => oldUtil.SelectEntry("Harvest Crop"), "Select Harvest Crop");

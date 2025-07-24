@@ -20,6 +20,7 @@ public partial class MainWindow : PluginWindowBase, IDisposable
     private StoredDataActions storedDataActions;
     InGameActions inGameActions;
     private ISaveManager<CharacterSaveState> saveManager;
+    private GardeningTaskManager gtm;
     private TaskManager taskManager;
     private ITextureProvider textureProvider;
     private IFramework framework;
@@ -54,11 +55,12 @@ public partial class MainWindow : PluginWindowBase, IDisposable
         saveManager = serviceProvider.GetRequiredService<ISaveManager<CharacterSaveState>>();
         textureProvider = serviceProvider.GetRequiredService<ITextureProvider>();
         this.scarecrowPicturePath = scarecrowPicturePath;
+        this.gtm = serviceProvider.GetRequiredService<GardeningTaskManager>();
         framework = serviceProvider.GetRequiredService<IFramework>();
         taskManager = serviceProvider.GetRequiredService<TaskManager>();
         chatGui = serviceProvider.GetRequiredService<IChatGui>();
         configService = serviceProvider.GetRequiredService<IConfigurationService<Configuration>>();
-        inGameActions = serviceProvider.GetRequiredService<InGameActions>();
+        inGameActions = serviceProvider.GetRequiredService<InGameActions>();        
         
         framework.RunOnFrameworkThread(() =>
         {

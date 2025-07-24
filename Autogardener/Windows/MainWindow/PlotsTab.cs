@@ -63,9 +63,15 @@ namespace Autogardener.Windows.MainWindow
             var config = configService.GetConfiguration();
             if (ImGuiComponents.IconButtonWithText(FontAwesomeIcon.Leaf, "Tend to plot", MidDarkGreen, DarkGreen, MidDarkGreen))
             {
-                //inGameActions.PlotPatchCare(nearestPlot, config.UseFertilizer, config.Replant);
-                inGameActions.TargetPlantingHoleCare(nearestPlot, config.UseFertilizer, config.Replant);
+                inGameActions.PlotPatchCare(nearestPlot, config.UseFertilizer, config.Replant);
+                //inGameActions.TargetPlantingHoleCare(nearestPlot, config.UseFertilizer, config.Replant);
             }
+
+            if (ImGui.Button("Abort"))
+            {
+                gtm.Abort();
+            }            
+
             bool useFertilizer = config.UseFertilizer;
             if (ImGui.Checkbox("Use fertilizer", ref useFertilizer))
             {

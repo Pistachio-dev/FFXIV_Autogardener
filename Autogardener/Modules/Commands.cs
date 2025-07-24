@@ -32,10 +32,11 @@ namespace Autogardener.Modules
         private readonly TaskManager taskManager;
         private readonly ITargetManager targetManager;
         private readonly ErrorMessageMonitor errorMessageMonitor;
+        private readonly MiniTA miniTA;
 
         public Commands(ILogService logService, IClientState clientState, GlobalData globalData,
             Utils utils, IGameGui gameGui, IClientChatGui clientChatGui, TaskManager taskManager, ITargetManager targetManager,
-            ErrorMessageMonitor errorMessageMonitor)
+            ErrorMessageMonitor errorMessageMonitor, MiniTA miniTA)
         {
             this.logService = logService;
             this.clientState = clientState;
@@ -46,6 +47,7 @@ namespace Autogardener.Modules
             this.taskManager = taskManager;
             this.targetManager = targetManager;
             this.errorMessageMonitor = errorMessageMonitor;
+            this.miniTA = miniTA;
         }
 
         private bool _gardening = false;
@@ -124,6 +126,7 @@ namespace Autogardener.Modules
 
         public unsafe bool SkipDialogueIfNeeded()
         {
+            return true;
             if (TryGetAddonByName<AddonTalk>("Talk", out var addonTalk)
                 && addonTalk->AtkUnitBase.IsVisible)
             {
@@ -160,6 +163,7 @@ namespace Autogardener.Modules
                 var entries = new AddonMaster.SelectString(addonSelectString).Entries;
                 if (TryGetMatchingEntry(entries, actionToSelect, out var matchingEntry)){
                     matchingEntry.Select();
+                    miniTA.RegisterOptionAttemptedToSelect(actionToSelect);
                 }
                 else
                 {
@@ -200,13 +204,13 @@ namespace Autogardener.Modules
 
         public unsafe bool ClickConfirmOnHousingGardeningAddon()
         {
-            if (!TryGetAddonByName<AtkUnitBase>("HousingGardening", out var gardeningAddon))
+            if (!(TryGetAddonByName<AtkUnitBase>("HousingGardening", out var gardeningAddon)))
             {
+                logService.Warning("HousingGardening addon not found");
                 return false;
             }
 
             Callback.Fire(gardeningAddon, false, 0, 0, 0, 0, 0);
-            taskManager.InsertDelay(100);
 
             return true;
         }
@@ -358,7 +362,7 @@ namespace Autogardener.Modules
             return -1;
         }
 
-        public unsafe bool InteractWithTargetPlot()
+        public unsafe bool InteractWithPlot()
         {
             if (!Player.Available) return false;
             if (Player.IsAnimationLocked) return false;
