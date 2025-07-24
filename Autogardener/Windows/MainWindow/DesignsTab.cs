@@ -174,15 +174,15 @@ namespace Autogardener.Windows.MainWindow
                 ? original
                 : original.Where(entry => filter.Contains(entry.Key)).ToDictionary();
 
-            IEnumerable<(uint id, string name)> orderedEnum = filtered.Select(e => (e.Key, e.Value.Name.ToString())).OrderBy(t => t.Item2);
-            idArray = new uint[filtered.Count];
-            nameArray = new string[filtered.Count];
-            var i = 0;
-            foreach (var tuple in orderedEnum)
+            List<(uint id, string name)> orderedEnum = filtered.Select(e => (e.Key, e.Value.Name.ToString())).OrderBy(t => t.Item2).ToList();
+            idArray = new uint[filtered.Count + 1];
+            nameArray = new string[filtered.Count + 1];
+            idArray[0] = 0;
+            nameArray[0] = "None";
+            for(int i = 1; i < idArray.Length; i++)                
             {
-                idArray[i] = tuple.id;
-                nameArray[i] = tuple.name;
-                i++;
+                idArray[i] = orderedEnum[i - 1].id;
+                nameArray[i] = orderedEnum[i - 1].name;
             }
         }
     }
