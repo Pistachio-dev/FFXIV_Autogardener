@@ -5,7 +5,7 @@
     "Description": "Tend to your plot in one click. Type /autog to start.",
     "ApplicableVersion": "any",
     "InternalName": "Autogardener",
-    "IconUr": "https://www.ffxivgardening.com/images/seed-icon/46.png",
+    "IconUrl": "https://www.ffxivgardening.com/images/seed-icon/46.png",
     "Tags": [
         "garden",
         "plot",
