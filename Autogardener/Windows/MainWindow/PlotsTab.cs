@@ -30,11 +30,11 @@ namespace Autogardener.Windows.MainWindow
                 ImGui.TextUnformatted("Too far away from any registered plot");
             }
 
-            if (ImGuiComponents.IconButtonWithText(FontAwesomeIcon.Search, "Scan nearest plot"))
+            if (ImGuiComponents.IconButtonWithText(FontAwesomeIcon.Search, "Scan nearest plot", Blue))
             {
                 storedDataActions.RegisterNearestPlot();
                 currentPlot = Math.Max(0, save.Plots.IndexOf(p => p.Id == storedDataActions.GetNearestTrackedPlot(false)?.Id));
-                DrawTooltip("Will check and save the plants of a plot. You need to be on it.");
+                DrawTooltip("Will check and save the plants of a plot. You need to be on it. It can't read every type of plant, stuff is weird sometimes.");
             }
 
             if (save.Plots.Any())
@@ -66,11 +66,13 @@ namespace Autogardener.Windows.MainWindow
                 inGameActions.PlotPatchCare(nearestPlot, config.UseFertilizer, config.Replant);
                 //inGameActions.TargetPlantingHoleCare(nearestPlot, config.UseFertilizer, config.Replant);
             }
-
-            if (ImGui.Button("Abort"))
+            DrawTooltip("Will fertilize, tend, harvest and also plant based on the plan selected.\nIt will never remove a crop that is not harvestable.");
+            ImGui.SameLine();
+            if (ImGuiComponents.IconButtonWithText(FontAwesomeIcon.Gun, "Abort", Red))
             {
                 gtm.Abort();
-            }            
+            }
+            DrawTooltip("Cancel any actions running or scheduled");
 
             bool useFertilizer = config.UseFertilizer;
             if (ImGui.Checkbox("Use fertilizer", ref useFertilizer))
