@@ -5,6 +5,8 @@
     <Description>Augment yourself with a robotic Green Thumb™</Description>
     <PackageProjectUrl>https://github.com/goatcorp/Autogardener</PackageProjectUrl>
     <PackageLicenseExpression>AGPL-3.0-or-later</PackageLicenseExpression>
+      <FileVersion>0.0.1.0</FileVersion>
+      <AssemblyVersion>0.0.1.0</AssemblyVersion>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
   <ItemGroup>
