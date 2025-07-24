@@ -55,27 +55,35 @@ namespace Autogardener.Modules
 
         public void ScanPlot(Plot plot)
         {
+            int index = 1;
             foreach (PlotHole plotHole in plot.PlantingHoles)
             {
-                var plotOb = objectTable.SearchById(plotHole.GameObjectId);
-                if (plotOb == null)
-                {
-                    throw new Exception($"Plot with objectdId {plotHole.GameObjectId} was not found in the object table");
-                }
-                plotHole.Initialize(plotOb);
-                taskManager.Enqueue(() => chatGui.Print("Starting scan"), "Scan start");
-                taskManager.Enqueue(() => commands.TargetObject(plotOb), "Target planting hole");
-                taskManager.Enqueue(() => commands.InteractWithPlot(), "InteractWithPlot");
-                taskManager.Enqueue(() => commands.SetPlantTypeFromDialogue(plotHole), "Extract plant type");
-                taskManager.Enqueue(() => commands.SkipDialogueIfNeeded(), "Skip dialogue");
-                taskManager.Enqueue(() => commands.SelectActionString(globalData
-                    .GetGardeningOptionStringLocalized(GlobalData.GardeningStrings.Quit)), "Select Quit");
+                taskManager.EnqueueSuperTask(() => ScanPlotHole(plotHole), $"Scan plot hole {index}");
+                index++;
             }
 
             taskManager.Enqueue(() => chatGui.Print("Scan complete! o7"), "Scan complete notification");
             taskManager.Enqueue(() => { saveManager.WriteCharacterSave(); }, "Save scan results");
+            taskManager.StartProcessingQueuedTasks();
         }
 
+        private bool ScanPlotHole(PlotHole plotHole)
+        {
+            var plotOb = objectTable.SearchById(plotHole.GameObjectId);
+            if (plotOb == null)
+            {
+                throw new Exception($"Plot with objectdId {plotHole.GameObjectId} was not found in the object table");
+            }
+            plotHole.Initialize(plotOb);
+            taskManager.Enqueue(() => chatGui.Print("Starting scan"), "Scan start");
+            taskManager.Enqueue(() => TargetAndInteractWithPlot(plotHole), "InteractWithPlot");
+            taskManager.Enqueue(() => commands.SetPlantTypeFromDialogue(plotHole), "Extract plant type");
+            taskManager.Enqueue(() => commands.SkipDialogueIfNeeded(), "Skip dialogue");
+            taskManager.Enqueue(() => commands.SelectActionString(globalData
+                .GetGardeningOptionStringLocalized(GlobalData.GardeningStrings.Quit)), "Select Quit");
+
+            return true;
+        }
         public void PlotPatchCare(Plot plot, bool fertilize, bool replant)
         {
             int index = 1;
