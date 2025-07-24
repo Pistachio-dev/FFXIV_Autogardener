@@ -107,6 +107,7 @@ public sealed class Plugin : IDalamudPlugin
         serviceCollection.AddSingleton<DesignManager>();
         serviceCollection.AddSingleton<InGameActions>();
         serviceCollection.AddSingleton<GardeningTaskManager>();
+        serviceCollection.AddSingleton<ErrorMessageMonitor>();
         return serviceCollection.BuildServiceProvider();
     }
 
@@ -115,6 +116,7 @@ public sealed class Plugin : IDalamudPlugin
         IFramework framework = serviceProvider.GetRequiredService<IFramework>();
         serviceProvider.GetRequiredService<ILogService>().AttachToGameLogicLoop(framework);
         serviceProvider.GetRequiredService<IChatListener>().InitializeAndRun("[AG]");
+        serviceProvider.GetRequiredService<ErrorMessageMonitor>().Attach();
         framework.Update += MakeSaveReady;
         ActionWatcher.SetLogService(logService);
     }

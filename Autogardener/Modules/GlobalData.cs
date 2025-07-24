@@ -106,6 +106,7 @@ namespace Autogardener.Modules
             { GardeningStrings.ReadyToHarvest, "This crop is ready to be harvested." }, // Has the plant name in the line above it
             { GardeningStrings.Shard, "Shard" },
             { GardeningStrings.xLight, "light" }, // Has the plant name in the line above it
+            { GardeningStrings.AlreadyFertilized, "This crop has already been sufficiently fertilized."}
         };
 
         public enum GardeningStrings
@@ -121,6 +122,7 @@ namespace Autogardener.Modules
             ReadyToHarvest,
             Shard,
             xLight,
+            AlreadyFertilized
         }
     }
 }

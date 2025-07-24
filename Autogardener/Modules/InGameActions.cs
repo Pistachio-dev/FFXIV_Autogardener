@@ -31,10 +31,12 @@ namespace Autogardener.Modules
         private readonly ITargetManager targetManager;
         private readonly GardeningTaskManager taskManager;
         private readonly IGameInventory gameInventory;
-        
+        private readonly ErrorMessageMonitor errorMessageMonitor;
+
         public InGameActions(ILogService logService, IChatGui chatGui, ISaveManager<CharacterSaveState> saveManager,
             GlobalData globalData, PlotWatcher plotWatcher, Commands commands, Utils utils, IClientState clientState,
-            IObjectTable objectTable, ITargetManager targetManager, GardeningTaskManager taskManager, IGameInventory gameInventory)
+            IObjectTable objectTable, ITargetManager targetManager, GardeningTaskManager taskManager, IGameInventory gameInventory,
+            ErrorMessageMonitor errorMessageMonitor)
         {
             this.logService = logService;
             this.chatGui = chatGui;
@@ -48,6 +50,7 @@ namespace Autogardener.Modules
             this.targetManager = targetManager;
             this.taskManager = taskManager;
             this.gameInventory = gameInventory;
+            this.errorMessageMonitor = errorMessageMonitor;
         }
 
         public void ScanPlot(Plot plot)
@@ -212,13 +215,16 @@ namespace Autogardener.Modules
                         "Select 'Fertililze Crop' option");
                 taskManager.EnqueueDelayMs(new Random().Next(200, 300));
 
-                // TODO: PREVENT ERROR LOOP HERE
                 taskManager.Enqueue(() => commands.Fertilize(), "Fertilize");
 
                 taskManager.Enqueue(() =>
                 {
-                    plotHole.LastFertilizedUtc = DateTime.UtcNow;
-                }, "Update last fertilized Timer");
+                    string alreadyFertilizedMsg = globalData.GetGardeningOptionStringLocalized(GlobalData.GardeningStrings.AlreadyFertilized);
+                    if (!errorMessageMonitor.WasThereARecentError(alreadyFertilizedMsg))
+                    {
+                        plotHole.LastFertilizedUtc = DateTime.UtcNow;
+                    }
+                }, "Update last fertilized Timer");                                                 
             }
 
             taskManager.EnqueueDelayMs(new Random().Next(200, 300));

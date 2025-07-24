@@ -31,9 +31,11 @@ namespace Autogardener.Modules
         private readonly IClientChatGui clientChatGui;
         private readonly TaskManager taskManager;
         private readonly ITargetManager targetManager;
+        private readonly ErrorMessageMonitor errorMessageMonitor;
 
         public Commands(ILogService logService, IClientState clientState, GlobalData globalData,
-            Utils utils, IGameGui gameGui, IClientChatGui clientChatGui, TaskManager taskManager, ITargetManager targetManager)
+            Utils utils, IGameGui gameGui, IClientChatGui clientChatGui, TaskManager taskManager, ITargetManager targetManager,
+            ErrorMessageMonitor errorMessageMonitor)
         {
             this.logService = logService;
             this.clientState = clientState;
@@ -43,6 +45,7 @@ namespace Autogardener.Modules
             this.clientChatGui = clientChatGui;
             this.taskManager = taskManager;
             this.targetManager = targetManager;
+            this.errorMessageMonitor = errorMessageMonitor;
         }
 
         private bool _gardening = false;
@@ -64,6 +67,11 @@ namespace Autogardener.Modules
 
         public unsafe bool Fertilize()
         {
+            string alreadyFertilizedMsg = globalData.GetGardeningOptionStringLocalized(GlobalData.GardeningStrings.AlreadyFertilized);
+            if (errorMessageMonitor.WasThereARecentError(alreadyFertilizedMsg))
+            {
+                return true;
+            }
             uint itemId = FishmealId;
             if (!TryGetItemSlotByItemId(itemId, out var container, out var itemSlotNumber))
             {
