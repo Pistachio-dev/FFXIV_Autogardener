@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Autogardener.Modules
+namespace Autogardener.Modules.Tasks
 {
     public class ErrorMessageMonitor
     {
@@ -31,7 +31,7 @@ namespace Autogardener.Modules
 
         public bool WasThereARecentError(string errorMessage = null)
         {
-            DateTime now = DateTime.UtcNow;
+            var now = DateTime.UtcNow;
             var recentMessages = recordedMessages.Where(r => now - r.DateTimeUtc < Recent);
             if (errorMessage != null)
             {

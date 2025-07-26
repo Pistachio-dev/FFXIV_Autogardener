@@ -1,5 +1,6 @@
 using Autogardener.Model;
 using Autogardener.Modules;
+using Autogardener.Modules.Tasks;
 using Autogardener.Windows;
 using Autogardener.Windows.MainWindow;
 using Dalamud.Game.Command;

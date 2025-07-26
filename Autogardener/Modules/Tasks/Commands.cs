@@ -19,7 +19,7 @@ using Lumina.Excel.Sheets.Experimental;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace Autogardener.Modules
+namespace Autogardener.Modules.Tasks
 {
     public class Commands
     {
@@ -69,12 +69,12 @@ namespace Autogardener.Modules
 
         public unsafe bool Fertilize()
         {
-            string alreadyFertilizedMsg = globalData.GetGardeningOptionStringLocalized(GlobalData.GardeningStrings.AlreadyFertilized);
+            var alreadyFertilizedMsg = globalData.GetGardeningOptionStringLocalized(GlobalData.GardeningStrings.AlreadyFertilized);
             if (errorMessageMonitor.WasThereARecentError(alreadyFertilizedMsg))
             {
                 return true;
             }
-            uint itemId = FishmealId;
+            var itemId = GlobalData.FishmealId;
             if (!TryGetItemSlotByItemId(itemId, out var container, out var itemSlotNumber))
             {
                 logService.Warning("Could not find item with id " + itemId);
@@ -87,7 +87,7 @@ namespace Autogardener.Modules
             ag->OpenForItemSlot(container->Type, itemSlotNumber, addonId);
             var contextMenu = (AtkUnitBase*)gameGui.GetAddonByName("ContextMenu", 1);
             if (contextMenu == null) return false;
-            for (int p = 0; p <= contextMenu->AtkValuesCount; p++)
+            for (var p = 0; p <= contextMenu->AtkValuesCount; p++)
             {
                 if (ag->EventIds[p] == 7)
                 {
@@ -106,9 +106,9 @@ namespace Autogardener.Modules
             {
                 var am = new AddonMaster.Talk((nint)addonTalk);
                 addonTalk->AtkValues->GetValueAsString();
-                string dialogueText = addonTalk->AtkTextNode228->NodeText.ToString();
+                var dialogueText = addonTalk->AtkTextNode228->NodeText.ToString();
                 logService.Info("Text node 228: " + dialogueText);
-                (uint id, string seedName) = ExtractPlantNameAndId(dialogueText);
+                (var id, var seedName) = ExtractPlantNameAndId(dialogueText);
                 if (id != 0)
                 {                    
                     plotHole.CurrentSeed = id;
@@ -126,7 +126,6 @@ namespace Autogardener.Modules
 
         public unsafe bool SkipDialogueIfNeeded()
         {
-            return true;
             if (TryGetAddonByName<AddonTalk>("Talk", out var addonTalk)
                 && addonTalk->AtkUnitBase.IsVisible)
             {
@@ -142,18 +141,32 @@ namespace Autogardener.Modules
             }
         }
 
-        private bool TryGetMatchingEntry(AddonMaster.SelectString.Entry[] entries, string actionToSelect, out AddonMaster.SelectString.Entry entry)
+
+
+        public unsafe bool InteractWithPlot()
         {
-            Func<AddonMaster.SelectString.Entry, bool> condition = entry => entry.SeString.ToString().Contains(actionToSelect, StringComparison.OrdinalIgnoreCase);
-            if (entries.Any(condition))
+            if (!Player.Available) return false;
+            if (Player.IsAnimationLocked) return false;
+            if (!utils.DismountIfNeeded()) return false;
+            if (IsOccupied()) return false;
+            var plotSelected = clientState.LocalPlayer?.TargetObject;
+            if (plotSelected == null)
             {
-                entry = entries.First(condition);
-                return true;
+                //clientChatGui.PrintError("No plot selected.");
+                return false;
             }
 
-            entry = default;
-            return false;
+            if (!GlobalData.GardenPlotDataIds.Contains(plotSelected.DataId))
+            {
+                clientChatGui.PrintError("That's not a plot");
+                return false;
+            }
+
+            TargetSystem.Instance()->InteractWithObject(plotSelected.Struct(), true);
+
+            return true;
         }
+
         public unsafe bool SelectActionString(string actionToSelect)
         {
             if (TryGetAddonByName<AddonSelectString>("SelectString", out var addonSelectString)
@@ -185,18 +198,14 @@ namespace Autogardener.Modules
             }
         }
 
-        private const uint PottingSoilId = 16026;
-        private const uint WindlightSeedsId = 15867;
-        private const uint FishmealId = 7767;
-
         public unsafe bool PickSeedsAndSoil(uint seedItemId, uint soilItemId)
         {
             if (!TryGetAddonByName<AtkUnitBase>("HousingGardening", out var gardeningAddon))
             {
                 return false;
             }
-            int seedIndex = GetIndexFromCollection(globalData.Seeds.Keys.ToHashSet(), seedItemId);
-            int soilIndex = GetIndexFromCollection(globalData.Soils.Keys.ToHashSet(), soilItemId);            
+            var seedIndex = GetIndexFromCollection(globalData.Seeds.Keys.ToHashSet(), seedItemId);
+            var soilIndex = GetIndexFromCollection(globalData.Soils.Keys.ToHashSet(), soilItemId);            
             logService.Info($"Soil: {soilIndex} Seed: {seedIndex}");
 
             return ChooseGardeningItems(soilIndex, seedIndex, gardeningAddon);
@@ -204,7 +213,7 @@ namespace Autogardener.Modules
 
         public unsafe bool ClickConfirmOnHousingGardeningAddon()
         {
-            if (!(TryGetAddonByName<AtkUnitBase>("HousingGardening", out var gardeningAddon)))
+            if (!TryGetAddonByName<AtkUnitBase>("HousingGardening", out var gardeningAddon))
             {
                 logService.Warning("HousingGardening addon not found");
                 return false;
@@ -215,6 +224,19 @@ namespace Autogardener.Modules
             return true;
         }
 
+        private bool TryGetMatchingEntry(AddonMaster.SelectString.Entry[] entries, string actionToSelect, out AddonMaster.SelectString.Entry entry)
+        {
+            Func<AddonMaster.SelectString.Entry, bool> condition = entry => entry.SeString.ToString().Contains(actionToSelect, StringComparison.OrdinalIgnoreCase);
+            if (entries.Any(condition))
+            {
+                entry = entries.First(condition);
+                return true;
+            }
+
+            entry = default;
+            return false;
+        }
+
         private (uint id, string name) ExtractPlantNameAndId(string dialogueText)
         {
             var matches = new Regex("([\\w ]{4,})").Matches(dialogueText);
@@ -223,9 +245,9 @@ namespace Autogardener.Modules
                 logService.Info("Scaned plot was empty");
                 return (0, "Empty");
             }
-            string plantName = matches[0].Groups[0].Value;
+            var plantName = matches[0].Groups[0].Value;
 
-            (uint id, string name) result = SearchSeed(plantName);
+            var result = SearchSeed(plantName);
             if (result.id == 0)
             {
                 return ExtractXlightNameAndId(plantName);
@@ -239,7 +261,7 @@ namespace Autogardener.Modules
         private (uint id, string name) ExtractXlightNameAndId(string plantName)
         {
             var regex = new Regex($"(\\w+)\\s{globalData.GetGardeningOptionStringLocalized(GlobalData.GardeningStrings.Shard)}");
-            Match match = regex.Match(plantName);
+            var match = regex.Match(plantName);
             if (!match.Success || match.Groups.Count == 0)
             {
                 return (0, "Empty");
@@ -267,13 +289,13 @@ namespace Autogardener.Modules
             if (soilIndex != -1)
             {
                 taskManager.InsertDelay(100);
-                taskManager.Insert((() => TryClickItem(gardeningAddon, 1, soilIndex)));
+                taskManager.Insert(() => TryClickItem(gardeningAddon, 1, soilIndex));
             }
 
             if (seedIndex != -1)
             {
                 taskManager.InsertDelay(100);
-                taskManager.Insert((() => TryClickItem(gardeningAddon, 2, seedIndex)));
+                taskManager.Insert(() => TryClickItem(gardeningAddon, 2, seedIndex));
             }
 
             return true;
@@ -292,26 +314,24 @@ namespace Autogardener.Modules
                 addon->YesButton->IsEnabled &&
                 addon->AtkUnitBase.UldManager.NodeList[15]->IsVisible())
             {
-                new AddonMaster.SelectYesno((IntPtr)addon).Yes();
+                new AddonMaster.SelectYesno((nint)addon).Yes();
                 return true;
             }
 
             return false;
         }
 
-
-
-        public unsafe bool TryGetItemSlotByItemId(uint itemId, out InventoryContainer* container, out int slotNumber)
+        private unsafe bool TryGetItemSlotByItemId(uint itemId, out InventoryContainer* container, out int slotNumber)
         {
-            InventoryContainer*[] inventories = GetCombinedInventories();
+            var inventories = GetCombinedInventories();
             container = null;
             slotNumber = -1;
             foreach (var inventory in inventories)
             {
                 logService.Info($"Checking inventory {inventory->Type}");
-                for (int i = 0; i < inventory->Size; i++)
+                for (var i = 0; i < inventory->Size; i++)
                 {
-                    InventoryItem* slot = inventory->GetInventorySlot(i);
+                    var slot = inventory->GetInventorySlot(i);
                     if (!slot->IsEmpty() && slot->ItemId == itemId)
                     {
                         slotNumber = i;
@@ -338,11 +358,11 @@ namespace Autogardener.Modules
         // This returned index is the index within the popup that appears when clicking the request slot, not an inventory index.
         private unsafe int GetIndexFromCollection(HashSet<uint> idCollection, uint targetId)
         {
-            InventoryContainer*[] container = GetCombinedInventories();
-            int indexOfTargetItem = 0;
+            var container = GetCombinedInventories();
+            var indexOfTargetItem = 0;
             foreach (var cont in container)
             {
-                for (int i = 0; i < cont->Size; i++)
+                for (var i = 0; i < cont->Size; i++)
                 {
                     var item = cont->GetInventorySlot(i);
                     if (idCollection.Contains(item->ItemId)) // It's a member of the collection, like "seeds", or "soils"
@@ -360,30 +380,6 @@ namespace Autogardener.Modules
             }
 
             return -1;
-        }
-
-        public unsafe bool InteractWithPlot()
-        {
-            if (!Player.Available) return false;
-            if (Player.IsAnimationLocked) return false;
-            if (!utils.DismountIfNeeded()) return false;
-            if (GenericHelpers.IsOccupied()) return false;
-            IGameObject? plotSelected = clientState.LocalPlayer?.TargetObject;
-            if (plotSelected == null)
-            {
-                //clientChatGui.PrintError("No plot selected.");
-                return false;
-            }
-
-            if (!GlobalData.GardenPlotDataIds.Contains(plotSelected.DataId))
-            {
-                clientChatGui.PrintError("That's not a plot");
-                return false;
-            }
-
-            TargetSystem.Instance()->InteractWithObject(plotSelected.Struct(), true);
-
-            return true;
         }
 
         private unsafe bool? TryClickItem(AtkUnitBase* addon, int i, int itemIndex)

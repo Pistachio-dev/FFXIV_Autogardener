@@ -11,7 +11,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Autogardener.Modules
+namespace Autogardener.Modules.Tasks
 {
     public class GardeningTaskManager
     {
@@ -50,37 +50,9 @@ namespace Autogardener.Modules
             taskListStack.Clear();
         }
 
-        private LinkedList<TaskManagerTask> GetTopStackOrInitialize()
-        {
-            if (taskListStack.Count == 0)
-            {
-                taskListStack.Push(new LinkedList<TaskManagerTask>());
-            }
-
-            return taskListStack.Peek();
-        }
         public string GetCurrentTaskName()
         {
             return taskManager.CurrentTask?.Name ?? "None";
-        }
-        private bool TryIncreaseTaskListStack(Guid newStackId)
-        {           
-            if (stackIds.Contains(newStackId))
-            {
-                return false;
-            }
-            taskListStack.Push(new LinkedList<TaskManagerTask>());
-            stackIds.Add(newStackId);
-            logService.Info($"Stack increased. Current stack size: {taskListStack.Count}. Id: {newStackId}");
-
-            return true;
-        }
-
-        private void PopAndInsertTaskStack(Guid stackId)
-        {
-            logService.Info("Stack inserted into taskManager");
-            taskManager.InsertMulti(taskListStack.Pop().ToArray());
-            stackIds.Remove(stackId);
         }
 
         public void StartProcessingQueuedTasks()
@@ -118,7 +90,7 @@ namespace Autogardener.Modules
             Func<bool> throttle = () =>
             {
                 
-                string key = "Generic throttle";
+                var key = "Generic throttle";
                 if (!EzThrottler.ThrottleNames.Contains(key)){
                     EzThrottler.Throttle(key, ms, true);
                     return false;
@@ -138,7 +110,7 @@ namespace Autogardener.Modules
         // Tasks that can insert new tasks
         public void EnqueueSuperTask(Func<bool> function, string name)
         {
-            Guid newStackId = Guid.NewGuid();
+            var newStackId = Guid.NewGuid();
             logService.Info($"Enqueued super function: {name}");
             Func<bool> superTask = () =>
             {
@@ -157,6 +129,35 @@ namespace Autogardener.Modules
         public void Insert(Func<bool> function, string name)
         {
             currentTaskList.AddFirst(new TaskManagerTask(function, name, DefConfig));
+        }
+
+        private bool TryIncreaseTaskListStack(Guid newStackId)
+        {
+            if (stackIds.Contains(newStackId))
+            {
+                return false;
+            }
+            taskListStack.Push(new LinkedList<TaskManagerTask>());
+            stackIds.Add(newStackId);
+            logService.Info($"Stack increased. Current stack size: {taskListStack.Count}. Id: {newStackId}");
+
+            return true;
+        }
+
+        private LinkedList<TaskManagerTask> GetTopStackOrInitialize()
+        {
+            if (taskListStack.Count == 0)
+            {
+                taskListStack.Push(new LinkedList<TaskManagerTask>());
+            }
+
+            return taskListStack.Peek();
+        }
+        private void PopAndInsertTaskStack(Guid stackId)
+        {
+            logService.Info("Stack inserted into taskManager");
+            taskManager.InsertMulti(taskListStack.Pop().ToArray());
+            stackIds.Remove(stackId);
         }
 
         private static TaskManagerConfiguration DefConfig = new TaskManagerConfiguration()

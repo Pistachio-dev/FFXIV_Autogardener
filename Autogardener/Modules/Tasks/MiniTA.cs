@@ -6,7 +6,7 @@ using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using System.Linq;
 
-namespace Autogardener.Modules
+namespace Autogardener.Modules.Tasks
 {
     public class MiniTA
     {

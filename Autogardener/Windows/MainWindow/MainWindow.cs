@@ -1,5 +1,6 @@
 using Autogardener.Model;
 using Autogardener.Modules;
+using Autogardener.Modules.Tasks;
 using Dalamud.Plugin.Services;
 using DalamudBasics.Configuration;
 using DalamudBasics.GUI.Windows;
@@ -70,6 +71,7 @@ public partial class MainWindow : PluginWindowBase, IDisposable
 
     protected override unsafe void SafeDraw()
     {
+        ImGui.TextUnformatted(gtm.GetCurrentTaskName());
         if (ImGui.BeginTabBar("MainTabBar"))
         {
             var save = saveManager.GetCharacterSaveInMemory();

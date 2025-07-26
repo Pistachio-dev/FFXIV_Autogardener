@@ -17,7 +17,7 @@ namespace Autogardener.Windows.MainWindow
 
         private void DrawDesignsTab(CharacterSaveState save)
         {
-            UpdateSelectorData(configService.GetConfiguration().ShowOnlyItemsInInventory);
+            UpdateSelectorData(configService.GetConfiguration().ShowOnlyItemsInInventory);            
             var nearestPlot = storedDataActions.GetNearestTrackedPlot(false);
             if (nearestPlot == null)
             {
