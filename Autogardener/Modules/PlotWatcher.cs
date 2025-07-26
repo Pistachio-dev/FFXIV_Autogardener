@@ -48,7 +48,7 @@ namespace Autogardener.Modules
             {
                 if (gameGui.WorldToScreen(plot.Location, out var screenPos))
                 {
-                    points.Add(new PlotHighlightData(screenPos, plot.Alias, plot.DesignName));
+                    points.Add(new PlotHighlightData(screenPos, plot.Name, plot.DesignName));
                 }
             }
 
@@ -82,8 +82,8 @@ namespace Autogardener.Modules
             var state = saveManager.GetCharacterSaveInMemory();
             foreach (var plot in state.Plots)
             {
-                log.Info($"{plot.Alias} =========================");
-                foreach (var hole in plot.PlantingHoles)
+                log.Info($"{plot.Name} =========================");
+                foreach (var hole in plot.Plots)
                 {
                     log.Info($"ObjId: {hole.GameObjectId} X: {hole.Location.X} Y: {hole.Location.Y} Z: {hole.Location.Z}");
                 }
@@ -97,12 +97,12 @@ namespace Autogardener.Modules
             }
         }
 
-        public void UpdatePlotList()
+        public void UpdatePlotPatchList()
         {
             var state = saveManager.GetCharacterSaveInMemory();
             var discoveredPlots = DiscoverPlots();
             discoveredPlots = FilterByDistance(discoveredPlots, GlobalData.MaxScanDistance);
-            List<Plot> combinedPlots = MergePlotLists(state.Plots, discoveredPlots);
+            List<PlotPatch> combinedPlots = MergePlotLists(state.Plots, discoveredPlots);
             bool saveToFile = HavePlotsChanged(state.Plots, combinedPlots);
             state.Plots = combinedPlots;
             if (saveToFile)
@@ -111,7 +111,7 @@ namespace Autogardener.Modules
             }
         }
 
-        private bool HavePlotsChanged(List<Plot> original, List<Plot> newCombined)
+        private bool HavePlotsChanged(List<PlotPatch> original, List<PlotPatch> newCombined)
         {
             if (original.Count != newCombined.Count) return true;
             for (int i = 0; i < original.Count; i++)
@@ -121,9 +121,9 @@ namespace Autogardener.Modules
 
             return false;
         }
-        private List<Plot> MergePlotLists(List<Plot> known, List<Plot> scanned)
+        private List<PlotPatch> MergePlotLists(List<PlotPatch> known, List<PlotPatch> scanned)
         {            
-            List<Plot> combinedPlots = new List<Plot>(known);
+            List<PlotPatch> combinedPlots = new List<PlotPatch>(known);
             foreach (var plot in scanned)
             {
                 if (!known.Any(p => p.Equals(plot)))
@@ -135,7 +135,7 @@ namespace Autogardener.Modules
             return combinedPlots;
         }
 
-        public List<Plot> FilterByDistance(List<Plot> plots, float maxDistance)
+        public List<PlotPatch> FilterByDistance(List<PlotPatch> plots, float maxDistance)
         {
             var playerPos = clientState.LocalPlayer?.Position;
             if (playerPos == null)
@@ -147,46 +147,46 @@ namespace Autogardener.Modules
             return result;
         }
 
-        public List<Plot> DiscoverPlots()
+        public List<PlotPatch> DiscoverPlots()
         {
-            List<Plot> foundPlots = new();
-            Plot? plotInConstruction = null;
-            var plotHoleObjects = objectTable
+            List<PlotPatch> foundPlotPatches = new();
+            PlotPatch? plotPatchInConstruction = null;
+            var plotObjects = objectTable
                 .Where(o => o != null && GlobalData.GardenPlotDataIds.Contains(o.DataId)).OrderBy(o => o.GameObjectId).ToList();
             var plotNumber = 1;
-            int plotHoleCounter = 0;
-            foreach (var plotHole in plotHoleObjects)
+            int plotCounter = 0;
+            foreach (var plotObject in plotObjects)
             {
-                log.Debug($"Building plant hole {plotHole.GameObjectId}");
-                if (plotInConstruction == null
-                    || Math.Abs((decimal)(plotInConstruction?.PlantingHoles.Last().GameObjectId ?? 0) - plotHole.GameObjectId) != 1 //Discontiguous id
-                    || plotHoleCounter == 8)
+                log.Debug($"Building plant hole {plotObject.GameObjectId}");
+                if (plotPatchInConstruction == null
+                    || Math.Abs((decimal)(plotPatchInConstruction?.Plots.Last().GameObjectId ?? 0) - plotObject.GameObjectId) != 1 //Discontiguous id
+                    || plotCounter == 8)
                 {
                     log.Debug("New Plot object created");
                     // Discontiguous, or first hole. Create new plot.
-                    if (plotInConstruction != null)
+                    if (plotPatchInConstruction != null)
                     {
-                        foundPlots.Add(plotInConstruction);
-                        plotHoleCounter = 0;
+                        foundPlotPatches.Add(plotPatchInConstruction);
+                        plotCounter = 0;
                     }
 
-                    plotInConstruction = new Plot($"Plot {plotNumber}");
+                    plotPatchInConstruction = new PlotPatch($"Plot {plotNumber}");
                     plotNumber++;
                 }
 
-                var newHole = new PlotHole(plotHole.GameObjectId, plotHole.EntityId,
-                                                    plotHole.ObjectIndex, plotHole.DataId, new SerializableVector3(plotHole.Position));
-                plotInConstruction?.PlantingHoles.Add(newHole);
-                plotHoleCounter++;
+                var newHole = new Plot(plotObject.GameObjectId, plotObject.EntityId,
+                                                    plotObject.ObjectIndex, plotObject.DataId, new SerializableVector3(plotObject.Position));
+                plotPatchInConstruction?.Plots.Add(newHole);
+                plotCounter++;
             }
 
-            if (plotInConstruction != null)
+            if (plotPatchInConstruction != null)
             {
-                foundPlots.Add(plotInConstruction);
+                foundPlotPatches.Add(plotPatchInConstruction);
             }
 
-            foundPlots = foundPlots.Where(p => p.PlantingHoles.Count != 0).ToList();
-            return foundPlots;
+            foundPlotPatches = foundPlotPatches.Where(p => p.Plots.Count != 0).ToList();
+            return foundPlotPatches;
         }
     }
 }

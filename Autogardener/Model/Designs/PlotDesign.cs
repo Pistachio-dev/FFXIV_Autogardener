@@ -1,8 +1,8 @@
 namespace Autogardener.Model.Designs
 {
-    public class PlotHolePlan
+    public class PlotDesign
     {
-        public PlotHolePlan(int relativeIndex)
+        public PlotDesign(int relativeIndex)
         {
             RelativeIndex = relativeIndex;
         }

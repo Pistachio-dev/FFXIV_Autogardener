@@ -19,12 +19,12 @@ namespace Autogardener.Modules
             this.saveManager = saveManager;
         }
 
-        public void AddNewDesign(Plot basePlot)
+        public void AddNewDesign(PlotPatch basePlot)
         {
-            var newDesign = new PlotPlan();
-            for (int i = 0; i < basePlot.PlantingHoles.Count; i++)
+            var newDesign = new PlotPatchDesign();
+            for (int i = 0; i < basePlot.Plots.Count; i++)
             {
-                newDesign.PlotHolePlans.Add(CreateFromPlotHole(basePlot.PlantingHoles[i], i));
+                newDesign.PlotDesigns.Add(CreateFromPlot(basePlot.Plots[i], i));
             }
 
             var save = saveManager.GetCharacterSaveInMemory();
@@ -37,17 +37,17 @@ namespace Autogardener.Modules
         // 0 X 4
         // 1 2 3
         // Each rotation is 90º clockwise
-        public void ApplyDesign(PlotPlan design, Plot targetPlot, int rotations)
+        public void ApplyDesign(PlotPatchDesign design, PlotPatch targetPlot, int rotations)
         {
-            if (design.PlotHolePlans.Count != targetPlot.PlantingHoles.Count)
+            if (design.PlotDesigns.Count != targetPlot.Plots.Count)
             {
                 throw new Exception("Mismatched design and plot hole count");
             }
 
-            targetPlot.AppliedDesign = new AppliedPlotPlan(design);
-            for (int i = 0; i < design.PlotHolePlans.Count; i++)
+            targetPlot.AppliedDesign = new AppliedPlotPatchDesign(design);
+            for (int i = 0; i < design.PlotDesigns.Count; i++)
             {
-                targetPlot.PlantingHoles[ApplyRotation(i, rotations)].Design = design.PlotHolePlans[i];
+                targetPlot.Plots[ApplyRotation(i, rotations)].Design = design.PlotDesigns[i];
             }
         }
 
@@ -56,11 +56,11 @@ namespace Autogardener.Modules
             return Math.Abs(index - (rotations * 3)) % 8;
         }
 
-        private PlotHolePlan CreateFromPlotHole(PlotHole basePlotHole, int index)
+        private PlotDesign CreateFromPlot(Plot basePlot, int index)
         {
-            return new PlotHolePlan(index)
+            return new PlotDesign(index)
             {
-                DesignatedSeed = basePlotHole.CurrentSeed,
+                DesignatedSeed = basePlot.CurrentSeed,
                 DesignatedSoil = 0,
                 DoNotHarvest = false,
                 RelativeIndex = index

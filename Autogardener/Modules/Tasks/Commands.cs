@@ -99,7 +99,7 @@ namespace Autogardener.Modules.Tasks
             return false;
         }
 
-        public unsafe bool SetPlantTypeFromDialogue(PlotHole plotHole)
+        public unsafe bool SetPlantTypeFromDialogue(Plot plot)
         {
             if (TryGetAddonByName<AddonTalk>("Talk", out var addonTalk)
                 && addonTalk->AtkUnitBase.IsVisible)
@@ -111,7 +111,7 @@ namespace Autogardener.Modules.Tasks
                 (var id, var seedName) = ExtractPlantNameAndId(dialogueText);
                 if (id != 0)
                 {                    
-                    plotHole.CurrentSeed = id;
+                    plot.CurrentSeed = id;
                     logService.Info($"Seed registered: {id}-{seedName}");
                 }
                 taskManager.InsertDelay(100);

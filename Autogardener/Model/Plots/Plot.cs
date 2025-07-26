@@ -1,40 +1,42 @@
 using Autogardener.Model.Designs;
-using System.Linq;
+using Dalamud.Game.ClientState.Objects.Types;
 
 namespace Autogardener.Model.Plots
 {
     public class Plot
-    {        
-        public Plot(string alias)
+    {
+        public Plot(ulong gameObjectId, uint entityId, uint objectIndex, uint dataId, SerializableVector3 location)
         {
-            Alias = alias;
+            GameObjectId = gameObjectId;
+            EntityId = entityId;
+            ObjectIndex = objectIndex;
+            DataId = dataId;
+            Location = location;
         }
 
-        public Guid Id { get; set; } = Guid.NewGuid();
-
-        public string DesignName => AppliedDesign?.Plan.PlanName ?? "Unassigned plan";
-        public AppliedPlotPlan? AppliedDesign { get; set; } = null;
-
-        public string Alias { get; set; }
-
-        public List<PlotHole> PlantingHoles { get; set; } = new();
-
-        public Vector3 Location => PlantingHoles.FirstOrDefault()?.Location.AsVector3() ?? Vector3.Zero;
-
-        public override bool Equals(object? otherPlotObject)
+        public void Initialize(IGameObject ob)
         {
-            if (otherPlotObject == null || !(otherPlotObject is Plot otherPlot))
-            {
-                return false; ;
-            }
-            if (!(otherPlot.PlantingHoles.Count == PlantingHoles.Count))
-            {
-                return false;
-            }
-
-            ulong lowerGameObjectId = PlantingHoles.Select(p => p.GameObjectId).OrderBy(goid => goid).First();
-            ulong otherPlotLowerGameObjectId = otherPlot.PlantingHoles.Select(p => p.GameObjectId).OrderBy(goid => goid).First();
-            return lowerGameObjectId == otherPlotLowerGameObjectId;
+            GameObjectId = ob.GameObjectId;
+            EntityId = ob.EntityId;
+            ObjectIndex = ob.ObjectIndex;
+            DataId = ob.DataId;
+            Location = new SerializableVector3(ob.Position.X, ob.Position.Y, ob.Position.Z);
         }
+
+        public PlotDesign? Design { get; set; } = null;
+
+        public uint CurrentSeed { get; set; } //ItemId
+
+        public uint CurrentSoil { get; set; }
+
+        public DateTime? LastTendedUtc { get; set; } // That the plugin knows of. I it gets tended without the plugin, it won't know. But you can't overtend so, great.
+        public DateTime? LastFertilizedUtc { get; set; } // Same as above
+        public ulong GameObjectId { get; set; }
+        public uint EntityId { get; set; }
+        public uint ObjectIndex { get; set; }
+
+        public uint DataId { get; set; }
+
+        public SerializableVector3 Location { get; set; }
     }
 }

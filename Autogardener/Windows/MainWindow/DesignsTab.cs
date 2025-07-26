@@ -18,14 +18,14 @@ namespace Autogardener.Windows.MainWindow
         private void DrawDesignsTab(CharacterSaveState save)
         {
             UpdateSelectorData(configService.GetConfiguration().ShowOnlyItemsInInventory);            
-            var nearestPlot = storedDataActions.GetNearestTrackedPlot(false);
+            var nearestPlot = storedDataActions.GetNearestTrackedPlotPatch(false);
             if (nearestPlot == null)
             {
                 ImGui.BeginDisabled();
             }
             string newDesignButtonText = nearestPlot == null
                 ? "Create new design for nearest plot"
-                : $"Create new design for {nearestPlot.Alias}";
+                : $"Create new design for {nearestPlot.Name}";
             if (ImGuiComponents.IconButtonWithText(FontAwesomeIcon.PaintBrush, newDesignButtonText))
             {
                 currentDesign = storedDataActions.CreateNewDesign();
@@ -38,14 +38,14 @@ namespace Autogardener.Windows.MainWindow
             //logService.Info(save.Designs.Count.ToString());
             if (save.Designs.Count > 1)
             {
-                ImGui.Combo("Design", ref currentDesign, save.Designs.Select(d => d.PlanName).ToArray(), save.Designs.Count);
+                ImGui.Combo("Design", ref currentDesign, save.Designs.Select(d => d.Name).ToArray(), save.Designs.Count);
                 DrawDesignRenameButton(save.Designs);
                 if (DrawRemoveDesignButton(save.Designs, save.Designs[currentDesign]))
                 {
                     return;
                 }
 
-                if (save.Designs[currentDesign].PlotHolePlans.Count == 0)
+                if (save.Designs[currentDesign].PlotDesigns.Count == 0)
                 {
                     ImGui.TextUnformatted("This design has no plots defined");
                     return;
@@ -59,7 +59,7 @@ namespace Autogardener.Windows.MainWindow
                     configService.SaveConfiguration();
                 }
 
-                int[][] displayLayout = GetPlotLayout(save.Designs[currentDesign].PlotHolePlans.Count);
+                int[][] displayLayout = GetPlotLayout(save.Designs[currentDesign].PlotDesigns.Count);
                 foreach (var row in displayLayout)
                 {
                     foreach (var index in row)
@@ -70,7 +70,7 @@ namespace Autogardener.Windows.MainWindow
                         }
                         else
                         {
-                            DrawPlotHoleDesign(save.Designs[currentDesign].PlotHolePlans[index], (uint)index);
+                            DrawPlotDesign(save.Designs[currentDesign].PlotDesigns[index], (uint)index);
                         }
 
                         ImGui.SameLine();
@@ -80,7 +80,7 @@ namespace Autogardener.Windows.MainWindow
             }
         }
 
-        private void DrawDesignRenameButton(List<PlotPlan> designs)
+        private void DrawDesignRenameButton(List<PlotPatchDesign> designs)
         {
             ImGui.SameLine();
             if (ImGuiComponents.IconButton(FontAwesomeIcon.Pen))
@@ -88,18 +88,18 @@ namespace Autogardener.Windows.MainWindow
                 toggleRenameDesign = !toggleRenameDesign;
             }
             DrawTooltip("Rename");
-            var designName = designs[currentDesign].PlanName;
+            var designName = designs[currentDesign].Name;
             if (toggleRenameDesign)
             {
                 if (ImGui.InputText("New name", ref designName, 40))
                 {
-                    designs[currentDesign].PlanName = designName;
+                    designs[currentDesign].Name = designName;
                     saveManager.WriteCharacterSave();
                 }
             }
         }
 
-        private bool DrawRemoveDesignButton(List<PlotPlan> designs, PlotPlan design)
+        private bool DrawRemoveDesignButton(List<PlotPatchDesign> designs, PlotPatchDesign design)
         {
             ImGui.SameLine();
             bool buttonsPressed = ImGui.GetIO().KeyShift && ImGui.GetIO().KeyCtrl;
@@ -121,7 +121,7 @@ namespace Autogardener.Windows.MainWindow
             return false;
 
         }
-        private void DrawPlotHoleDesign(PlotHolePlan design, uint index)
+        private void DrawPlotDesign(PlotDesign design, uint index)
         {
             ImGui.PushStyleVar(ImGuiStyleVar.FrameBorderSize, 1f);
             ImGui.BeginChildFrame(100 + index, new Vector2(200, 200));

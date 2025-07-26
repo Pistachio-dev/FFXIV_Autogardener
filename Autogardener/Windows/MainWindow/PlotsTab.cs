@@ -17,12 +17,12 @@ namespace Autogardener.Windows.MainWindow
 
         private void DrawPlotsTab(CharacterSaveState save)
         {
-            var nearestPlot = storedDataActions.GetNearestTrackedPlot(false);
+            var nearestPlot = storedDataActions.GetNearestTrackedPlotPatch(false);
             if (nearestPlot != null)
             {
                 ImGui.TextUnformatted("Nearest plot:");
                 ImGui.SameLine();
-                ImGui.TextColored(NeutralGreen, nearestPlot.Alias);
+                ImGui.TextColored(NeutralGreen, nearestPlot.Name);
                 DrawTendButtonAndParameters(nearestPlot);
             }
             else
@@ -32,14 +32,14 @@ namespace Autogardener.Windows.MainWindow
 
             if (ImGuiComponents.IconButtonWithText(FontAwesomeIcon.Search, "Scan nearest plot", Blue))
             {
-                storedDataActions.RegisterNearestPlot();
-                currentPlot = Math.Max(0, save.Plots.IndexOf(p => p.Id == storedDataActions.GetNearestTrackedPlot(false)?.Id));
+                storedDataActions.RegisterNearestPlotPatch();
+                currentPlot = Math.Max(0, save.Plots.IndexOf(p => p.Id == storedDataActions.GetNearestTrackedPlotPatch(false)?.Id));
                 DrawTooltip("Will check and save the plants of a plot. You need to be on it. It can't read every type of plant, stuff is weird sometimes.");
             }
 
             if (save.Plots.Any())
             {
-                ImGui.Combo("Plot", ref currentPlot, save.Plots.Select(p => p.Alias).ToArray(), save.Plots.Count);
+                ImGui.Combo("Plot", ref currentPlot, save.Plots.Select(p => p.Name).ToArray(), save.Plots.Count);
                 var plot = save.Plots[currentPlot];
                 DrawPlotRenameButton(plot);
                 if (DrawForgetPlotButton(save, plot))
@@ -48,9 +48,9 @@ namespace Autogardener.Windows.MainWindow
                 }
 
                 DrawDesignSelector(plot, save);
-                if (plot.AppliedDesign?.Plan != null)
+                if (plot.AppliedDesign?.Design != null)
                 {
-                    DrawDesignItems(plot.AppliedDesign.Plan);
+                    DrawDesignItems(plot.AppliedDesign.Design);
                 }
                 
                 DrawCurrentPlot(save.Plots[currentPlot]);
@@ -58,7 +58,7 @@ namespace Autogardener.Windows.MainWindow
                 plotWatcher.HighlightPlots();
             }
         }
-        private void DrawTendButtonAndParameters(Plot nearestPlot)
+        private void DrawTendButtonAndParameters(PlotPatch nearestPlot)
         {
             var config = configService.GetConfiguration();
             if (ImGuiComponents.IconButtonWithText(FontAwesomeIcon.Leaf, "Tend to plot", MidDarkGreen, DarkGreen, MidDarkGreen))
@@ -97,7 +97,7 @@ namespace Autogardener.Windows.MainWindow
 
         }
 
-        private void DrawDesignItems(PlotPlan plotPlan)
+        private void DrawDesignItems(PlotPatchDesign plotPlan)
         {
             var checkResult = storedDataActions.CheckResourceAvailability(plotPlan, true);
             foreach (var item in checkResult.Entries)
@@ -110,22 +110,22 @@ namespace Autogardener.Windows.MainWindow
             ImGui.NewLine();
         }
 
-        private void DrawDesignSelector(Plot plot, CharacterSaveState save)
+        private void DrawDesignSelector(PlotPatch plot, CharacterSaveState save)
         {
             var designForCurrentPlot = GetCurrentDesignNumber(plot, save);
-            var designNames = save.Designs.Select(p => p.PlanName).ToArray();
+            var designNames = save.Designs.Select(p => p.Name).ToArray();
             if (ImGui.Combo("Plan", ref designForCurrentPlot, designNames, designNames.Length))
             {
                 if (!storedDataActions.ApplyDesign(ref plot, save.Designs[designForCurrentPlot]))
                 {
                     return;
                 }
-                plot.AppliedDesign = new AppliedPlotPlan(save.Designs[designForCurrentPlot]);
+                plot.AppliedDesign = new AppliedPlotPatchDesign(save.Designs[designForCurrentPlot]);
                 taskManager.Enqueue(() => saveManager.WriteCharacterSave());
             }
         }
 
-        private void DrawPlotRenameButton(Plot plot)
+        private void DrawPlotRenameButton(PlotPatch plot)
         {
             ImGui.SameLine();
             if (ImGuiComponents.IconButton(FontAwesomeIcon.Pen))
@@ -135,14 +135,14 @@ namespace Autogardener.Windows.MainWindow
             DrawTooltip("Rename");
             if (toggleRenamePlot)
             {
-                var plotName = plot.Alias;
+                var plotName = plot.Name;
                 if (ImGui.InputText("New name", ref plotName, 40))
                 {
-                    plot.Alias = plotName; saveManager.WriteCharacterSave();
+                    plot.Name = plotName; saveManager.WriteCharacterSave();
                 }
             }
         }
-        private bool DrawForgetPlotButton(CharacterSaveState save, Plot plot)
+        private bool DrawForgetPlotButton(CharacterSaveState save, PlotPatch plot)
         {
             ImGui.SameLine();
             bool buttonsPressed = ImGui.GetIO().KeyShift && ImGui.GetIO().KeyCtrl;
@@ -161,14 +161,14 @@ namespace Autogardener.Windows.MainWindow
 
         }
 
-        private void DrawCurrentPlot(Plot plot)
+        private void DrawCurrentPlot(PlotPatch plot)
         {
-            if (plot.PlantingHoles.Count == 0)
+            if (plot.Plots.Count == 0)
             {
                 ImGui.TextUnformatted("This plot has no planting slots, somehow. This is strange.");
                 return;
             }
-            int[][] displayLayout = GetPlotLayout(plot.PlantingHoles.Count);
+            int[][] displayLayout = GetPlotLayout(plot.Plots.Count);
             foreach (var row in displayLayout)
             {
                 foreach (var index in row)
@@ -179,13 +179,13 @@ namespace Autogardener.Windows.MainWindow
                     }
                     else
                     {
-                        if (index >= plot.PlantingHoles.Count)
+                        if (index >= plot.Plots.Count)
                         {
                             logService.Warning($"Planting hole index {index} is out of bounds");
                         }
                         else
                         {
-                            DrawPlotHoleStatus(plot.PlantingHoles[index], (uint)index);
+                            DrawPlotStatus(plot.Plots[index], (uint)index);
                         }
                     }
 
@@ -195,7 +195,7 @@ namespace Autogardener.Windows.MainWindow
             }           
         }
 
-        private void DrawPlotHoleStatus(PlotHole hole, uint index)
+        private void DrawPlotStatus(Plot hole, uint index)
         {
             ImGui.PushItemWidth(200);
             ImGui.PushStyleVar(ImGuiStyleVar.FrameBorderSize, 1f);
@@ -218,14 +218,14 @@ namespace Autogardener.Windows.MainWindow
             ImGui.PopItemWidth();
         }
 
-        private int GetCurrentDesignNumber(Plot plot, CharacterSaveState state)
+        private int GetCurrentDesignNumber(PlotPatch plot, CharacterSaveState state)
         {
             if (plot.AppliedDesign == null)
             {
                 return 0; // None
             }
 
-            var designId = plot.AppliedDesign.Plan.Id;
+            var designId = plot.AppliedDesign.Design.Id;
             int index = state.Designs.IndexOf(p => p.Id == designId);
             if (index == -1) { return 0; }
             return index;

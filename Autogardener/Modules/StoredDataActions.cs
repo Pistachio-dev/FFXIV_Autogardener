@@ -40,56 +40,56 @@ namespace Autogardener.Modules
             this.inGameActions = ingameActions;
         }
 
-        public void RegisterNearestPlot()
+        public void RegisterNearestPlotPatch()
         {
             
             var player = clientState.LocalPlayer;
             if (player == null)
             {
-                logService.Warning("Attempted to register nearest plot, but local player is null.");
+                logService.Warning("Attempted to register nearest plot patch, but local player is null.");
                 return;
             }
 
             var charState = saveManager.GetCharacterSaveInMemory();
 
-            Plot? plot = GetNearestTrackedPlot(true);
-            if (plot == null)
+            PlotPatch? plotPatch = GetNearestTrackedPlotPatch(true);
+            if (plotPatch == null)
             {
-                logService.Warning("No plot is near");
-                chatGui.PrintError("No plot is near");
+                logService.Warning("No plot patch is near");
+                chatGui.PrintError("No plot patch is near");
                 return;
             }
-            Plot? alreadySeenPlot = charState.Plots.FirstOrDefault(p => p.Equals(plot));
+            PlotPatch? alreadySeenPlot = charState.Plots.FirstOrDefault(p => p.Equals(plotPatch));
             if (alreadySeenPlot != null)
             {
-                plot = alreadySeenPlot;
+                plotPatch = alreadySeenPlot;
             }
             else
             {
-                charState.Plots.Add(plot);
+                charState.Plots.Add(plotPatch);
             }
 
-            if (plot == null)
+            if (plotPatch == null)
             {
-                logService.Warning("Could not get the nearest plot");
+                logService.Warning("Could not get the nearest plot patch");
                 return;
             }
 
-            inGameActions.ScanPlot(plot);
+            inGameActions.ScanPlot(plotPatch);
         }
 
         public int CreateNewDesign()
         {
             var state = saveManager.GetCharacterSaveInMemory();
             var index = state.Designs.Count;
-            var slots = GetNearestTrackedPlot(false)?.PlantingHoles.Count ?? 8;
-            state.Designs.Add(PlotPlan.CreateEmptyWithSlots(slots, "New plan"));
+            var slots = GetNearestTrackedPlotPatch(false)?.Plots.Count ?? 8;
+            state.Designs.Add(PlotPatchDesign.CreateEmptyWithSlots(slots, "New design"));
             logService.Info($"Current design count: {state.Designs.Count}");
             saveManager.WriteCharacterSave(state);
             return index;
         }
 
-        public ResourcesCheckResult CheckResourceAvailability(PlotPlan design, bool fertilize)
+        public ResourcesCheckResult CheckResourceAvailability(PlotPatchDesign design, bool fertilize)
         {
             var expectedItems = GetExpectedItemAmounts(design, fertilize);
 
@@ -126,15 +126,15 @@ namespace Autogardener.Modules
             return result;
         }
 
-        private Dictionary<uint, int> GetExpectedItemAmounts(PlotPlan design, bool fertilize)
+        private Dictionary<uint, int> GetExpectedItemAmounts(PlotPatchDesign design, bool fertilize)
         {
             Dictionary<uint, int> expectedItems = new(); // ItemId, quantity expected
             if (fertilize)
             {
-                expectedItems.Add(GlobalData.FishmealId, design.PlotHolePlans.Count);
+                expectedItems.Add(GlobalData.FishmealId, design.PlotDesigns.Count);
 
             }
-            foreach (var plan in design.PlotHolePlans)
+            foreach (var plan in design.PlotDesigns)
             {
                 expectedItems.IncrementOrSet(plan.DesignatedSeed);
                 expectedItems.IncrementOrSet(plan.DesignatedSoil);
@@ -144,12 +144,12 @@ namespace Autogardener.Modules
             return expectedItems;
         }
                
-        public Plot? GetNearestTrackedPlot(bool addNewPlots)
+        public PlotPatch? GetNearestTrackedPlotPatch(bool addNewPlots)
         {
             var state = saveManager.GetCharacterSaveInMemory();            
             if (addNewPlots)
             {
-                plotWatcher.UpdatePlotList();
+                plotWatcher.UpdatePlotPatchList();
             }
 
             Vector3 playerLocation = clientState.LocalPlayer?.Position ?? Vector3.Zero;
@@ -159,15 +159,15 @@ namespace Autogardener.Modules
                 return null;
             }
 
-            IEnumerable<(Plot plot, float distance)> plotsWithDistances
+            IEnumerable<(PlotPatch plotPatch, float distance)> plotsPatchesWithDistances
                 = state.Plots.Select(x => (x, Math.Abs(Vector3.Distance(x.Location, playerLocation))))
                 .Where(tuple => tuple.Item2 < GlobalData.MaxScanDistance);
 
             try
             {
-                (Plot nearestPlot, float distance) = plotsWithDistances.OrderBy(t => t.distance).First();
-                logService.Debug($"Nearest plot found with {nearestPlot.PlantingHoles.Count} slots at distance {distance}");
-                return nearestPlot;
+                (PlotPatch nearestPlotPatch, float distance) = plotsPatchesWithDistances.OrderBy(t => t.distance).First();
+                logService.Debug($"Nearest plot found with {nearestPlotPatch.Plots.Count} slots at distance {distance}");
+                return nearestPlotPatch;
             }
             catch (InvalidOperationException)
             {
@@ -176,17 +176,17 @@ namespace Autogardener.Modules
             }
         }
 
-        public bool ApplyDesign(ref Plot plot, PlotPlan design)
+        public bool ApplyDesign(ref PlotPatch plotPatch, PlotPatchDesign design)
         {
-            if (plot.PlantingHoles.Count != design.PlotHolePlans.Count)
+            if (plotPatch.Plots.Count != design.PlotDesigns.Count)
             {
                 chatGui.PrintError("Plot and design do not match!");
                 return false;
             }
-            for (var i = 0; i < plot.PlantingHoles.Count; i++){
-                var plotHole = plot.PlantingHoles[i];
-                var plotHolePlan = design.PlotHolePlans[i];
-                plotHole.Design = plotHolePlan;
+            for (var i = 0; i < plotPatch.Plots.Count; i++){
+                var plot = plotPatch.Plots[i];
+                var plotDesign = design.PlotDesigns[i];
+                plot.Design = plotDesign;
             }
 
             return true;

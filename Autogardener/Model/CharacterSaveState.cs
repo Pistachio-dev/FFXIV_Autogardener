@@ -5,11 +5,11 @@ namespace Autogardener.Model
 {
     public class CharacterSaveState
     {
-        public List<Plot> Plots { get; set; } = new();
+        public List<PlotPatch> Plots { get; set; } = new();
 
-        public List<PlotPlan> Designs { get; set; } = new()
+        public List<PlotPatchDesign> Designs { get; set; } = new()
         {
-            PlotPlan.CreateEmptyWithSlots(8, "Default")
+            PlotPatchDesign.CreateEmptyWithSlots(8, "Default")
         };
     }
 }
