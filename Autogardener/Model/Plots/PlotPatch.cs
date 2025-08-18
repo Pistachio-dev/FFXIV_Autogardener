@@ -5,9 +5,9 @@ namespace Autogardener.Model.Plots
 {
     public class PlotPatch
     {        
-        public PlotPatch(string alias)
+        public PlotPatch(string name)
         {
-            Name = alias;
+            Name = name;
         }
 
         public Guid Id { get; set; } = Guid.NewGuid();
