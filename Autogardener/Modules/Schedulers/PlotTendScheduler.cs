@@ -16,7 +16,7 @@ namespace Autogardener.Modules.Schedulers
     public class PlotTendScheduler
     {
         public bool Complete => taskQueue.Count <= currentTaskIndex;
-        public readonly Plot plot;
+        public readonly Plot Plot;
         private readonly ILogService logService;
         private readonly GameActions op;
         private readonly GlobalData gData;
@@ -25,7 +25,7 @@ namespace Autogardener.Modules.Schedulers
 
         public PlotTendScheduler(Plot plot, ILogService logService, GameActions op, GlobalData gData)
         {
-            this.plot = plot;
+            this.Plot = plot;
             this.logService = logService;
             this.op = op;
             this.gData = gData;

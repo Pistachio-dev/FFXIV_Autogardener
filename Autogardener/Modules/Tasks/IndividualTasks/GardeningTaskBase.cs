@@ -1,13 +1,7 @@
 using Autogardener.Model.Plots;
 using Autogardener.Modules.Actions;
 using Autogardener.Modules.Schedulers;
-using DalamudBasics.Logging;
 using ECommons.Throttlers;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Autogardener.Modules.Tasks.IndividualTasks
 {
@@ -36,6 +30,7 @@ namespace Autogardener.Modules.Tasks.IndividualTasks
         // Run PreRun
         internal GardeningTaskResult Run(PlotTendScheduler scheduler)
         {
+            var plot = scheduler.Plot;
             if (!EzThrottler.Throttle(TaskName, throttleTime))
             {
                 return GardeningTaskResult.Incomplete;

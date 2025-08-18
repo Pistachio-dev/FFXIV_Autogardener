@@ -1,6 +1,7 @@
 using Autogardener.Model;
 using Autogardener.Modules;
 using Autogardener.Modules.Tasks;
+using Dalamud.Bindings.ImGui;
 using Dalamud.Plugin.Services;
 using DalamudBasics.Configuration;
 using DalamudBasics.GUI.Windows;
@@ -8,7 +9,6 @@ using DalamudBasics.Logging;
 using DalamudBasics.SaveGames;
 using ECommons.Automation.NeoTaskManager;
 using Microsoft.Extensions.DependencyInjection;
-using System.Linq;
 
 namespace Autogardener.Windows.MainWindow;
 
@@ -100,7 +100,7 @@ public partial class MainWindow : PluginWindowBase, IDisposable
         var scarecrowPic = textureProvider.GetFromFile(scarecrowPicturePath).GetWrapOrDefault();
         if (scarecrowPic != null)
         {
-            ImGui.Image(scarecrowPic.ImGuiHandle, new Vector2(scarecrowPic.Width, scarecrowPic.Height));
+            ImGui.Image(scarecrowPic.Handle, new Vector2(scarecrowPic.Width, scarecrowPic.Height));
         }
         
         ImGui.EndChildFrame();

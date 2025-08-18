@@ -61,34 +61,35 @@ namespace Autogardener.Modules.Tasks
 
         public unsafe bool Fertilize()
         {
-            var alreadyFertilizedMsg = globalData.GetGardeningOptionStringLocalized(GlobalData.GardeningStrings.AlreadyFertilized);
-            if (errorMessageMonitor.WasThereARecentError(alreadyFertilizedMsg))
-            {
-                return true;
-            }
-            var itemId = GlobalData.FishmealId;
-            if (!TryGetItemSlotByItemId(itemId, out var container, out var itemSlotNumber))
-            {
-                logService.Warning("Could not find item with id " + itemId);
-                return true;
-            }
+            throw new NotImplementedException();
+            //var alreadyFertilizedMsg = globalData.GetGardeningOptionStringLocalized(GlobalData.GardeningStrings.AlreadyFertilized);
+            //if (errorMessageMonitor.WasThereARecentError(alreadyFertilizedMsg))
+            //{
+            //    return true;
+            //}
+            //var itemId = GlobalData.FishmealId;
+            //if (!TryGetItemSlotByItemId(itemId, out var container, out var itemSlotNumber))
+            //{
+            //    logService.Warning("Could not find item with id " + itemId);
+            //    return true;
+            //}
 
-            logService.Info($"Fertilizer found in slot {container->Type}:{itemSlotNumber}");
-            var ag = AgentInventoryContext.Instance();
-            var addonId = AgentModule.Instance()->GetAgentByInternalId(AgentId.Inventory)->GetAddonId();
-            ag->OpenForItemSlot(container->Type, itemSlotNumber, addonId);
-            var contextMenu = (AtkUnitBase*)gameGui.GetAddonByName("ContextMenu", 1);
-            if (contextMenu == null) return false;
-            for (var p = 0; p <= contextMenu->AtkValuesCount; p++)
-            {
-                if (ag->EventIds[p] == 7)
-                {
-                    Callback.Fire(contextMenu, true, 0, p - 7, 0, 0, 0);
-                    return true;
-                }
-            }
+            //logService.Info($"Fertilizer found in slot {container->Type}:{itemSlotNumber}");
+            //var ag = AgentInventoryContext.Instance();
+            //var addonId = AgentModule.Instance()->GetAgentByInternalId(AgentId.Inventory)->GetAddonId();
+            //ag->OpenForItemSlot(container->Type, itemSlotNumber, addonId);
+            //var contextMenu = (AtkUnitBase*)gameGui.GetAddonByName("ContextMenu", 1);
+            //if (contextMenu == null) return false;
+            //for (var p = 0; p <= contextMenu->AtkValuesCount; p++)
+            //{
+            //    if (ag->EventIds[p] == 7)
+            //    {
+            //        Callback.Fire(contextMenu, true, 0, p - 7, 0, 0, 0);
+            //        return true;
+            //    }
+            //}
 
-            return false;
+            //return false;
         }
 
         public unsafe bool SetPlantTypeFromDialogue(Plot plot)
@@ -161,33 +162,34 @@ namespace Autogardener.Modules.Tasks
 
         public unsafe bool SelectActionString(string actionToSelect)
         {
-            if (TryGetAddonByName<AddonSelectString>("SelectString", out var addonSelectString)
-                && IsAddonReady(&addonSelectString->AtkUnitBase))
-            {
-                logService.Info("SelectString addon found");
-                var entries = new AddonMaster.SelectString(addonSelectString).Entries;
-                if (TryGetMatchingEntry(entries, actionToSelect, out var matchingEntry)){
-                    matchingEntry.Select();
-                    miniTA.RegisterOptionAttemptedToSelect(actionToSelect);
-                }
-                else
-                {
-                    logService.Info($"\"{actionToSelect}\" didn't match any option");
-                    foreach (var entry in new AddonMaster.SelectString(addonSelectString).Entries)
-                    {
-                        logService.Info("Entry: " + entry.SeString.ToString());
-                    }
+            throw new NotImplementedException();
+            //if (TryGetAddonByName<AddonSelectString>("SelectString", out var addonSelectString)
+            //    && IsAddonReady(&addonSelectString->AtkUnitBase))
+            //{
+            //    logService.Info("SelectString addon found");
+            //    var entries = new AddonMaster.SelectString(addonSelectString).Entries;
+            //    if (TryGetMatchingEntry(entries, actionToSelect, out var matchingEntry)){
+            //        matchingEntry.Select();
+            //        miniTA.RegisterOptionAttemptedToSelect(actionToSelect);
+            //    }
+            //    else
+            //    {
+            //        logService.Info($"\"{actionToSelect}\" didn't match any option");
+            //        foreach (var entry in new AddonMaster.SelectString(addonSelectString).Entries)
+            //        {
+            //            logService.Info("Entry: " + entry.SeString.ToString());
+            //        }
 
-                    return false;
-                }
+            //        return false;
+            //    }
 
-                return true;
-            }
-            else
-            {
-                //logService.Warning("No SelectString addon found");
-                return false;
-            }
+            //    return true;
+            //}
+            //else
+            //{
+            //    //logService.Warning("No SelectString addon found");
+            //    return false;
+            //}
         }
 
         public unsafe bool PickSeedsAndSoil(uint seedItemId, uint soilItemId)

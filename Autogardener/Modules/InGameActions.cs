@@ -77,7 +77,7 @@ namespace Autogardener.Modules
             }
             plot.Initialize(plotOb);
             taskManager.Enqueue(() => chatGui.Print("Starting scan"), "Scan start");
-            taskManager.Enqueue(() => TargetAndInteractWithPlot(plot), "InteractWithPlot");
+            //taskManager.Enqueue(() => TargetAndInteractWithPlot(plot), "InteractWithPlot");
             taskManager.Enqueue(() => commands.SetPlantTypeFromDialogue(plot), "Extract plant type");
             taskManager.Enqueue(() => commands.SkipDialogueIfNeeded(), "Skip dialogue");
             taskManager.Enqueue(() => commands.SelectActionString(globalData
@@ -110,38 +110,11 @@ namespace Autogardener.Modules
         private void BeginPlotCare(Plot plot, bool fertilize, bool replant)
         {
             //taskManager.Enqueue(() => TargetPlotGameObjectId(plot), "Target plot");
-            taskManager.Enqueue(() => TargetAndInteractWithPlot(plot), "Interact with plot");
+            //taskManager.Enqueue(() => TargetAndInteractWithPlot(plot), "Interact with plot");
             taskManager.EnqueueDelayMs(new Random().Next(200, 300));
             taskManager.Enqueue(commands.SkipDialogueIfNeeded, "Skip dialogue");
             taskManager.EnqueueDelayMs(new Random().Next(200, 300));
             taskManager.EnqueueSuperTask(() => SelectOption(plot, fertilize, replant), "Select branching option");
-        }
-
-        private bool TargetAndInteractWithPlot(Plot plot)
-        {
-            var targetingResult = TargetPlotGameObjectId(plot);
-            if (targetingResult == false)
-            {
-                return false;
-            }
-
-            if (targetManager.Target?.GameObjectId != plot.GameObjectId){
-                return false;
-            }
-
-            return commands.InteractWithPlot();
-        }
-        private bool TargetPlotGameObjectId(Plot plot)
-        {
-            var plotOb = objectTable.SearchById(plot.GameObjectId);
-            if (plotOb == null)
-            {
-                chatGui.PrintError("Can't access plot. Did you move away?");
-                throw new Exception($"Plot with objectdId {plot.GameObjectId} was not found in the object table");                
-            }
-            
-            commands.TargetObject(plotOb);
-            return true;
         }
 
         private void PrintErrorAndSelectQuit(string errorMessage)
@@ -271,7 +244,7 @@ namespace Autogardener.Modules
 
         private void GetToOptionSelectMenu(Plot plot)
         {
-            taskManager.Enqueue(() => TargetAndInteractWithPlot(plot), "Target and interact with plot");
+            //taskManager.Enqueue(() => TargetAndInteractWithPlot(plot), "Target and interact with plot");
             taskManager.EnqueueDelayMs(new Random().Next(200, 300));
             taskManager.Enqueue(() => commands.SkipDialogueIfNeeded(), "Skip dialog");
             taskManager.EnqueueDelayMs(new Random().Next(200, 300));

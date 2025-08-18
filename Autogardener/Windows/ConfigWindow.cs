@@ -1,3 +1,4 @@
+using Dalamud.Bindings.ImGui;
 using DalamudBasics.Configuration;
 using DalamudBasics.GUI.Windows;
 using DalamudBasics.Logging;
@@ -11,8 +12,7 @@ public class ConfigWindow : PluginWindowBase, IDisposable
 
     public ConfigWindow(ILogService logService, IServiceProvider sp) : base(logService, "Configuration")
     {
-        Size = new Vector2(232, 90);
-        SizeCondition = ImGuiCond.Always;
+        Size = new Vector2(232, 90);        
 
         configuration = sp.GetRequiredService<IConfiguration>();
     }
