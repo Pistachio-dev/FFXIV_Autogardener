@@ -28,6 +28,21 @@ namespace Autogardener.Modules.Actions
             return false;
         }
 
+        // Unsure if this would work with other talk addons. But for gardening it works fine.
+        public unsafe string? GetTalkAddonDialogue()
+        {
+            if (TryGetAddonByName<AddonTalk>("Talk", out var addonTalk)
+                && addonTalk->AtkUnitBase.IsVisible)
+            {
+                var addonMaster = new AddonMaster.Talk((nint)addonTalk);
+                var dialogueText = addonTalk->AtkTextNode228->NodeText.ToString();
+
+                return dialogueText;
+            }
+
+            return null;
+        }
+
         public unsafe bool IsTalkAddonVisible()
         {
             return TryGetAddonByName<AddonTalk>("Talk", out var addonTalk)

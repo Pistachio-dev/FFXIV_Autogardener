@@ -53,6 +53,7 @@ namespace Autogardener.Modules.Schedulers
         {
             taskQueue.AddLast(new TargetObjectTask("Target object", op));
             taskQueue.AddLast(new InteractWithObjectTask("Interact with object", op));
+            taskQueue.AddLast(new ExtractSeedTypeTask("Extract seed type", op));
             taskQueue.AddLast(new SkipChatterTask("Skip plant description talk", op));
             string quitOption = gData.GetGardeningOptionStringLocalized(GlobalData.GardeningStrings.Quit);
             taskQueue.AddLast(new SelectStringTask("Select Quit", quitOption, op));

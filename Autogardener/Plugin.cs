@@ -116,6 +116,7 @@ public sealed class Plugin : IDalamudPlugin
         serviceCollection.AddSingleton<Targeting>();
         serviceCollection.AddSingleton<GameActions>();
         serviceCollection.AddSingleton<HighLevelScheduler>();
+        serviceCollection.AddSingleton<DataExtraction>();
         return serviceCollection.BuildServiceProvider();
     }
 
