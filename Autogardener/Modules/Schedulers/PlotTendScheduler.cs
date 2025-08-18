@@ -29,6 +29,7 @@ namespace Autogardener.Modules.Schedulers
             this.logService = logService;
             this.op = op;
             this.gData = gData;
+            SetupStartingTasks();
         }
 
         public void Append(GardeningTaskBase task)
@@ -50,7 +51,7 @@ namespace Autogardener.Modules.Schedulers
                 taskQueue.AddAfter(currentTaskNode, newTasks[i]);
             }
         }
-        public void SetupStartingTasks()
+        private void SetupStartingTasks()
         {
             taskQueue.AddLast(new TargetObjectTask("Target object", op));
             taskQueue.AddLast(new InteractWithObjectTask("Interact with object", op));
