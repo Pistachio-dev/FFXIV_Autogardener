@@ -1,5 +1,6 @@
 using Autogardener.Model;
 using Autogardener.Modules;
+using Autogardener.Modules.Schedulers;
 using Autogardener.Modules.Tasks;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Plugin.Services;
@@ -26,6 +27,7 @@ public partial class MainWindow : PluginWindowBase, IDisposable
     private IFramework framework;
     private IChatGui chatGui;
     public IConfigurationService<Configuration> configService;
+    public HighLevelScheduler hlScheduler;
     
     private static readonly Vector4 LightGreen = new Vector4(0.769f, 0.9f, 0.6f, 1);
     private static readonly Vector4 MidLightGreen = new Vector4(0.58f, 0.75f, 0.37f, 1);
@@ -60,7 +62,8 @@ public partial class MainWindow : PluginWindowBase, IDisposable
         taskManager = serviceProvider.GetRequiredService<TaskManager>();
         chatGui = serviceProvider.GetRequiredService<IChatGui>();
         configService = serviceProvider.GetRequiredService<IConfigurationService<Configuration>>();
-        inGameActions = serviceProvider.GetRequiredService<InGameActions>();        
+        inGameActions = serviceProvider.GetRequiredService<InGameActions>();
+        hlScheduler = serviceProvider.GetRequiredService<HighLevelScheduler>();
         
         framework.RunOnFrameworkThread(() =>
         {

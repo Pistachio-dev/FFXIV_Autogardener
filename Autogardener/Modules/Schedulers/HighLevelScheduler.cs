@@ -1,5 +1,6 @@
 using Autogardener.Model.Plots;
 using Autogardener.Modules.Actions;
+using Dalamud.Plugin.Services;
 using DalamudBasics.Logging;
 using System;
 using System.Collections.Generic;
@@ -15,18 +16,26 @@ namespace Autogardener.Modules.Schedulers
         private readonly ILogService logService;
         private readonly GameActions op;
         private readonly GlobalData gData;
-        private readonly GardenPatchScheduler plotPatchScheduler; // Only one for now
-        public HighLevelScheduler(PlotPatch plotPatch, ILogService logService, GameActions op, GlobalData gData)
-        {
-            this.plotPatchScheduler = new GardenPatchScheduler(plotPatch, logService, op, gData);
+        private readonly IFramework framework;
+        private GardenPatchScheduler? plotPatchScheduler; // Only one for now
+        public HighLevelScheduler(ILogService logService, GameActions op, GlobalData gData, IFramework framework)
+        {            
             this.logService = logService;
             this.op = op;
             this.gData = gData;
+            this.framework = framework;
+        }
+        
+        public void SchedulePatchTend(PlotPatch patch)
+        {
+            this.plotPatchScheduler = new GardenPatchScheduler(patch, logService, op, gData);
+            framework.Update += Tick;
         }
 
-        public void Tick()
+        private void Tick(IFramework framework)
         {
-            plotPatchScheduler.Tick();
+            plotPatchScheduler?.Tick();
+            // TODO: Unregister Tick when done.
         }
     }
 }

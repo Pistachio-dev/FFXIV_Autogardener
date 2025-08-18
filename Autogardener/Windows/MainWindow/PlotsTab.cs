@@ -62,6 +62,11 @@ namespace Autogardener.Windows.MainWindow
         private void DrawTendButtonAndParameters(PlotPatch nearestPlot)
         {
             var config = configService.GetConfiguration();
+            if (ImGui.Button("Tend (experimental)"))
+            {
+                hlScheduler.SchedulePatchTend(nearestPlot);
+            }
+
             if (ImGuiComponents.IconButtonWithText(FontAwesomeIcon.Leaf, "Tend to plot", MidDarkGreen, DarkGreen, MidDarkGreen))
             {
                 inGameActions.PlotPatchCare(nearestPlot, config.UseFertilizer, config.Replant);

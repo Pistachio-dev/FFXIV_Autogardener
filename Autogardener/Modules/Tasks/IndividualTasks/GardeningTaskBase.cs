@@ -43,6 +43,7 @@ namespace Autogardener.Modules.Tasks.IndividualTasks
             }
             if (!preRunDone)
             {
+                op.Log.Info($"Task \"{TaskName}\": Prerun");
                 PreRun(plot);
                 preRunDone = true;
             }

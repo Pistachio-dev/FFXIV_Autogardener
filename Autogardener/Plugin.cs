@@ -1,5 +1,7 @@
 using Autogardener.Model;
 using Autogardener.Modules;
+using Autogardener.Modules.Actions;
+using Autogardener.Modules.Schedulers;
 using Autogardener.Modules.Tasks;
 using Autogardener.Windows;
 using Autogardener.Windows.MainWindow;
@@ -109,6 +111,11 @@ public sealed class Plugin : IDalamudPlugin
         serviceCollection.AddSingleton<GardeningTaskManager>();
         serviceCollection.AddSingleton<ErrorMessageMonitor>();
         serviceCollection.AddSingleton<MiniTA>();
+        serviceCollection.AddSingleton<AddonManagement>();        
+        serviceCollection.AddSingleton<GameObjectInteractions>();
+        serviceCollection.AddSingleton<Targeting>();
+        serviceCollection.AddSingleton<GameActions>();
+        serviceCollection.AddSingleton<HighLevelScheduler>();
         return serviceCollection.BuildServiceProvider();
     }
 
