@@ -11,11 +11,13 @@ namespace Autogardener.Modules.Tasks.IndividualTasks
         protected readonly GameActions op;
         private const int MaxTaskAttempts = 50;
         private const int ConfirmationAttemptsBeforeRetry = 5;
+        private int throttleTime = 33; // One frame at 30 fps
+
         private int taskAttempts = 0;
         private int confirmationAttempts = 0;
         private bool preRunDone = false;
         
-        private int throttleTime = 10;
+        
         private bool waitingConfirmation = false;
         internal GardeningTaskBase(string name, GameActions op)
         {
