@@ -3,19 +3,16 @@ using Autogardener.Modules.Actions;
 using Autogardener.Modules.Exceptions;
 using Autogardener.Modules.Tasks.IndividualTasks;
 using DalamudBasics.Logging;
-using ECommons.Automation.NeoTaskManager;
 using Humanizer;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Autogardener.Modules.Schedulers
 {
     public class PlotTendScheduler
     {
         public bool Complete => taskQueue.Count <= currentTaskIndex;
+
+        private readonly GardenPatchScheduler parentScheduler;
         public readonly Plot Plot;
         private readonly ILogService logService;
         private readonly GameActions op;
@@ -23,8 +20,9 @@ namespace Autogardener.Modules.Schedulers
         private readonly LinkedList<GardeningTaskBase> taskQueue = new();
         private int currentTaskIndex = 0;
 
-        public PlotTendScheduler(Plot plot, ILogService logService, GameActions op, GlobalData gData)
+        public PlotTendScheduler(GardenPatchScheduler parentScheduler, Plot plot, ILogService logService, GameActions op, GlobalData gData)
         {
+            this.parentScheduler = parentScheduler;
             this.Plot = plot;
             this.logService = logService;
             this.op = op;
@@ -81,6 +79,7 @@ namespace Autogardener.Modules.Schedulers
                     case GardeningTaskResult.Bailout:
                         logService.Warning($"Bailout on task \"{currentTask.TaskName}\" at {DateTime.Now.Humanize()}");
                         taskQueue.Clear();
+                        parentScheduler.Abort();
                         return;
                 }
             }

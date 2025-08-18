@@ -9,13 +9,13 @@ namespace Autogardener.Modules.Tasks.IndividualTasks
     {
         public string TaskName { get; }
         protected readonly GameActions op;
-        private const int MaxTaskAttempts = 5;
-        private const int MaxConfirmationAttempts = 5;
+        private const int MaxTaskAttempts = 50;
+        private const int ConfirmationAttemptsBeforeRetry = 5;
         private int taskAttempts = 0;
         private int confirmationAttempts = 0;
         private bool preRunDone = false;
         
-        private int throttleTime = 500;
+        private int throttleTime = 10;
         private bool waitingConfirmation = false;
         internal GardeningTaskBase(string name, GameActions op)
         {
@@ -36,9 +36,9 @@ namespace Autogardener.Modules.Tasks.IndividualTasks
                 return GardeningTaskResult.Incomplete;
             }
 
-            if (taskAttempts > MaxTaskAttempts || confirmationAttempts > MaxConfirmationAttempts)
+            if (taskAttempts > MaxTaskAttempts)
             {
-                op.Log.Warning($"Task \"{TaskName}\" reached the max try amount. Bailing out.");
+                op.Log.Warning($"Task \"{TaskName}\" reached the max try amount. Bailing out. Attempts: {taskAttempts}. Confirmation attempts: {confirmationAttempts}");
                 return GardeningTaskResult.Bailout;
             }
             if (!preRunDone)
@@ -65,6 +65,14 @@ namespace Autogardener.Modules.Tasks.IndividualTasks
             {
                 op.Log.Debug($"Confirmation successful for task {TaskName}");
                 return GardeningTaskResult.Complete;
+            }
+
+
+            if (confirmationAttempts >= ConfirmationAttemptsBeforeRetry)
+            {
+                // Retry the action
+                waitingConfirmation = false;
+                confirmationAttempts = 0;
             }
 
             return GardeningTaskResult.Incomplete;
