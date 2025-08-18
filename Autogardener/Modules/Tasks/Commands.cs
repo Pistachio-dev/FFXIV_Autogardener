@@ -54,14 +54,6 @@ namespace Autogardener.Modules.Tasks
         public bool Gardening => _gardening && GlobalData.GardenPlotDataIds.Contains(clientState.LocalPlayer?.TargetObject?.DataId ?? 0);
 
 
-
-        public bool TargetObject(IGameObject ob)
-        {
-            logService.Debug($"Targeting {ob.GameObjectId}");
-            targetManager.Target = ob;
-            return true;
-        }
-
         public unsafe bool IsItemPresentInInventory(uint itemId)
         {
             return TryGetItemSlotByItemId(itemId, out var _, out var _);
@@ -224,18 +216,7 @@ namespace Autogardener.Modules.Tasks
             return true;
         }
 
-        private bool TryGetMatchingEntry(AddonMaster.SelectString.Entry[] entries, string actionToSelect, out AddonMaster.SelectString.Entry entry)
-        {
-            Func<AddonMaster.SelectString.Entry, bool> condition = entry => entry.SeString.ToString().Contains(actionToSelect, StringComparison.OrdinalIgnoreCase);
-            if (entries.Any(condition))
-            {
-                entry = entries.First(condition);
-                return true;
-            }
 
-            entry = default;
-            return false;
-        }
 
         private (uint id, string name) ExtractPlantNameAndId(string dialogueText)
         {
