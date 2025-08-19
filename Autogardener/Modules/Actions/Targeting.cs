@@ -25,6 +25,8 @@ namespace Autogardener.Modules.Actions
             this.objectTable = objectTable;
         }
 
+        public ulong? CurrentTarget => targetManager.Target?.GameObjectId;
+
         public bool TargetObject(ulong gameObjectId)
         {
             var go = objectTable.SearchById(gameObjectId);
@@ -40,6 +42,7 @@ namespace Autogardener.Modules.Actions
 
         public bool VerifyTarget(ulong gameObjectId)
         {
+            logService.Debug($"Verifying target is {gameObjectId}");
             return targetManager.Target?.GameObjectId == gameObjectId;
         }
     }

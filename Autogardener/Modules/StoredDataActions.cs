@@ -166,7 +166,7 @@ namespace Autogardener.Modules
             try
             {
                 (PlotPatch nearestPlotPatch, float distance) = plotsPatchesWithDistances.OrderBy(t => t.distance).First();
-                logService.Debug($"Nearest plot found with {nearestPlotPatch.Plots.Count} slots at distance {distance}");
+                //logService.Debug($"Nearest plot found with {nearestPlotPatch.Plots.Count} slots at distance {distance}");
                 return nearestPlotPatch;
             }
             catch (InvalidOperationException)

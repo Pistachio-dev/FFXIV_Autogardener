@@ -17,7 +17,7 @@ namespace Autogardener.Windows.MainWindow
 
 
         private void DrawPlotsTab(CharacterSaveState save)
-        {
+        {            
             var nearestPlot = storedDataActions.GetNearestTrackedPlotPatch(false);
             if (nearestPlot != null)
             {

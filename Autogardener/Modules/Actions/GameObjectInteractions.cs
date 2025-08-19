@@ -50,10 +50,11 @@ namespace Autogardener.Modules.Actions
 
         public unsafe bool InteractWithTargetedPlot()
         {
-            if (!Player.Available) return false;
-            if (Player.IsAnimationLocked) return false;
-            if (!utils.DismountIfNeeded()) return false;
-            if (IsOccupied()) return false;
+            if (!IsPlayerReady())
+            {
+                log.Debug("Interaction failed. Player not ready or occupied.");
+                return false;
+            }
             var plotSelected = clientState.LocalPlayer?.TargetObject;
             if (plotSelected == null)
             {
@@ -68,6 +69,16 @@ namespace Autogardener.Modules.Actions
             }
 
             TargetSystem.Instance()->InteractWithObject(plotSelected.Struct(), true);
+
+            return true;
+        }
+
+        private unsafe bool IsPlayerReady()
+        {
+            if (!Player.Available) return false;
+            if (Player.IsAnimationLocked) return false;
+            if (!utils.DismountIfNeeded()) return false;
+            if (Utils.IsOccupied()) return false;
 
             return true;
         }
