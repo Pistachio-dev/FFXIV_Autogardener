@@ -44,7 +44,7 @@ namespace Autogardener.Modules.Schedulers
         internal void Abort()
         {
             framework.Update -= Tick;
-            chatGui.PrintError("Autogarder got stuck on something. Aborting. Please panic.");
+            chatGui.PrintError("Autogardener got stuck on something. Aborting. Please panic.");
         }
         private void Tick(IFramework framework)
         {
