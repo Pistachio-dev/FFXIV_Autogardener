@@ -61,7 +61,6 @@ namespace Autogardener.Modules.Tasks
 
         public unsafe bool Fertilize()
         {
-            throw new NotImplementedException();
             //var alreadyFertilizedMsg = globalData.GetGardeningOptionStringLocalized(GlobalData.GardeningStrings.AlreadyFertilized);
             //if (errorMessageMonitor.WasThereARecentError(alreadyFertilizedMsg))
             //{
@@ -89,7 +88,7 @@ namespace Autogardener.Modules.Tasks
             //    }
             //}
 
-            //return false;
+            return false;
         }
 
         public unsafe bool SetPlantTypeFromDialogue(Plot plot)

@@ -1,7 +1,9 @@
 using Autogardener.Model.Plots;
 using Autogardener.Modules.Actions;
 using Autogardener.Modules.Exceptions;
+using Autogardener.Modules.Tasks;
 using Autogardener.Modules.Tasks.IndividualTasks;
+using DalamudBasics.Configuration;
 using DalamudBasics.Logging;
 using Humanizer;
 using System.Linq;
@@ -11,22 +13,27 @@ namespace Autogardener.Modules.Schedulers
     public class PlotTendScheduler
     {
         public bool Complete => taskQueue.Count <= currentTaskIndex;
-
+        public PlotStatus PlotStatus = PlotStatus.Unknown;
         private readonly GardenPatchScheduler parentScheduler;
         public readonly Plot Plot;
         private readonly ILogService logService;
         private readonly GameActions op;
         private readonly GlobalData gData;
+        private readonly IConfigurationService<Configuration> confService;
+        private readonly ErrorMessageMonitor errorMessageMonitor;
         private readonly LinkedList<GardeningTaskBase> taskQueue = new();
         private int currentTaskIndex = 0;
 
-        public PlotTendScheduler(GardenPatchScheduler parentScheduler, Plot plot, ILogService logService, GameActions op, GlobalData gData)
+        public PlotTendScheduler(GardenPatchScheduler parentScheduler, Plot plot, ILogService logService,
+            GameActions op, GlobalData gData, IConfigurationService<Configuration> confService, ErrorMessageMonitor errorMessageMonitor)
         {
             this.parentScheduler = parentScheduler;
             this.Plot = plot;
             this.logService = logService;
             this.op = op;
             this.gData = gData;
+            this.confService = confService;
+            this.errorMessageMonitor = errorMessageMonitor;
             SetupStartingTasks();
         }
 
@@ -49,6 +56,7 @@ namespace Autogardener.Modules.Schedulers
                 taskQueue.AddAfter(currentTaskNode, newTasks[i]);
             }
         }
+
         private void SetupStartingTasks()
         {
             taskQueue.AddLast(new TargetObjectTask("Target object", op));
@@ -56,7 +64,31 @@ namespace Autogardener.Modules.Schedulers
             taskQueue.AddLast(new ExtractSeedTypeTask("Extract seed type", op));
             taskQueue.AddLast(new SkipChatterTask("Skip plant description talk", op));
             string quitOption = gData.GetGardeningOptionStringLocalized(GlobalData.GardeningStrings.Quit);
-            taskQueue.AddLast(new SelectStringTask("Select Quit", quitOption, op));
+            string harvestOption = gData.GetGardeningOptionStringLocalized(GlobalData.GardeningStrings.HarvestCrop);
+            string plantOption = gData.GetGardeningOptionStringLocalized(GlobalData.GardeningStrings.PlantSeeds);
+            string fertilizeOption = gData.GetGardeningOptionStringLocalized(GlobalData.GardeningStrings.Fertilize);
+            string tendOption = gData.GetGardeningOptionStringLocalized(GlobalData.GardeningStrings.TendCrop);
+
+            taskQueue.AddLast(new QueryPlotStatusTask(this, gData, "Get plot status", op));
+            if (PlotStatus == PlotStatus.BeyondHope)
+            {
+                taskQueue.AddLast(new SelectStringTask("Select Quit", quitOption, op));
+            }
+            if (confService.GetConfiguration().UseFertilizer) // TODO: Stop trying when you run out of fertilizer
+            {
+                taskQueue.AddLast(new SelectStringTask("Select Fertilize", fertilizeOption, op));
+                taskQueue.AddLast(new FertilizeTask("Use Fertilizer", errorMessageMonitor, op));
+                AddTasksToGetBackToOptionsMenu();
+            }
+            taskQueue.AddLast(new SelectStringTask("Select Tend", tendOption, op));
+            taskQueue.AddLast(new ReportTendTask("Set \"last tended\"", op));
+        }
+
+        private void AddTasksToGetBackToOptionsMenu()
+        {
+            taskQueue.AddLast(new TargetObjectTask("Target object", op));
+            taskQueue.AddLast(new InteractWithObjectTask("Interact with object", op));
+            taskQueue.AddLast(new SkipChatterTask("Skip plant description talk", op));
         }
 
         public void Tick()

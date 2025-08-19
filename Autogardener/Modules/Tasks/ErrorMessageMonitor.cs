@@ -29,7 +29,7 @@ namespace Autogardener.Modules.Tasks
             chatGui.ChatMessage += RecordErrorMessages;
         }
 
-        public bool WasThereARecentError(string errorMessage = null)
+        public bool WasThereARecentError(string? errorMessage = null)
         {
             var now = DateTime.UtcNow;
             var recentMessages = recordedMessages.Where(r => now - r.DateTimeUtc < Recent);

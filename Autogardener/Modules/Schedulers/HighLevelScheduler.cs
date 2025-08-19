@@ -1,6 +1,8 @@
 using Autogardener.Model.Plots;
 using Autogardener.Modules.Actions;
+using Autogardener.Modules.Tasks;
 using Dalamud.Plugin.Services;
+using DalamudBasics.Configuration;
 using DalamudBasics.Logging;
 using System;
 using System.Collections.Generic;
@@ -18,19 +20,24 @@ namespace Autogardener.Modules.Schedulers
         private readonly GlobalData gData;
         private readonly IFramework framework;
         private readonly IChatGui chatGui;
+        private readonly IConfigurationService<Configuration> confService;
+        private readonly ErrorMessageMonitor errorMessageMonitor;
         private GardenPatchScheduler? plotPatchScheduler; // Only one for now
-        public HighLevelScheduler(ILogService logService, GameActions op, GlobalData gData, IFramework framework, IChatGui chatGui)
+        public HighLevelScheduler(ILogService logService, GameActions op, GlobalData gData, IFramework framework,            
+            IChatGui chatGui, IConfigurationService<Configuration> confService, ErrorMessageMonitor errorMessageMonitor)
         {            
             this.logService = logService;
             this.op = op;
             this.gData = gData;
             this.framework = framework;
             this.chatGui = chatGui;
+            this.confService = confService;
+            this.errorMessageMonitor = errorMessageMonitor;
         }
         
         public void SchedulePatchTend(PlotPatch patch)
         {
-            this.plotPatchScheduler = new GardenPatchScheduler(this, patch, logService, op, gData);
+            this.plotPatchScheduler = new GardenPatchScheduler(this, patch, logService, op, gData, confService, errorMessageMonitor);
             framework.Update += Tick;
         }
 

@@ -49,7 +49,12 @@ namespace Autogardener.Modules.Actions
                 && addonTalk->AtkUnitBase.IsVisible;
         }
 
-        public unsafe bool TrySelectActionString(string actionToSelect, out List<string> options)
+        public bool TryGetOptionsAsStrings(out List<string> options)
+        {
+            return TrySelectActionString(string.Empty, out options, true);
+        }
+
+        public unsafe bool TrySelectActionString(string actionToSelect, out List<string> options, bool dontInteract = false)
         {
             options = new List<string>();
             if (TryGetAddonByName<AddonSelectString>("SelectString", out var addonSelectString)
@@ -57,6 +62,11 @@ namespace Autogardener.Modules.Actions
             {
                 var entries = new AddonMaster.SelectString(addonSelectString).Entries;
                 options.AddRange(entries.Select(entry => entry.Text));
+                if (dontInteract)
+                {
+                    return true;
+                }
+
                 if (TryGetMatchingEntry(entries, actionToSelect, out var matchingEntry))
                 {
                     matchingEntry.Select();
