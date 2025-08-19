@@ -27,15 +27,15 @@ namespace Autogardener.Modules.Actions
 
         public ulong? CurrentTarget => targetManager.Target?.GameObjectId;
 
-        public bool TargetObject(ulong gameObjectId)
+        public bool TargetPlotObject(ulong gameObjectId)
         {
-            var go = objectTable.SearchById(gameObjectId);
+            var go = objectTable.EventObjects.FirstOrDefault(go => go.GameObjectId == gameObjectId);
             if (go == null)
             {
                 return false;
             }
 
-            logService.Debug($"Targeting {go.GameObjectId}");
+            logService.Debug($"Targeting {go.GameObjectId} Type: {go.ObjectKind}");
             targetManager.Target = go;
             return true;
         }
@@ -44,6 +44,19 @@ namespace Autogardener.Modules.Actions
         {
             logService.Debug($"Verifying target is {gameObjectId}");
             return targetManager.Target?.GameObjectId == gameObjectId;
+        }
+
+        public unsafe bool IsTooFarToInteractWith(ulong gameObjectId)
+        {
+            var go = objectTable.EventObjects.FirstOrDefault(go => go.GameObjectId == gameObjectId);
+            var player = clientState.LocalPlayer;
+            if (go == null || player == null)
+            {
+                return true; // Can't target what does not exist.
+            }
+
+            var distance = Math.Abs(Vector3.Distance(go.Position, player.Position));
+            return distance > GlobalData.MaxInteractDistance;
         }
     }
 }
