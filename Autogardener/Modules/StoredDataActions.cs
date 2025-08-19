@@ -161,7 +161,7 @@ namespace Autogardener.Modules
 
             IEnumerable<(PlotPatch plotPatch, float distance)> plotsPatchesWithDistances
                 = state.Plots.Select(x => (x, Math.Abs(Vector3.Distance(x.Location, playerLocation))))
-                .Where(tuple => tuple.Item2 < GlobalData.MaxScanDistance);
+                .Where(tuple => tuple.Item2 < GlobalData.MaxInteractDistance);
 
             try
             {

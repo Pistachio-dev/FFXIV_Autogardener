@@ -41,11 +41,19 @@ namespace Autogardener.Modules.Schedulers
             framework.Update += Tick;
         }
 
-        internal void Abort()
+        internal void Abort(AbortReason reason)
         {
             framework.Update -= Tick;
-            chatGui.PrintError("Autogardener got stuck on something. Aborting. Please panic.");
+            if (reason == AbortReason.RetriesExceeded)
+            {
+                chatGui.PrintError("Autogardener got stuck on something. Aborting. Please panic.");
+            }
+            if (reason == AbortReason.MovedTooFarAway)
+            {
+                chatGui.PrintError("You moved too far away from the plot. Aborting.");
+            }
         }
+
         private void Tick(IFramework framework)
         {
             plotPatchScheduler?.Tick();

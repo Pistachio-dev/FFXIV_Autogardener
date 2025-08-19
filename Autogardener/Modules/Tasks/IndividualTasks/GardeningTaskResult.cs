@@ -10,6 +10,6 @@ namespace Autogardener.Modules.Tasks.IndividualTasks
     {
         Complete,
         Incomplete,
-        Bailout
+        Bailout_RetriesExceeded
     }
 }

@@ -41,7 +41,7 @@ namespace Autogardener.Modules.Tasks.IndividualTasks
             if (taskAttempts > MaxTaskAttempts)
             {
                 op.Log.Warning($"Task \"{TaskName}\" reached the max try amount. Bailing out. Attempts: {taskAttempts}. Confirmation attempts: {confirmationAttempts}");
-                return GardeningTaskResult.Bailout;
+                return GardeningTaskResult.Bailout_RetriesExceeded;
             }
             if (!preRunDone)
             {

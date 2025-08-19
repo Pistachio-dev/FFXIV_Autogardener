@@ -40,11 +40,11 @@ namespace Autogardener.Modules.Schedulers
             }
         }
 
-        internal void Abort()
+        internal void Abort(AbortReason reason)
         {
             plotSchedulerQueue.Clear();
             logService.Warning("Garden Patch operation aborted");
-            parentScheduler.Abort();
+            parentScheduler.Abort(reason);
         }
 
         public void Tick()

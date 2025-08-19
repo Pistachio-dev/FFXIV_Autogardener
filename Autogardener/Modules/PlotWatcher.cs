@@ -102,7 +102,7 @@ namespace Autogardener.Modules
         {
             var state = saveManager.GetCharacterSaveInMemory();
             var discoveredPlots = DiscoverPlots();
-            discoveredPlots = FilterByDistance(discoveredPlots, GlobalData.MaxScanDistance);
+            discoveredPlots = FilterByDistance(discoveredPlots, GlobalData.MaxInteractDistance);
             List<PlotPatch> combinedPlots = MergePlotLists(state.Plots, discoveredPlots);
             bool saveToFile = HavePlotsChanged(state.Plots, combinedPlots);
             state.Plots = combinedPlots;

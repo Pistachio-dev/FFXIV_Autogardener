@@ -1,18 +1,16 @@
 using Autogardener.Model.Plots;
 using Autogardener.Modules.Actions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Autogardener.Modules.Schedulers;
 
 namespace Autogardener.Modules.Tasks.IndividualTasks
 {
     public class TargetObjectAndInteractTask : GardeningTaskBase
     {
-        public TargetObjectAndInteractTask(string name, GameActions op):base(name, op)
-        {
+        private readonly PlotTendScheduler scheduler;
 
+        public TargetObjectAndInteractTask(PlotTendScheduler scheduler, string name, GameActions op):base(name, op)
+        {
+            this.scheduler = scheduler;
         }
 
         public override bool PreRun(Plot plot)
@@ -22,7 +20,12 @@ namespace Autogardener.Modules.Tasks.IndividualTasks
 
         public override bool Task(Plot plot)
         {
-            if (!op.Targeting.TargetObject(plot.GameObjectId))
+            if (op.Targeting.IsTooFarToInteractWith(plot.GameObjectId))
+            {
+                scheduler.Abort(AbortReason.MovedTooFarAway);
+            }
+
+            if (!op.Targeting.TargetPlotObject(plot.GameObjectId))
             {
                 return false;
             }

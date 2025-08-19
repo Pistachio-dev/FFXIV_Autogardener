@@ -37,6 +37,11 @@ namespace Autogardener.Modules.Schedulers
             SetupStartingTasks();
         }
 
+        public void Abort(AbortReason reason)
+        {
+            parentScheduler.Abort(reason);
+        }
+
         public void Append(GardeningTaskBase task)
         {
             taskQueue.AddLast(task);
@@ -59,7 +64,7 @@ namespace Autogardener.Modules.Schedulers
 
         private void SetupStartingTasks()
         {
-            taskQueue.AddLast(new TargetObjectAndInteractTask("Target and interact with object", op));
+            taskQueue.AddLast(new TargetObjectAndInteractTask(this, "Target and interact with object", op));
             taskQueue.AddLast(new ExtractSeedTypeTask("Extract seed type", op));
             taskQueue.AddLast(new SkipChatterTask("Skip plant description talk", op));
             string quitOption = gData.GetGardeningOptionStringLocalized(GlobalData.GardeningStrings.Quit);
@@ -85,7 +90,7 @@ namespace Autogardener.Modules.Schedulers
 
         private void AddTasksToGetBackToOptionsMenu()
         {
-            taskQueue.AddLast(new TargetObjectAndInteractTask("Target object again and interact", op));
+            taskQueue.AddLast(new TargetObjectAndInteractTask(this, "Target object again and interact", op));
             taskQueue.AddLast(new SkipChatterTask("Skip plant description talk", op));
         }
 
@@ -107,10 +112,10 @@ namespace Autogardener.Modules.Schedulers
                     case GardeningTaskResult.Complete:
                         currentTaskIndex++;
                         return;
-                    case GardeningTaskResult.Bailout:
+                    case GardeningTaskResult.Bailout_RetriesExceeded:
                         logService.Warning($"Bailout on task \"{currentTask.TaskName}\" at {DateTime.Now.Humanize()}");
                         taskQueue.Clear();
-                        parentScheduler.Abort();
+                        parentScheduler.Abort(AbortReason.RetriesExceeded);
                         return;
                 }
             }

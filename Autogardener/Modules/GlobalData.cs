@@ -19,7 +19,7 @@ namespace Autogardener.Modules
 
         public const uint FishmealId = 7767;
 
-        public const float MaxScanDistance = 4;
+        public const float MaxInteractDistance = 4;
 
         public static readonly List<uint> GardenPlotDataIds
             = new List<uint> { OutdoorPatchDataId, RivieraFlowerpotDataId, GladeFlowerpotDataId, OasisFlowerpotDataId };
