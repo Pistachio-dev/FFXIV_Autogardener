@@ -1,5 +1,11 @@
 [
   {
+    "AssemblyVersion": "0.1.0.0",
+    "DalamudApiLevel": 13,
+    "ChangeLog": "-Single patch tending finished",
+    "IsTest": false
+  },
+  {
     "AssemblyVersion": "0.0.1.1",
     "DalamudApiLevel": 12,
     "ChangeLog": "First release",
