@@ -115,7 +115,7 @@ namespace Autogardener.Windows.MainWindow
         {
             var designForCurrentPlot = GetCurrentDesignNumber(plot, save);
             var designNames = save.Designs.Select(p => p.Name).ToArray();
-            if (ImGui.Combo("Plan", ref designForCurrentPlot, designNames, designNames.Length))
+            if (ImGui.Combo("Design", ref designForCurrentPlot, designNames, designNames.Length))
             {
                 if (!storedDataActions.ApplyDesign(ref plot, save.Designs[designForCurrentPlot]))
                 {

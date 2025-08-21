@@ -80,7 +80,7 @@ namespace Autogardener.Modules
             var state = saveManager.GetCharacterSaveInMemory();
             var index = state.Designs.Count;
             var slots = GetNearestTrackedPlotPatch(false)?.Plots.Count ?? 8;
-            state.Designs.Add(PlotPatchDesign.CreateEmptyWithSlots(slots, "New design"));
+            state.Designs.Add(PlotPatchDesign.CreateEmptyWithSlots(slots, $"New design {index}"));
             logService.Info($"Current design count: {state.Designs.Count}");
             saveManager.WriteCharacterSave(state);
             return index;

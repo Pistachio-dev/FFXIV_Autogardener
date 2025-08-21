@@ -43,13 +43,16 @@ namespace Autogardener.Windows.MainWindow
                 {
                     ImGui.Combo("Design", ref currentDesign, save.Designs.Select(d => d.Name).ToArray(), save.Designs.Count);
                 }
-                
-                DrawDesignRenameButton(save.Designs);
+
                 var selectedDesign = save.Designs[currentDesign];
-                if (DrawRemoveDesignButton(save.Designs, selectedDesign))
+                if (currentDesign != 0)
                 {
-                    return;
-                }
+                    DrawDesignRenameButton(save.Designs);
+                    if (DrawRemoveDesignButton(save.Designs, selectedDesign))
+                    {
+                        return;
+                    }
+                }                               
 
                 if (selectedDesign.PlotDesigns.Count == 0)
                 {
@@ -140,21 +143,21 @@ namespace Autogardener.Windows.MainWindow
             ImGui.PushStyleVar(ImGuiStyleVar.FrameBorderSize, 1f);
             ImGui.BeginChildFrame(100 + index, new Vector2(200, 200));
             var seedComboIndex = design.DesignatedSeed == 0 ? 0 : seedIds.IndexOf(design.DesignatedSeed);
-            if (ImGui.Combo($"Seed##design{index}", ref seedComboIndex, seedNames, seedNames.Length))
+            if (ImGui.Combo($"Seed##design{index}", ref seedComboIndex, seedNames, seedNames.Length) && currentDesign != 0)
             {
                 design.DesignatedSeed = seedIds[seedComboIndex];
                 saveManager.WriteCharacterSave();
             }
 
             var soilComboIndex = design.DesignatedSoil == 0 ? 0 : soilIds.IndexOf(design.DesignatedSoil);
-            if (ImGui.Combo($"Soil##design{index}", ref soilComboIndex, soilNames, soilNames.Length))
+            if (ImGui.Combo($"Soil##design{index}", ref soilComboIndex, soilNames, soilNames.Length) && currentDesign != 0)
             {
                 design.DesignatedSoil = soilIds[soilComboIndex];
                 saveManager.WriteCharacterSave();
             }
 
             var keepWhenGrown = design.DoNotHarvest;
-            if (ImGui.Checkbox($"Keep when grown##{index}", ref keepWhenGrown))
+            if (ImGui.Checkbox($"Keep when grown##{index}", ref keepWhenGrown) && currentDesign != 0)
             {
                 design.DoNotHarvest = keepWhenGrown;
                 saveManager.WriteCharacterSave();
