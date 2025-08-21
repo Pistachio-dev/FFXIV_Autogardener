@@ -41,7 +41,11 @@ namespace Autogardener.Windows.MainWindow
 
             if (save.Plots.Any())
             {
-                ImGui.Combo("Plot", ref currentPlot, save.Plots.Select(p => p.Name).ToArray(), save.Plots.Count);
+                if (!toggleRenamePlot)
+                {
+                    ImGui.Combo("Plot", ref currentPlot, save.Plots.Select(p => p.Name).ToArray(), save.Plots.Count);
+                }
+                
                 var plot = save.Plots[currentPlot];
                 DrawPlotRenameButton(plot);
                 if (DrawForgetPlotButton(save, plot))
@@ -124,20 +128,22 @@ namespace Autogardener.Windows.MainWindow
 
         private void DrawPlotRenameButton(PlotPatch plot)
         {
-            ImGui.SameLine();
-            if (ImGuiComponents.IconButton(FontAwesomeIcon.Pen))
-            {
-                toggleRenamePlot = !toggleRenamePlot;
-            }
-            DrawTooltip("Rename");
-            if (toggleRenamePlot)
+            if (!toggleRenamePlot) { ImGui.SameLine(); }
+            else
             {
                 var plotName = plot.Name;
                 if (ImGui.InputText("New name", ref plotName, 40))
                 {
                     plot.Name = plotName; saveManager.WriteCharacterSave();
                 }
+                ImGui.SameLine();
             }
+            if (ImGuiComponents.IconButton(toggleRenameDesign ? FontAwesomeIcon.Save : FontAwesomeIcon.Pen, Blue))
+            {
+                toggleRenamePlot = !toggleRenamePlot;
+            }
+            DrawTooltip(toggleRenamePlot ? "Save" : "Rename");
+
         }
         private bool DrawForgetPlotButton(CharacterSaveState save, PlotPatch plot)
         {

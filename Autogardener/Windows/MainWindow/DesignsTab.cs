@@ -27,7 +27,7 @@ namespace Autogardener.Windows.MainWindow
             string newDesignButtonText = nearestPlot == null
                 ? "Create new design for nearest plot"
                 : $"Create new design for {nearestPlot.Name}";
-            if (ImGuiComponents.IconButtonWithText(FontAwesomeIcon.PaintBrush, newDesignButtonText))
+            if (ImGuiComponents.IconButtonWithText(FontAwesomeIcon.PaintBrush, newDesignButtonText, NeutralGreen))
             {
                 currentDesign = storedDataActions.CreateNewDesign();
                 return;
@@ -39,7 +39,11 @@ namespace Autogardener.Windows.MainWindow
             //logService.Info(save.Designs.Count.ToString());
             if (save.Designs.Count > 1)
             {
-                ImGui.Combo("Design", ref currentDesign, save.Designs.Select(d => d.Name).ToArray(), save.Designs.Count);
+                if (!toggleRenameDesign)
+                {
+                    ImGui.Combo("Design", ref currentDesign, save.Designs.Select(d => d.Name).ToArray(), save.Designs.Count);
+                }
+                
                 DrawDesignRenameButton(save.Designs);
                 var selectedDesign = save.Designs[currentDesign];
                 if (DrawRemoveDesignButton(save.Designs, selectedDesign))
@@ -84,21 +88,29 @@ namespace Autogardener.Windows.MainWindow
 
         private void DrawDesignRenameButton(List<PlotPatchDesign> designs)
         {
-            ImGui.SameLine();
-            if (ImGuiComponents.IconButton(FontAwesomeIcon.Pen))
+            if (!toggleRenameDesign)
+            {
+                ImGui.SameLine();
+            }
+            else
+            {
+                var designName = designs[currentDesign].Name;
+                if (toggleRenameDesign)
+                {
+                    if (ImGui.InputText("New name", ref designName, 40))
+                    {
+                        designs[currentDesign].Name = designName;
+                        saveManager.WriteCharacterSave();
+                    }
+                    ImGui.SameLine();
+                }
+            }
+            if (ImGuiComponents.IconButton(toggleRenameDesign ? FontAwesomeIcon.Save : FontAwesomeIcon.Pen, Blue))
             {
                 toggleRenameDesign = !toggleRenameDesign;
             }
-            DrawTooltip("Rename");
-            var designName = designs[currentDesign].Name;
-            if (toggleRenameDesign)
-            {
-                if (ImGui.InputText("New name", ref designName, 40))
-                {
-                    designs[currentDesign].Name = designName;
-                    saveManager.WriteCharacterSave();
-                }
-            }
+            DrawTooltip(toggleRenameDesign ? "Save" : "Rename");
+
         }
 
         private bool DrawRemoveDesignButton(List<PlotPatchDesign> designs, PlotPatchDesign design)
