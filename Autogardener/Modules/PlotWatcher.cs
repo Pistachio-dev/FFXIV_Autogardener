@@ -13,6 +13,8 @@ namespace Autogardener.Modules
     public class PlotWatcher
     {
         private static readonly uint HighlightColor = ImGui.GetColorU32(new Vector4(0, 1, 0, 1));
+        private static readonly uint HighlightColor2 = ImGui.GetColorU32(new Vector4(0, 1f, 0.7f, 1));
+        private static readonly uint HighlightColor3 = ImGui.GetColorU32(new Vector4(1, 0, 0, 1));
         private readonly ILogService log;
         private readonly IObjectTable objectTable;
         private readonly IClientState clientState;
@@ -67,12 +69,18 @@ namespace Autogardener.Modules
             foreach (var dataPoint in data)
             {
                 ImGui.GetBackgroundDrawList()
-                    .AddText(new Vector2(dataPoint.Position.X, dataPoint.Position.Y - 40), HighlightColor, dataPoint.PlotName);
+                    .AddText(ImGui.GetIO().FontDefault, 40, new Vector2(dataPoint.Position.X + 10, dataPoint.Position.Y - 40), HighlightColor, dataPoint.PlotName);
+                ImGui.GetBackgroundDrawList()
+                    .AddText(ImGui.GetIO().FontDefault, 40, new Vector2(dataPoint.Position.X + 10, dataPoint.Position.Y - 40), HighlightColor, dataPoint.PlotName);
 
                 ImGui.GetBackgroundDrawList()
-                    .AddText(new Vector2(dataPoint.Position.X, dataPoint.Position.Y - 20), HighlightColor, dataPoint.DesignName);
+                    .AddText(ImGui.GetIO().FontDefault, 35, new Vector2(dataPoint.Position.X + 10, dataPoint.Position.Y - 10), HighlightColor2, dataPoint.DesignName);
 
-                ImGui.GetBackgroundDrawList().AddCircleFilled(dataPoint.Position, 5, HighlightColor);
+                ImGui.GetBackgroundDrawList()
+                    .AddText(ImGui.GetIO().FontDefault, 35, new Vector2(dataPoint.Position.X + 10, dataPoint.Position.Y - 10), HighlightColor2, dataPoint.DesignName);
+
+                ImGui.GetBackgroundDrawList().AddCircleFilled(dataPoint.Position, 5, HighlightColor3);
+                ImGui.GetBackgroundDrawList().AddCircleFilled(dataPoint.Position, 5, HighlightColor3);
             }
 
             ImGui.GetBackgroundDrawList().PopClipRect();
