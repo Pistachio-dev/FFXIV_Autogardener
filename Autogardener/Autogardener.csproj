@@ -17,6 +17,7 @@
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
             <Visible>false</Visible>
         </Content>
+        <Content Include="NewestRelease.json" />
     </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DalamudBasics\DalamudBasics\DalamudBasics.csproj" />
