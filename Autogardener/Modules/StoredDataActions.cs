@@ -39,8 +39,7 @@ namespace Autogardener.Modules
         }
 
         public void RegisterNearestPlotPatch()
-        {
-            
+        {            
             var player = clientState.LocalPlayer;
             if (player == null)
             {
@@ -60,6 +59,8 @@ namespace Autogardener.Modules
             PlotPatch? alreadySeenPlot = charState.Plots.FirstOrDefault(p => p.Equals(plotPatch));
             if (alreadySeenPlot != null)
             {
+                logService.Warning($"This plot is already scanned, with name {alreadySeenPlot.Name}");
+                chatGui.Print($"This plot is already scanned, with name {alreadySeenPlot.Name}");
                 plotPatch = alreadySeenPlot;
             }
             else

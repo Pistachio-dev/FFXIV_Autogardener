@@ -136,7 +136,7 @@ namespace Autogardener.Modules
             return combinedPlots;
         }
 
-        public List<PlotPatch> FilterByDistance(List<PlotPatch> plots, float maxDistance)
+        private List<PlotPatch> FilterByDistance(List<PlotPatch> plots, float maxDistance)
         {
             var playerPos = clientState.LocalPlayer?.Position;
             if (playerPos == null)
@@ -148,7 +148,7 @@ namespace Autogardener.Modules
             return result;
         }
 
-        public List<PlotPatch> DiscoverPlots()
+        private List<PlotPatch> DiscoverPlots()
         {
             List<PlotPatch> foundPlotPatches = new();
             PlotPatch? plotPatchInConstruction = null;
