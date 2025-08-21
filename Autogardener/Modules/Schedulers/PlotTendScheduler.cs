@@ -114,7 +114,15 @@ namespace Autogardener.Modules.Schedulers
 
         public void AddPlantOrQuitTask()
         {
-            taskQueue.AddLast(new VerifyCanPlantTask(this, gData, "Verify that we have the resources to plant", op));
+            if (confService.GetConfiguration().Replant)
+            {
+                taskQueue.AddLast(new VerifyCanPlantTask(this, gData, "Verify that we have the resources to plant", op));
+            }
+            else
+            {
+                AddQuitTask();
+                AddFinishTask();
+            }
         }
 
         public void AddPlantSeedsTasks()
