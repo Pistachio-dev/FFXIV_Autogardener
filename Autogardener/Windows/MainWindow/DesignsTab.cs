@@ -146,6 +146,11 @@ namespace Autogardener.Windows.MainWindow
                 design.DoNotHarvest = keepWhenGrown;
                 saveManager.WriteCharacterSave();
             }
+            
+            if (ImGuiComponents.IconButtonWithText(FontAwesomeIcon.Copy, "Copy to all plots"))
+            {
+                inGameActions.PropagateDesign(design, currentDesign)
+            }
             ImGui.SameLine();
             ImGuiComponents.HelpMarker("For many interbreeding setups, you need a seed to be present,\n" +
                 "but gain nothing from harvesting it,\nso it's easier to let it stay fully grown");

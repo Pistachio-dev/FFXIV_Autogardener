@@ -46,6 +46,16 @@ namespace Autogardener.Modules.Actions
 
             return null;
         }
+        internal static unsafe InventoryContainer*[] GetCombinedInventories()
+        {
+            var im = InventoryManager.Instance();
+            var inv1 = im->GetInventoryContainer(InventoryType.Inventory1);
+            var inv2 = im->GetInventoryContainer(InventoryType.Inventory2);
+            var inv3 = im->GetInventoryContainer(InventoryType.Inventory3);
+            var inv4 = im->GetInventoryContainer(InventoryType.Inventory4);
+            InventoryContainer*[] container = { inv1, inv2, inv3, inv4 };
+            return container;
+        }
 
         private unsafe bool TryGetItemSlotByItemId(uint itemId, out InventoryContainer* container, out int slotNumber)
         {
@@ -70,15 +80,6 @@ namespace Autogardener.Modules.Actions
             return false;
         }
 
-        private unsafe InventoryContainer*[] GetCombinedInventories()
-        {
-            var im = InventoryManager.Instance();
-            var inv1 = im->GetInventoryContainer(InventoryType.Inventory1);
-            var inv2 = im->GetInventoryContainer(InventoryType.Inventory2);
-            var inv3 = im->GetInventoryContainer(InventoryType.Inventory3);
-            var inv4 = im->GetInventoryContainer(InventoryType.Inventory4);
-            InventoryContainer*[] container = { inv1, inv2, inv3, inv4 };
-            return container;
-        }
+
     }
 }

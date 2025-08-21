@@ -1,4 +1,5 @@
 using Autogardener.Model;
+using Autogardener.Model.Designs;
 using Autogardener.Model.Plots;
 using Autogardener.Modules.Tasks;
 using Dalamud.Game.ClientState.Objects;
@@ -68,6 +69,14 @@ namespace Autogardener.Modules
             taskManager.StartProcessingQueuedTasks();
         }
 
+        public void PropagateDesign(PlotDesign designToCopy, PlotPatchDesign patchDesign)
+        {
+            foreach (var design in patchDesign.PlotDesigns){
+                design.DesignatedSeed = designToCopy.DesignatedSeed;
+                design.DesignatedSoil = designToCopy.DesignatedSoil;
+                design.DoNotHarvest = designToCopy.DoNotHarvest;
+            }
+        }
         private bool ScanPlot(Plot plot)
         {
             var plotOb = objectTable.SearchById(plot.GameObjectId);

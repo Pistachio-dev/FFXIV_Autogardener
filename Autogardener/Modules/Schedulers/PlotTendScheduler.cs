@@ -13,7 +13,8 @@ namespace Autogardener.Modules.Schedulers
     public class PlotTendScheduler
     {
         public bool Complete => taskQueue.Count <= currentTaskIndex;
-        public PlotStatus PlotStatus = PlotStatus.Unknown;
+        internal PlotStatus PlotStatus = PlotStatus.Unknown;
+        internal PlantingStatus PlantingStatus = PlantingStatus.NotChecked;
         private readonly GardenPatchScheduler parentScheduler;
         public readonly Plot Plot;
         private readonly ILogService logService;
@@ -23,6 +24,7 @@ namespace Autogardener.Modules.Schedulers
         private readonly ErrorMessageMonitor errorMessageMonitor;
         private readonly LinkedList<GardeningTaskBase> taskQueue = new();
         private int currentTaskIndex = 0;
+        
 
         public PlotTendScheduler(GardenPatchScheduler parentScheduler, Plot plot, ILogService logService,
             GameActions op, GlobalData gData, IConfigurationService<Configuration> confService, ErrorMessageMonitor errorMessageMonitor)
@@ -68,16 +70,45 @@ namespace Autogardener.Modules.Schedulers
             taskQueue.AddLast(new ExtractSeedTypeTask("Extract seed type", op));
             taskQueue.AddLast(new SkipChatterTask("Skip plant description talk", op));
             string quitOption = gData.GetGardeningOptionStringLocalized(GlobalData.GardeningStrings.Quit);
-            string harvestOption = gData.GetGardeningOptionStringLocalized(GlobalData.GardeningStrings.HarvestCrop);
             string plantOption = gData.GetGardeningOptionStringLocalized(GlobalData.GardeningStrings.PlantSeeds);
-            string fertilizeOption = gData.GetGardeningOptionStringLocalized(GlobalData.GardeningStrings.Fertilize);
-            string tendOption = gData.GetGardeningOptionStringLocalized(GlobalData.GardeningStrings.TendCrop);
+
 
             taskQueue.AddLast(new QueryPlotStatusTask(this, gData, "Get plot status", op));
+            // THIS WILL NOT WORK! PLOT STATUS IS NULL UNTIL THIS TASK RUNS
+            if (PlotStatus == PlotStatus.Harvestable && !(Plot.Design?.DoNotHarvest ?? false))
+            {
+
+            }
             if (PlotStatus == PlotStatus.BeyondHope)
             {
                 taskQueue.AddLast(new SelectStringTask("Select Quit", quitOption, op));
             }
+
+        }
+
+        private void AddTasksToGetBackToOptionsMenu()
+        {
+            taskQueue.AddLast(new TargetObjectAndInteractTask(this, "Target object again and interact", op));
+            taskQueue.AddLast(new SkipChatterTask("Skip plant description talk", op));
+            taskQueue.AddLast(new ExtractSeedTypeTask("Extract seed type", op));
+            taskQueue.AddLast(new SkipChatterTask("Skip plant description talk", op));
+            taskQueue.AddLast(new QueryPlotStatusTask(this, gData, "Get plot status", op));
+            // Add the "conditionally add more tasks" task here
+        }
+
+        private void AddHarvestingTasks()
+        {
+            string harvestOption = gData.GetGardeningOptionStringLocalized(GlobalData.GardeningStrings.HarvestCrop);
+
+            taskQueue.AddLast(new SelectStringTask("Select \"Harvest\"", harvestOption, op));
+            taskQueue.AddLast(new ReportHarvested("Update seed and soil present", op));
+        }
+
+        private void AddFertilizeAndTendTasks()
+        {
+            string fertilizeOption = gData.GetGardeningOptionStringLocalized(GlobalData.GardeningStrings.Fertilize);
+            string tendOption = gData.GetGardeningOptionStringLocalized(GlobalData.GardeningStrings.TendCrop);
+
             if (confService.GetConfiguration().UseFertilizer) // TODO: Stop trying when you run out of fertilizer
             {
                 taskQueue.AddLast(new SelectStringTask("Select Fertilize", fertilizeOption, op));
@@ -88,10 +119,9 @@ namespace Autogardener.Modules.Schedulers
             taskQueue.AddLast(new ReportTendTask("Set \"last tended\"", op));
         }
 
-        private void AddTasksToGetBackToOptionsMenu()
+        private void AddPlantSeedsTasks()
         {
-            taskQueue.AddLast(new TargetObjectAndInteractTask(this, "Target object again and interact", op));
-            taskQueue.AddLast(new SkipChatterTask("Skip plant description talk", op));
+
         }
 
         public void Tick()

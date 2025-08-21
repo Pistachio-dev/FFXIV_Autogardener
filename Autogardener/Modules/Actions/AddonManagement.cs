@@ -2,17 +2,21 @@ using Autogardener.Modules.Exceptions;
 using DalamudBasics.Logging;
 using ECommons.UIHelpers.AddonMasterImplementations;
 using FFXIVClientStructs.FFXIV.Client.UI;
+using FFXIVClientStructs.FFXIV.Component.GUI;
 using System.Linq;
 
 namespace Autogardener.Modules.Actions
 {
-    public class AddonManagement
+    public abstract class AddonManagement
     {
+        private readonly GlobalData gData;
+
         private ILogService log { get; }
 
-        public AddonManagement(ILogService logService)
+        public AddonManagement(ILogService logService, GlobalData gData)
         {
             log = logService;
+            this.gData = gData;
         }
         
         public unsafe bool TrySkipTalk()
@@ -96,6 +100,7 @@ namespace Autogardener.Modules.Actions
             return false;
 
         }
+        
         private bool TryGetMatchingEntry(AddonMaster.SelectString.Entry[] entries, string actionToSelect, out AddonMaster.SelectString.Entry entry)
         {
             Func<AddonMaster.SelectString.Entry, bool> condition = entry => entry.SeString.ToString().Contains(actionToSelect, StringComparison.OrdinalIgnoreCase);
