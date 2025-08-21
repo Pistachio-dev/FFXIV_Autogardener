@@ -9,6 +9,7 @@ namespace Autogardener.Modules.Schedulers
     public enum AbortReason
     {
         RetriesExceeded,
-        MovedTooFarAway
+        MovedTooFarAway,
+        UserRequest
     }
 }

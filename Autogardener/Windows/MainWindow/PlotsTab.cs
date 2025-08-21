@@ -1,6 +1,7 @@
 using Autogardener.Model;
 using Autogardener.Model.Designs;
 using Autogardener.Model.Plots;
+using Autogardener.Modules.Schedulers;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Components;
@@ -62,21 +63,17 @@ namespace Autogardener.Windows.MainWindow
         private void DrawTendButtonAndParameters(PlotPatch nearestPlot)
         {
             var config = configService.GetConfiguration();
-            if (ImGui.Button("Tend (experimental)"))
-            {
-                hlScheduler.SchedulePatchTend(nearestPlot);
-            }
 
             if (ImGuiComponents.IconButtonWithText(FontAwesomeIcon.Leaf, "Tend to plot", MidDarkGreen, DarkGreen, MidDarkGreen))
             {
-                inGameActions.PlotPatchCare(nearestPlot, config.UseFertilizer, config.Replant);
-                //inGameActions.TargetPlantingHoleCare(nearestPlot, config.UseFertilizer, config.Replant);
+                hlScheduler.SchedulePatchTend(nearestPlot);
             }
             DrawTooltip("Will fertilize, tend, harvest and also plant based on the plan selected.\nIt will never remove a crop that is not harvestable.");
+
             ImGui.SameLine();
             if (ImGuiComponents.IconButtonWithText(FontAwesomeIcon.Gun, "Abort", Red))
             {
-                gtm.Abort();
+                hlScheduler.Abort(AbortReason.UserRequest);
             }
             DrawTooltip("Cancel any actions running or scheduled");
 
@@ -94,12 +91,6 @@ namespace Autogardener.Windows.MainWindow
                 configService.SaveConfiguration();
             }
             DrawTooltip("After harvesting a plant, will plant the seeds given in the design.");
-            int delay = config.StepDelayInMs;
-            if (ImGui.DragInt("Delay between steps", ref delay, 1))
-            {
-                config.StepDelayInMs = delay;
-                configService.SaveConfiguration();
-            }
 
         }
 

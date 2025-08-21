@@ -1,7 +1,6 @@
 using Autogardener.Model;
 using Autogardener.Modules;
 using Autogardener.Modules.Schedulers;
-using Autogardener.Modules.Tasks;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Plugin.Services;
 using DalamudBasics.Configuration;
@@ -17,11 +16,8 @@ public partial class MainWindow : PluginWindowBase, IDisposable
 {
     private PlotWatcher plotWatcher;
     private GlobalData globalData;
-    private Commands commands;
     private StoredDataActions storedDataActions;
-    InGameActions inGameActions;
     private ISaveManager<CharacterSaveState> saveManager;
-    private GardeningTaskManager gtm;
     private TaskManager taskManager;
     private ITextureProvider textureProvider;
     private IFramework framework;
@@ -51,18 +47,15 @@ public partial class MainWindow : PluginWindowBase, IDisposable
 
         plotWatcher = serviceProvider.GetRequiredService<PlotWatcher>();
         globalData = serviceProvider.GetRequiredService<GlobalData>();
-        commands = serviceProvider.GetRequiredService<Commands>();
         storedDataActions = serviceProvider.GetRequiredService<StoredDataActions>();
 
         saveManager = serviceProvider.GetRequiredService<ISaveManager<CharacterSaveState>>();
         textureProvider = serviceProvider.GetRequiredService<ITextureProvider>();
         this.scarecrowPicturePath = scarecrowPicturePath;
-        this.gtm = serviceProvider.GetRequiredService<GardeningTaskManager>();
         framework = serviceProvider.GetRequiredService<IFramework>();
         taskManager = serviceProvider.GetRequiredService<TaskManager>();
         chatGui = serviceProvider.GetRequiredService<IChatGui>();
         configService = serviceProvider.GetRequiredService<IConfigurationService<Configuration>>();
-        inGameActions = serviceProvider.GetRequiredService<InGameActions>();
         hlScheduler = serviceProvider.GetRequiredService<HighLevelScheduler>();
         
         framework.RunOnFrameworkThread(() =>
@@ -74,7 +67,6 @@ public partial class MainWindow : PluginWindowBase, IDisposable
 
     protected override unsafe void SafeDraw()
     {
-        ImGui.TextUnformatted(gtm.GetCurrentTaskName());
         if (ImGui.BeginTabBar("MainTabBar"))
         {
             var save = saveManager.GetCharacterSaveInMemory();

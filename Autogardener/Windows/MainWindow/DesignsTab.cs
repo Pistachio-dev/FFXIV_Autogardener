@@ -153,7 +153,7 @@ namespace Autogardener.Windows.MainWindow
 
             if (ImGuiComponents.IconButtonWithText(FontAwesomeIcon.Copy, "Copy to all plots"))
             {
-                inGameActions.PropagateDesign(design, parentPatchDesign);
+                storedDataActions.PropagateDesign(design, parentPatchDesign);
             }
             ImGuiComponents.HelpMarker("Copy this setup for the other plots inside this patch");
 

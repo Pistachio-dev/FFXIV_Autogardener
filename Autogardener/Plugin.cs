@@ -104,13 +104,8 @@ public sealed class Plugin : IDalamudPlugin
         serviceCollection.AddSingleton<PlotWatcher>();
         serviceCollection.AddSingleton<TaskManager>();
         serviceCollection.AddSingleton<GlobalData>();
-        serviceCollection.AddSingleton<Commands>();
         serviceCollection.AddSingleton<StoredDataActions>();
-        serviceCollection.AddSingleton<DesignManager>();
-        serviceCollection.AddSingleton<InGameActions>();
-        serviceCollection.AddSingleton<GardeningTaskManager>();
         serviceCollection.AddSingleton<ErrorMessageMonitor>();
-        serviceCollection.AddSingleton<MiniTA>();
         serviceCollection.AddSingleton<AddonManagement>();        
         serviceCollection.AddSingleton<GameObjectInteractions>();
         serviceCollection.AddSingleton<Targeting>();
@@ -127,7 +122,6 @@ public sealed class Plugin : IDalamudPlugin
         serviceProvider.GetRequiredService<ILogService>().AttachToGameLogicLoop(framework);
         serviceProvider.GetRequiredService<IChatListener>().InitializeAndRun("[AG]");
         serviceProvider.GetRequiredService<ErrorMessageMonitor>().Attach();
-        serviceProvider.GetRequiredService<MiniTA>().Attach();
         framework.Update += MakeSaveReady;
     }
 

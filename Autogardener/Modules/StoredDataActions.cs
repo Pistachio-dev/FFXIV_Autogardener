@@ -23,12 +23,11 @@ namespace Autogardener.Modules
         private readonly PlotWatcher plotWatcher;
         private readonly IClientState clientState;
         private readonly IGameInventory gameInventory;
-        private readonly InGameActions inGameActions;
 
         
         public StoredDataActions(ILogService logService, IChatGui chatGui, ISaveManager<CharacterSaveState> saveManager,
             GlobalData globalData, PlotWatcher plotWatcher, IClientState clientState,
-            IGameInventory gameInventory, InGameActions ingameActions)
+            IGameInventory gameInventory)
         {
             this.logService = logService;
             this.chatGui = chatGui;
@@ -37,7 +36,6 @@ namespace Autogardener.Modules
             this.plotWatcher = plotWatcher;
             this.clientState = clientState;
             this.gameInventory = gameInventory;
-            this.inGameActions = ingameActions;
         }
 
         public void RegisterNearestPlotPatch()
@@ -74,8 +72,6 @@ namespace Autogardener.Modules
                 logService.Warning("Could not get the nearest plot patch");
                 return;
             }
-
-            inGameActions.ScanPlot(plotPatch);
         }
 
         public int CreateNewDesign()
@@ -87,6 +83,18 @@ namespace Autogardener.Modules
             logService.Info($"Current design count: {state.Designs.Count}");
             saveManager.WriteCharacterSave(state);
             return index;
+        }
+
+        public void PropagateDesign(PlotDesign designToCopy, PlotPatchDesign patchDesign)
+        {
+            foreach (var design in patchDesign.PlotDesigns)
+            {
+                design.DesignatedSeed = designToCopy.DesignatedSeed;
+                design.DesignatedSoil = designToCopy.DesignatedSoil;
+                design.DoNotHarvest = designToCopy.DoNotHarvest;
+            }
+
+            saveManager.WriteCharacterSave();
         }
 
         public ResourcesCheckResult CheckResourceAvailability(PlotPatchDesign design, bool fertilize)
