@@ -25,7 +25,7 @@ namespace Autogardener.Modules.Actions
             for (int invSectionIndex = 0; invSectionIndex < inventories.Length; invSectionIndex++)
             {
                 var inventory = inventories[invSectionIndex];
-                logService.Info($"Checking inventory {inventory->Type}");
+                logService.Debug($"Checking inventory {inventory->Type}");
                 for (var i = 0; i < inventory->Size; i++)
                 {
                     var slot = inventory->GetInventorySlot(i);
@@ -64,7 +64,7 @@ namespace Autogardener.Modules.Actions
             slotNumber = -1;
             foreach (var inventory in inventories)
             {
-                logService.Info($"Checking inventory {inventory->Type}");
+                logService.Debug($"Checking inventory {inventory->Type}");
                 for (var i = 0; i < inventory->Size; i++)
                 {
                     var slot = inventory->GetInventorySlot(i);

@@ -64,7 +64,7 @@ namespace Autogardener.Modules.Actions
                 return false;
             }
             var seedIndex = GetIndexFromCollection(gData.Seeds.Keys.ToHashSet(), seedItemId);
-            log.Info($"Seed: {seedIndex}");
+            log.Info($"Seed: {seedItemId}");
 
             return TryClickItem(gardeningAddon, 1, seedIndex);
         }
@@ -76,7 +76,7 @@ namespace Autogardener.Modules.Actions
                 return false;
             }
             var soilIndex = GetIndexFromCollection(gData.Soils.Keys.ToHashSet(), soilItemId);
-            log.Info($"Soil: {soilIndex}");
+            log.Info($"Soil: {soilItemId}");
 
             return TryClickItem(gardeningAddon, 2, soilIndex);
         }

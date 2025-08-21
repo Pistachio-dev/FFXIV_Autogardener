@@ -56,12 +56,13 @@ namespace Autogardener.Modules.Tasks.IndividualTasks
                 if (Task(plot))
                 {
                     op.Log.Debug($"Work successful for task {TaskName}");
-                    waitingConfirmation = true;
+                    waitingConfirmation = true;                    
                 }
 
                 return GardeningTaskResult.Incomplete;
             }
 
+            op.Log.Debug($"Running confirmation for task {TaskName}");
             confirmationAttempts++;
             if (Confirmation(plot))
             {

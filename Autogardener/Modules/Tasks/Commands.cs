@@ -224,7 +224,7 @@ namespace Autogardener.Modules.Tasks
             var matches = new Regex("([\\w ]{4,})").Matches(dialogueText);
             if (matches.Count < 2 || matches[0].Groups.Count == 0)
             {
-                logService.Info("Scaned plot was empty");
+                logService.Info("Scanned plot was empty");
                 return (0, "Empty");
             }
             var plantName = matches[0].Groups[0].Value;
@@ -310,7 +310,7 @@ namespace Autogardener.Modules.Tasks
             slotNumber = -1;
             foreach (var inventory in inventories)
             {
-                logService.Info($"Checking inventory {inventory->Type}");
+                logService.Debug($"Checking inventory {inventory->Type}");
                 for (var i = 0; i < inventory->Size; i++)
                 {
                     var slot = inventory->GetInventorySlot(i);
