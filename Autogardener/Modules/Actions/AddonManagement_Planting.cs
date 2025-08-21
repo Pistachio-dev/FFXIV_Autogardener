@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace Autogardener.Modules.Actions
 {
-    internal partial class AddonManagement
+    public partial class AddonManagement
     {
         public unsafe bool ClickConfirmOnHousingGardeningAddon()
         {

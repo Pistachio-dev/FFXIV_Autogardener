@@ -41,12 +41,13 @@ namespace Autogardener.Windows.MainWindow
             {
                 ImGui.Combo("Design", ref currentDesign, save.Designs.Select(d => d.Name).ToArray(), save.Designs.Count);
                 DrawDesignRenameButton(save.Designs);
-                if (DrawRemoveDesignButton(save.Designs, save.Designs[currentDesign]))
+                var selectedDesign = save.Designs[currentDesign];
+                if (DrawRemoveDesignButton(save.Designs, selectedDesign))
                 {
                     return;
                 }
 
-                if (save.Designs[currentDesign].PlotDesigns.Count == 0)
+                if (selectedDesign.PlotDesigns.Count == 0)
                 {
                     ImGui.TextUnformatted("This design has no plots defined");
                     return;
@@ -60,7 +61,7 @@ namespace Autogardener.Windows.MainWindow
                     configService.SaveConfiguration();
                 }
 
-                int[][] displayLayout = GetPlotLayout(save.Designs[currentDesign].PlotDesigns.Count);
+                int[][] displayLayout = GetPlotLayout(selectedDesign.PlotDesigns.Count);
                 foreach (var row in displayLayout)
                 {
                     foreach (var index in row)
@@ -71,7 +72,7 @@ namespace Autogardener.Windows.MainWindow
                         }
                         else
                         {
-                            DrawPlotDesign(save.Designs[currentDesign].PlotDesigns[index], (uint)index);
+                            DrawPlotDesign(selectedDesign.PlotDesigns[index], (uint)index, selectedDesign);
                         }
 
                         ImGui.SameLine();
@@ -122,7 +123,7 @@ namespace Autogardener.Windows.MainWindow
             return false;
 
         }
-        private void DrawPlotDesign(PlotDesign design, uint index)
+        private void DrawPlotDesign(PlotDesign design, uint index, PlotPatchDesign parentPatchDesign)
         {
             ImGui.PushStyleVar(ImGuiStyleVar.FrameBorderSize, 1f);
             ImGui.BeginChildFrame(100 + index, new Vector2(200, 200));
@@ -146,14 +147,15 @@ namespace Autogardener.Windows.MainWindow
                 design.DoNotHarvest = keepWhenGrown;
                 saveManager.WriteCharacterSave();
             }
-            
-            if (ImGuiComponents.IconButtonWithText(FontAwesomeIcon.Copy, "Copy to all plots"))
-            {
-                inGameActions.PropagateDesign(design, currentDesign)
-            }
             ImGui.SameLine();
             ImGuiComponents.HelpMarker("For many interbreeding setups, you need a seed to be present,\n" +
                 "but gain nothing from harvesting it,\nso it's easier to let it stay fully grown");
+
+            if (ImGuiComponents.IconButtonWithText(FontAwesomeIcon.Copy, "Copy to all plots"))
+            {
+                inGameActions.PropagateDesign(design, parentPatchDesign);
+            }
+            ImGuiComponents.HelpMarker("Copy this setup for the other plots inside this patch");
 
             ImGui.EndChildFrame();
             ImGui.PopStyleVar();

@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace Autogardener.Modules.Actions
 {
-    public abstract class AddonManagement
+    public partial class AddonManagement
     {
         private readonly GlobalData gData;
 
