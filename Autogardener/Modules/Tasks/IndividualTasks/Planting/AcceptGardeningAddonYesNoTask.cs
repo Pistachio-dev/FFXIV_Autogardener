@@ -21,7 +21,7 @@ namespace Autogardener.Modules.Tasks.IndividualTasks.Planting
 
         public override bool PreRun(Plot plot)
         {
-            throw new NotImplementedException();
+            return true;
         }
 
         public override bool Task(Plot plot)

@@ -22,42 +22,58 @@ namespace Autogardener.Modules.Tasks.IndividualTasks.Planting
 
         public override bool Confirmation(Plot plot)
         {
-            throw new NotImplementedException();
+            return true;
         }
 
         public override bool PreRun(Plot plot)
         {
-            throw new NotImplementedException();
+            return true;
         }
 
         public override bool Task(Plot plot)
         {
+            var plantingStatus = GetPlantingStatus(plot);
+            if (plantingStatus == PlantingStatus.Possible)
+            {
+                scheduler.AddPlantSeedsTasks();
+            }
+            else
+            {
+                scheduler.AddQuitTask();
+            }
+
+            return true;
+        }
+
+        private PlantingStatus GetPlantingStatus(Plot plot)
+        {
+            if (plot.Design == null)
+            {
+                op.ChatGui.Print("No design for plot. Skipping replanting.");
+                return PlantingStatus.ImpossibleOrUnwanted;
+            }
+
             if (plot.Design?.DesignatedSeed == 0 || plot.Design?.DesignatedSoil == 0)
             {
                 op.ChatGui.Print("Missing seeds or soil. Not replanting.");
-                scheduler.PlantingStatus = PlantingStatus.ImpossibleOrUnwanted;
-                return true;
+                return PlantingStatus.ImpossibleOrUnwanted;
             }
 
-            var seed = op.Inventory.TryGetItemInInventory(plot.Design!.DesignatedSeed);
-            
+            var seed = op.Inventory.TryGetItemInInventory(plot.Design.DesignatedSeed);
+
             if (seed == null)
             {
                 op.ChatGui.Print($"Missing seed {gData.GetSeedStringName(plot.Design.DesignatedSeed)}. Can't replant.");
-                scheduler.PlantingStatus = PlantingStatus.ImpossibleOrUnwanted;
-                return true;
+                return PlantingStatus.ImpossibleOrUnwanted;
             }
             var soil = op.Inventory.TryGetItemInInventory(plot.Design.DesignatedSoil);
             if (soil == null)
             {
-                op.ChatGui.Print($"Missing soil {gData.GetSeedStringName(plot.Design.DesignatedSeed)}. Can't replant.");
-                scheduler.PlantingStatus = PlantingStatus.ImpossibleOrUnwanted;
-                return true;
+                op.ChatGui.Print($"Missing soil {gData.GetSeedStringName(plot.Design.DesignatedSoil)}. Can't replant.");
+                return PlantingStatus.ImpossibleOrUnwanted;
             }
 
-            scheduler.PlantingStatus = PlantingStatus.Possible;
-
-            return true;
+            return PlantingStatus.Possible;
         }
     }
 }

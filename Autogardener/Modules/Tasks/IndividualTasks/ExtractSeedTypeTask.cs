@@ -28,7 +28,7 @@ namespace Autogardener.Modules.Tasks.IndividualTasks
         public override bool Task(Plot plot)
         {
             string? text = op.AddonManagement.GetTalkAddonDialogue();
-            if (text == null) return false;
+            if (text == null) return true;
             (uint id, string name) = op.DataExtraction.ExtractPlantNameAndId(text);
             if (id != 0)
             {

@@ -8,25 +8,26 @@ using System.Threading.Tasks;
 
 namespace Autogardener.Modules.Tasks.IndividualTasks
 {
-    internal class SelectSeedsAndSoilTask : GardeningTaskBase
+    internal class FinishingTask : GardeningTaskBase
     {
-        public SelectSeedsAndSoilTask(string name, GameActions op) : base(name, op)
+        public FinishingTask(string name, GameActions op) : base(name, op)
         {
         }
 
         public override bool Confirmation(Plot plot)
         {
-            throw new NotImplementedException();
+            return true;
         }
 
         public override bool PreRun(Plot plot)
         {
-            throw new NotImplementedException();
+            return true;
         }
 
         public override bool Task(Plot plot)
         {
-            throw new NotImplementedException();
+            op.Log.Info($"Plot {plot.GameObjectId} successfully tended.");
+            return true;
         }
     }
 }

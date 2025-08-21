@@ -3,6 +3,7 @@ using Autogardener.Modules.Actions;
 using Autogardener.Modules.Exceptions;
 using Autogardener.Modules.Tasks;
 using Autogardener.Modules.Tasks.IndividualTasks;
+using Autogardener.Modules.Tasks.IndividualTasks.Planting;
 using DalamudBasics.Configuration;
 using DalamudBasics.Logging;
 using Humanizer;
@@ -64,47 +65,38 @@ namespace Autogardener.Modules.Schedulers
             }
         }
 
-        private void SetupStartingTasks()
+        public void SetupStartingTasks()
         {
             taskQueue.AddLast(new TargetObjectAndInteractTask(this, "Target and interact with object", op));
             taskQueue.AddLast(new ExtractSeedTypeTask("Extract seed type", op));
             taskQueue.AddLast(new SkipChatterTask("Skip plant description talk", op));
-            string quitOption = gData.GetGardeningOptionStringLocalized(GlobalData.GardeningStrings.Quit);
-            string plantOption = gData.GetGardeningOptionStringLocalized(GlobalData.GardeningStrings.PlantSeeds);
+            AddTasksConditionally();
+        }
 
-
+        private void AddTasksConditionally()
+        {
+            // Run his when the options SelectString is showing
             taskQueue.AddLast(new QueryPlotStatusTask(this, gData, "Get plot status", op));
-            // THIS WILL NOT WORK! PLOT STATUS IS NULL UNTIL THIS TASK RUNS
-            if (PlotStatus == PlotStatus.Harvestable && !(Plot.Design?.DoNotHarvest ?? false))
-            {
-
-            }
-            if (PlotStatus == PlotStatus.BeyondHope)
-            {
-                taskQueue.AddLast(new SelectStringTask("Select Quit", quitOption, op));
-            }
-
+            taskQueue.AddLast(new AddTasksBasedOnAvailableOptionsTask("Schedule next steps", this, op));
         }
 
         private void AddTasksToGetBackToOptionsMenu()
         {
             taskQueue.AddLast(new TargetObjectAndInteractTask(this, "Target object again and interact", op));
             taskQueue.AddLast(new SkipChatterTask("Skip plant description talk", op));
-            taskQueue.AddLast(new ExtractSeedTypeTask("Extract seed type", op));
-            taskQueue.AddLast(new SkipChatterTask("Skip plant description talk", op));
-            taskQueue.AddLast(new QueryPlotStatusTask(this, gData, "Get plot status", op));
-            // Add the "conditionally add more tasks" task here
         }
 
-        private void AddHarvestingTasks()
+        public void AddHarvestingTasks()
         {
             string harvestOption = gData.GetGardeningOptionStringLocalized(GlobalData.GardeningStrings.HarvestCrop);
 
             taskQueue.AddLast(new SelectStringTask("Select \"Harvest\"", harvestOption, op));
             taskQueue.AddLast(new ReportHarvested("Update seed and soil present", op));
+            AddTasksToGetBackToOptionsMenu();
+            AddTasksConditionally();
         }
 
-        private void AddFertilizeAndTendTasks()
+        public void AddFertilizeAndTendTasks()
         {
             string fertilizeOption = gData.GetGardeningOptionStringLocalized(GlobalData.GardeningStrings.Fertilize);
             string tendOption = gData.GetGardeningOptionStringLocalized(GlobalData.GardeningStrings.TendCrop);
@@ -117,11 +109,35 @@ namespace Autogardener.Modules.Schedulers
             }
             taskQueue.AddLast(new SelectStringTask("Select Tend", tendOption, op));
             taskQueue.AddLast(new ReportTendTask("Set \"last tended\"", op));
+            AddFinishTask();
         }
 
-        private void AddPlantSeedsTasks()
+        public void AddPlantOrQuitTask()
         {
+            taskQueue.AddLast(new VerifyCanPlantTask(this, gData, "Verify that we have the resources to plant", op));
+        }
 
+        public void AddPlantSeedsTasks()
+        {
+            string plantOption = gData.GetGardeningOptionStringLocalized(GlobalData.GardeningStrings.PlantSeeds);
+            taskQueue.AddLast(new SelectStringTask("Select \"Plant Seeds\"", plantOption, op));
+            taskQueue.AddLast(new PickSeedsTask("Pick seeds", op));
+            taskQueue.AddLast(new PickSoilTask("Pick soil", op));
+            taskQueue.AddLast(new ConfirmGardeningAddonTask("Click confirm on gardening addon", op));
+            taskQueue.AddLast(new AcceptGardeningAddonYesNoTask("Click yes on gardening addon confirmation", op));
+            AddTasksToGetBackToOptionsMenu();
+            AddTasksConditionally();
+        }
+
+        public void AddQuitTask()
+        {
+            string quitOption = gData.GetGardeningOptionStringLocalized(GlobalData.GardeningStrings.Quit);
+            taskQueue.AddLast(new SelectStringTask("Select Quit", quitOption, op));
+        }
+
+        public void AddFinishTask()
+        {
+            taskQueue.Add(new FinishingTask("Finishing", op));
         }
 
         public void Tick()
