@@ -13,12 +13,12 @@
       "fertilizer",
       "gardening"
     ],
-    "DalamudApiLevel": 12,
-    "AssemblyVersion": "0.0.1.1",
-    "Changelog": "First release",
-    "DownloadLinkInstall": "https://github.com/Pistachio-dev/FFXIV_Autogardener/releases/download/0.0.1.1_release/Autogardener.zip",
-    "DownloadLinkUpdate": "https://github.com/Pistachio-dev/FFXIV_Autogardener/releases/download/0.0.1.1_release/Autogardener.zip",
-    "LastUpdate": 1753386316,
+    "DalamudApiLevel": 13,
+    "AssemblyVersion": "0.1.0.0",
+    "Changelog": "-Single patch tending finished",
+    "DownloadLinkInstall": "https://github.com/Pistachio-dev/FFXIV_Autogardener/releases/download/0.1.0.0_release/Autogardener.zip",
+    "DownloadLinkUpdate": "https://github.com/Pistachio-dev/FFXIV_Autogardener/releases/download/0.1.0.0_release/Autogardener.zip",
+    "LastUpdate": 1755794104,
     "InternalName": "Autogardener"
   }
 ]
