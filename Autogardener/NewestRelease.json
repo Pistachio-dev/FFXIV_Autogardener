@@ -1,6 +1,6 @@
 {
-    "AssemblyVersion" : "0.1.0.0",
+    "AssemblyVersion" : "0.1.0.1",
     "DalamudApiLevel" : 13,
-    "ChangeLog": "-Single patch tending finished",
+    "ChangeLog": "- Fixed system getting stuck if you try to harvest with a full inventory",
     "IsTest": false
 }
