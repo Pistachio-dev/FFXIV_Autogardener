@@ -3,6 +3,7 @@ using Autogardener.Modules.Actions;
 using Autogardener.Modules.Exceptions;
 using Autogardener.Modules.Tasks;
 using Autogardener.Modules.Tasks.IndividualTasks;
+using Autogardener.Modules.Tasks.IndividualTasks.Harvest;
 using Autogardener.Modules.Tasks.IndividualTasks.Planting;
 using DalamudBasics.Configuration;
 using DalamudBasics.Logging;
@@ -73,14 +74,14 @@ namespace Autogardener.Modules.Schedulers
             AddTasksConditionally();
         }
 
-        private void AddTasksConditionally()
+        public void AddTasksConditionally()
         {
             // Run his when the options SelectString is showing
             taskQueue.AddLast(new QueryPlotStatusTask(this, gData, "Get plot status", op));
             taskQueue.AddLast(new AddTasksBasedOnAvailableOptionsTask("Schedule next steps", this, op));
         }
 
-        private void AddTasksToGetBackToOptionsMenu()
+        public void AddTasksToGetBackToOptionsMenu()
         {
             taskQueue.AddLast(new TargetObjectAndInteractTask(this, "Target object again and interact", op));
             taskQueue.AddLast(new SkipChatterTask("Skip plant description talk", op));
@@ -91,9 +92,7 @@ namespace Autogardener.Modules.Schedulers
             string harvestOption = gData.GetGardeningOptionStringLocalized(GlobalData.GardeningStrings.HarvestCrop);
 
             taskQueue.AddLast(new SelectStringTask("Select \"Harvest\"", harvestOption, op));
-            taskQueue.AddLast(new ReportHarvested("Update seed and soil present", op));
-            AddTasksToGetBackToOptionsMenu();
-            AddTasksConditionally();
+            taskQueue.AddLast(new VerifyHarvestAndContinueTask("Verify harvest and continue", this, gData, errorMessageMonitor, op));
         }
 
         public void AddFertilizeAndTendTasks()
@@ -104,7 +103,7 @@ namespace Autogardener.Modules.Schedulers
             if (confService.GetConfiguration().UseFertilizer) // TODO: Stop trying when you run out of fertilizer
             {
                 taskQueue.AddLast(new SelectStringTask("Select Fertilize", fertilizeOption, op));
-                taskQueue.AddLast(new FertilizeTask("Use Fertilizer", errorMessageMonitor, op));
+                taskQueue.AddLast(new FertilizeTask("Use Fertilizer", errorMessageMonitor, gData, op));
                 AddTasksToGetBackToOptionsMenu();
             }
             taskQueue.AddLast(new SelectStringTask("Select Tend", tendOption, op));

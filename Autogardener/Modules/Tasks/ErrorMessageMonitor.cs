@@ -13,7 +13,7 @@ namespace Autogardener.Modules.Tasks
     public class ErrorMessageMonitor
     {
         private const int RecordSizeLimit = 20;
-        private static readonly TimeSpan Recent = TimeSpan.FromSeconds(0.5f);
+        private static readonly TimeSpan Recent = TimeSpan.FromSeconds(2.5f);
         private readonly ILogService logService;
         private readonly IChatGui chatGui;
         private readonly IFramework framework;
@@ -32,17 +32,25 @@ namespace Autogardener.Modules.Tasks
         public bool WasThereARecentError(string? errorMessage = null)
         {
             var now = DateTime.UtcNow;
-            var recentMessages = recordedMessages.Where(r => now - r.DateTimeUtc < Recent);
+            var recentMessages = recordedMessages.Where(r => now - r.DateTimeUtc < Recent).ToList();
+
             if (errorMessage != null)
             {
-                recentMessages = recentMessages.Where(r => r.Message.Contains(errorMessage, StringComparison.OrdinalIgnoreCase));
+                recentMessages = recentMessages.Where(r => r.Message.Contains(errorMessage, StringComparison.OrdinalIgnoreCase)).ToList();
             }
-            return recentMessages.Any();
+
+            if (recentMessages.Any())
+            {
+                recordedMessages.Clear(); // Avoid reading the error twice
+                return true;
+            }
+
+            return false;
         }
 
         private void RecordErrorMessages(XivChatType type, int timestamp, ref SeString sender, ref SeString message, ref bool isHandled)
         {
-            if (type == XivChatType.ErrorMessage || type == XivChatType.SystemError)
+            if (type == XivChatType.ErrorMessage || type == XivChatType.SystemError || type == (XivChatType)2108) //2108 is the type of the "Insufficient Inventory" messages
             {
                 RecordMessage(message);
             }
@@ -56,7 +64,7 @@ namespace Autogardener.Modules.Tasks
             recordedMessages.Add(record);
             if (recordedMessages.Count > RecordSizeLimit)
             {
-                recordedMessages = recordedMessages.Skip(90).ToList();
+                recordedMessages = recordedMessages.Skip(RecordSizeLimit / 2).ToList();
             }
         }
 

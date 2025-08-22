@@ -10,18 +10,17 @@ namespace Autogardener.Modules.Tasks.IndividualTasks
 {
     public class FertilizeTask : GardeningTaskBase
     {
-        public FertilizeTask(string name, ErrorMessageMonitor errorMonitor, GameActions op) : base(name, op)
+        public FertilizeTask(string name, ErrorMessageMonitor errorMonitor, GlobalData gData, GameActions op) : base(name, op)
         {
             this.errorMonitor = errorMonitor;
-
+            this.gData = gData;
         }
 
         private const uint FertilizerId = GlobalData.FishmealId;
         private bool couldNotUseFertilizer = false; // Does this if you get an error or don't have enough.
         private int fertilizerCount = 0;
         private readonly ErrorMessageMonitor errorMonitor;
-
-
+        private readonly GlobalData gData;
 
         public override bool PreRun(Plot plot)
         {
@@ -39,7 +38,7 @@ namespace Autogardener.Modules.Tasks.IndividualTasks
                 return true;
             }
 
-            if (errorMonitor.WasThereARecentError()) //TODO: VERIFY THE MESSAGE
+            if (errorMonitor.WasThereARecentError(gData.GetGardeningOptionStringLocalized(GlobalData.GardeningStrings.AlreadyFertilized)))
             {
                 // Most likely, plot already fertilized
                 couldNotUseFertilizer = true;
