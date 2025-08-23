@@ -31,9 +31,10 @@ namespace Autogardener.Modules.Tasks.IndividualTasks
         public abstract bool Task(Plot plot);
         public abstract bool Confirmation(Plot plot);
 
-        public virtual void OnSoftBailout(Plot plot)
+        protected virtual void TriggerBailout(Plot plot)
         {
             op.Log.Warning($"Soft bailout on task \"{TaskName}\"");
+            taskAttempts = int.MaxValue;
         }
 
         // Run PreRun
@@ -49,7 +50,7 @@ namespace Autogardener.Modules.Tasks.IndividualTasks
             {
                 if (softBailout)
                 {
-                    OnSoftBailout(plot);
+                    TriggerBailout(plot);
                     return GardeningTaskResult.Bailout_Softbailout;
                 }
                 op.Log.Warning($"Task \"{TaskName}\" reached the max try amount. Bailing out. Attempts: {taskAttempts}. Confirmation attempts: {confirmationAttempts}");

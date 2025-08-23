@@ -1,10 +1,6 @@
 using Autogardener.Model.Plots;
 using Autogardener.Modules.Actions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using ECommons.Throttlers;
 
 namespace Autogardener.Modules.Tasks.IndividualTasks
 {
@@ -21,6 +17,7 @@ namespace Autogardener.Modules.Tasks.IndividualTasks
         private int fertilizerCount = 0;
         private readonly ErrorMessageMonitor errorMonitor;
         private readonly GlobalData gData;
+        private int fertilizeAttempts = 0; // Uses its own counter to compensate for the slower throttle
 
         public override bool PreRun(Plot plot)
         {
@@ -31,6 +28,15 @@ namespace Autogardener.Modules.Tasks.IndividualTasks
 
         public override bool Task(Plot plot)
         {
+            if (fertilizeAttempts > 5)
+            {
+                TriggerBailout(plot);
+            }
+
+            if (!EzThrottler.Throttle("Fertilize", 100)) // A slower throtle for this one
+            {
+                return false;
+            }
             if (fertilizerCount == 0)
             {
                 op.ChatGui.PrintError("Out of fertilizer");
@@ -52,6 +58,7 @@ namespace Autogardener.Modules.Tasks.IndividualTasks
                 return true;
             }
 
+            fertilizeAttempts++;
             return op.GoInteractions.Fertilize(itemInfo);
         }
 
@@ -64,12 +71,6 @@ namespace Autogardener.Modules.Tasks.IndividualTasks
             }
 
             return couldNotUseFertilizer || currentQuantity < fertilizerCount;
-        }
-
-        public override void OnSoftBailout(Plot plot)
-        {
-            base.OnSoftBailout(plot);
-            op.ChatGui.PrintError($"Something is blocking fertilizing. Skipping for this plot.");
         }
     }
 }
