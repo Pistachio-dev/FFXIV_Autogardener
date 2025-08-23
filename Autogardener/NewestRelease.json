@@ -1,6 +1,6 @@
 {
-    "AssemblyVersion" : "0.1.0.1",
-    "DalamudApiLevel" : 13,
-    "ChangeLog": "- Fixed system getting stuck if you try to harvest with a full inventory",
+    "AssemblyVersion": "0.2.0.0",
+    "DalamudApiLevel": 13,
+    "ChangeLog": "- Added automovement to garden patches. This can also be used as a chain of plots and chat commands to automatically tend multiple plots in a row. For instance, tend two at your private state, then us /li fc from Lifestream, and tend to other three in the FC house.\n- Fixed system getting stuck if you try to harvest with a full inventory\n- If the plugin gets stuck on Fertilizing, it just skips the step instead of the whole plot",
     "IsTest": false
 }
