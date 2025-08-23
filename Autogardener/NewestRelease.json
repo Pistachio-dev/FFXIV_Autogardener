@@ -1,6 +1,6 @@
 {
     "AssemblyVersion": "0.2.0.1",
     "DalamudApiLevel": 13,
-    "ChangeLog": "- Tweaked Fertilize task\n- Added a toggle to disable autoharvest",
+    "ChangeLog": "- Tweaked Fertilize task\n- Added a toggle to disable autoharvest\n- Updated scarecrow picture with positionals",
     "IsTest": false
 }
