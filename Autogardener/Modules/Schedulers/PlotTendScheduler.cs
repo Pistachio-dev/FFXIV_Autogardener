@@ -89,6 +89,13 @@ namespace Autogardener.Modules.Schedulers
 
         public void AddHarvestingTasks()
         {
+            if (Plot.Design?.DoNotHarvest ?? false)
+            {
+                AddQuitTask();
+                AddFinishTask();
+                return;
+            }
+
             string harvestOption = gData.GetGardeningOptionStringLocalized(GlobalData.GardeningStrings.HarvestCrop);
 
             taskQueue.AddLast(new SelectStringTask("Select \"Harvest\"", harvestOption, op));
