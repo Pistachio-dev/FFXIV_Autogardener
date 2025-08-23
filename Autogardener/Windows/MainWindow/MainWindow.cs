@@ -101,7 +101,6 @@ public partial class MainWindow : PluginWindowBase, IDisposable
         {
             ImGui.Image(scarecrowPic.Handle, new Vector2(scarecrowPic.Width, scarecrowPic.Height));
         }
-        
         ImGui.EndChildFrame();
         ImGui.PopStyleVar();
     }
