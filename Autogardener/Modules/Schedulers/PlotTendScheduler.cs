@@ -12,7 +12,7 @@ using System.Linq;
 
 namespace Autogardener.Modules.Schedulers
 {
-    public class PlotTendScheduler
+    public class PlotTendScheduler : IScheduler
     {
         public bool Complete => taskQueue.Count <= currentTaskIndex;
         internal PlotStatus PlotStatus = PlotStatus.Unknown;
@@ -27,7 +27,7 @@ namespace Autogardener.Modules.Schedulers
         private readonly ErrorMessageMonitor errorMessageMonitor;
         private readonly LinkedList<GardeningTaskBase> taskQueue = new();
         private int currentTaskIndex = 0;
-        
+        public bool Done() => taskQueue.Count == 0;
 
         public PlotTendScheduler(GardenPatchScheduler parentScheduler, PlotPatch patch, Plot plot, ILogService logService,
             GameActions op, GlobalData gData, IConfigurationService<Configuration> confService, ErrorMessageMonitor errorMessageMonitor)

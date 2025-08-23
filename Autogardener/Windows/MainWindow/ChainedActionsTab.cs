@@ -1,6 +1,7 @@
 using Autogardener.Model;
 using Autogardener.Model.ActionChains;
 using Autogardener.Model.Plots;
+using Autogardener.Modules.Schedulers;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Components;
@@ -13,7 +14,18 @@ namespace Autogardener.Windows.MainWindow
         private void DrawChainedActionsTab()
         {
             var save = saveManager.GetCharacterSaveInMemory();
-            ImGuiComponents.IconButtonWithText(Dalamud.Interface.FontAwesomeIcon.BoltLightning, "Execute action chain", new Vector4(0.6f, 0.6f, 0, 1));
+            if (ImGuiComponents.IconButtonWithText(FontAwesomeIcon.BoltLightning, "Execute action chain", new Vector4(0.6f, 0.6f, 0, 1)))
+            {
+                logService.Info(System.Text.Json.JsonSerializer.Serialize(save.Actions));
+                hlScheduler.ScheduleActionChain(save.Actions);
+            }
+            ImGui.SameLine();
+            if (ImGuiComponents.IconButtonWithText(FontAwesomeIcon.Gun, "Abort", Red))
+            {
+                hlScheduler.Abort(AbortReason.UserRequest);
+            }
+            DrawTooltip("Cancel any actions running or scheduled");
+            ImGui.Separator();
             DrawChainAddButtons(save);
             DrawChainList(save);
             ImGui.EndTabItem();
@@ -28,12 +40,14 @@ namespace Autogardener.Windows.MainWindow
             if (ImGuiComponents.IconButtonWithText(FontAwesomeIcon.Leaf, "Add plot destination", MidDarkGreen))
             {
                 save.Actions.Add(new ChainedAction { Type = ChainedActionType.GoToPlot, PatchId = save.Plots.First().Id });
+                saveManager.WriteCharacterSave();
             }
             ImGuiComponents.HelpMarker("You will run to the plot and tend to it automatically");
             ImGui.SameLine();
             if (ImGuiComponents.IconButtonWithText(FontAwesomeIcon.Computer, "Add chat command", Blue))
             {
                 save.Actions.Add(new ChainedAction { Type = ChainedActionType.ExecuteCommand });
+                saveManager.WriteCharacterSave();
             }
             ImGuiComponents.HelpMarker("You can use plugins like Lifestream to move to other locations. This plugin will only move in a straight line to the plot");
         }
@@ -49,7 +63,7 @@ namespace Autogardener.Windows.MainWindow
                 }
                 if (action.Type == ChainedActionType.ExecuteCommand)
                 {
-                    DrawCommandTexbox(action, i);
+                    DrawCommandTexbox(action, i);                    
                 }
                 ImGui.SameLine();
                 WriteDeleteActionButton(action, i);
@@ -75,6 +89,16 @@ namespace Autogardener.Windows.MainWindow
                 action.Command = command;
                 saveManager.WriteCharacterSave();
             }
+            DrawTooltip("A chat command, for instance a Lifestream command to move to another location.");
+
+            ImGui.SameLine();
+            int timeout = action.CommandWaitTime;
+            if (ImGui.InputInt($"Timeout##{index}", ref timeout))
+            {
+                action.CommandWaitTime = timeout;
+                saveManager.WriteCharacterSave();
+            }
+            DrawTooltip("How long before executing the next action. The plugin does not know how long it will take. When in doubt, set a higher number.");
         }
         private void WriteDeleteActionButton(ChainedAction action, int index)
         {
@@ -87,12 +111,12 @@ namespace Autogardener.Windows.MainWindow
             {
                 storedDataActions.RemoveAction(action.Id);
             }
-            
+            DrawTooltip("Shift + Click to delete this action");
             if (!ImGui.GetIO().KeyShift)
             {
                 ImGui.EndDisabled();
             }
-            DrawTooltip("Shift + Click to delete this action");
+
         }
     }
 }

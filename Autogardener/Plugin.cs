@@ -9,6 +9,7 @@ using Autogardener.Windows.MainWindow;
 using Dalamud.Game.Command;
 using Dalamud.Plugin.Services;
 using DalamudBasics.Chat.Listener;
+using DalamudBasics.Chat.Output;
 using DalamudBasics.Debugging;
 using DalamudBasics.DependencyInjection;
 using DalamudBasics.Interop;
@@ -126,6 +127,7 @@ public sealed class Plugin : IDalamudPlugin
         serviceProvider.GetRequiredService<ErrorMessageMonitor>().Attach();
         framework.Update += MakeSaveReady;
         serviceProvider.GetRequiredService<MovementController>().Attach(framework);
+        serviceProvider.GetRequiredService<IChatOutput>().InitializeAndAttachToGameLogicLoop(framework);
     }
 
     private void OnCommand(string command, string args)

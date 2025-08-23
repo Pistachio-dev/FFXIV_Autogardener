@@ -3,6 +3,7 @@ using Autogardener.Modules.Actions;
 using Autogardener.Modules.Tasks;
 using DalamudBasics.Configuration;
 using DalamudBasics.Logging;
+using FFXIVClientStructs.Havok.Animation.Playback.Multithreaded;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace Autogardener.Modules.Schedulers
 {
-    public class GardenPatchScheduler
+    public class GardenPatchScheduler: IScheduler
     {
         public bool Complete => !plotSchedulerQueue.Any();
 
@@ -23,6 +24,9 @@ namespace Autogardener.Modules.Schedulers
         private readonly IConfigurationService<Configuration> confService;
         private readonly ErrorMessageMonitor errorMessageMonitor;
         private Queue<PlotTendScheduler> plotSchedulerQueue = new Queue<PlotTendScheduler>();
+
+        public bool Done() => plotSchedulerQueue.Count == 0;
+
         public GardenPatchScheduler(HighLevelScheduler parentScheduler, PlotPatch patch, ILogService logService, GameActions op, GlobalData gd,
             IConfigurationService<Configuration> confService, ErrorMessageMonitor errorMessageMonitor)
         {

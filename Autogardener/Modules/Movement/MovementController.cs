@@ -4,7 +4,7 @@ using System.Diagnostics;
 
 namespace Autogardener.Modules.Movement
 {
-    internal class MovementController
+    public class MovementController
     {
         private readonly ILogService logService;
         private readonly IClientState clientState;
