@@ -12,11 +12,13 @@ namespace Autogardener.Modules.Tasks.IndividualTasks.Planting
     public class VerifyCanPlantTask : GardeningTaskBase
     {
         private readonly PlotTendScheduler scheduler;
+        private readonly PlotPatch patch;
         private readonly GlobalData gData;
 
-        public VerifyCanPlantTask(PlotTendScheduler scheduler, GlobalData gData, string name, GameActions op) : base(name, op)
+        public VerifyCanPlantTask(PlotTendScheduler scheduler, PlotPatch patch, GlobalData gData, string name, GameActions op) : base(name, op)
         {
             this.scheduler = scheduler;
+            this.patch = patch;
             this.gData = gData;
         }
 
@@ -47,29 +49,30 @@ namespace Autogardener.Modules.Tasks.IndividualTasks.Planting
 
         private PlantingStatus GetPlantingStatus(Plot plot)
         {
-            if (plot.Design == null)
+            var design = patch.Design(plot);
+            if (design == null)
             {
                 op.ChatGui.Print("No design for plot. Skipping replanting.");
                 return PlantingStatus.ImpossibleOrUnwanted;
             }
 
-            if (plot.Design?.DesignatedSeed == 0 || plot.Design?.DesignatedSoil == 0)
+            if (design.DesignatedSeed == 0 || design.DesignatedSoil == 0)
             {
                 op.ChatGui.Print("Missing seeds or soil. Not replanting.");
                 return PlantingStatus.ImpossibleOrUnwanted;
             }
 
-            var seed = op.Inventory.TryGetItemInInventory(plot.Design.DesignatedSeed);
+            var seed = op.Inventory.TryGetItemInInventory(design.DesignatedSeed);
 
             if (seed == null)
             {
-                op.ChatGui.Print($"Missing seed {gData.GetSeedStringName(plot.Design.DesignatedSeed)}. Can't replant.");
+                op.ChatGui.Print($"Missing seed {gData.GetSeedStringName(design.DesignatedSeed)}. Can't replant.");
                 return PlantingStatus.ImpossibleOrUnwanted;
             }
-            var soil = op.Inventory.TryGetItemInInventory(plot.Design.DesignatedSoil);
+            var soil = op.Inventory.TryGetItemInInventory(design.DesignatedSoil);
             if (soil == null)
             {
-                op.ChatGui.Print($"Missing soil {gData.GetSeedStringName(plot.Design.DesignatedSoil)}. Can't replant.");
+                op.ChatGui.Print($"Missing soil {gData.GetSeedStringName(design.DesignatedSoil)}. Can't replant.");
                 return PlantingStatus.ImpossibleOrUnwanted;
             }
 

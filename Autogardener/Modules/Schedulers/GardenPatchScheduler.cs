@@ -35,7 +35,7 @@ namespace Autogardener.Modules.Schedulers
             this.errorMessageMonitor = errorMessageMonitor;
             foreach (var plot in patch.Plots)
             {
-                PlotTendScheduler plotTendScheduler = new PlotTendScheduler(this, plot, logService, op, gd, confService, errorMessageMonitor);
+                PlotTendScheduler plotTendScheduler = new PlotTendScheduler(this, patch, plot, logService, op, gd, confService, errorMessageMonitor);
                 plotSchedulerQueue.Enqueue(plotTendScheduler);
             }
         }

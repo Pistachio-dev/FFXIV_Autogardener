@@ -21,6 +21,27 @@ namespace Autogardener.Model.Plots
 
         public Vector3 Location => Plots.FirstOrDefault()?.Location.AsVector3() ?? Vector3.Zero;
 
+        public PlotDesign? Design(Plot plot)
+        {
+            if (AppliedDesign == null)
+            {
+                return null;
+            }
+
+            int index = Plots.IndexOf(plot);
+            if (index == -1)
+            {
+                return null;
+            }
+
+            if (index >= AppliedDesign.Design.PlotDesigns.Count)
+            {
+                return null;
+            }
+
+            return AppliedDesign.Design.PlotDesigns[index];
+        }
+
         public override bool Equals(object? otherPlotPatchObject)
         {
             if (otherPlotPatchObject == null || !(otherPlotPatchObject is PlotPatch otherPlotPatch))

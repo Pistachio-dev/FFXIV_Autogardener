@@ -11,8 +11,11 @@ namespace Autogardener.Modules.Tasks.IndividualTasks.Planting
 {
     internal class PickSoilTask : GardeningTaskBase
     {
-        public PickSoilTask(string name, GameActions op) : base(name, op)
+        private readonly PlotPatch patch;
+
+        public PickSoilTask(string name, PlotPatch patch, GameActions op) : base(name, op)
         {
+            this.patch = patch;
         }
 
         public override bool Confirmation(Plot plot)
@@ -27,7 +30,7 @@ namespace Autogardener.Modules.Tasks.IndividualTasks.Planting
 
         public override bool Task(Plot plot)
         {
-            return op.AddonManagement.PickSoil(plot.Design?.DesignatedSoil ?? throw new MissingDesignException());
+            return op.AddonManagement.PickSoil(patch.Design(plot)?.DesignatedSoil ?? throw new MissingDesignException());
         }
     }
 }

@@ -18,6 +18,7 @@ namespace Autogardener.Modules.Schedulers
         internal PlotStatus PlotStatus = PlotStatus.Unknown;
         internal PlantingStatus PlantingStatus = PlantingStatus.NotChecked;
         private readonly GardenPatchScheduler parentScheduler;
+        private readonly PlotPatch patch;
         public readonly Plot Plot;
         private readonly ILogService logService;
         private readonly GameActions op;
@@ -28,10 +29,11 @@ namespace Autogardener.Modules.Schedulers
         private int currentTaskIndex = 0;
         
 
-        public PlotTendScheduler(GardenPatchScheduler parentScheduler, Plot plot, ILogService logService,
+        public PlotTendScheduler(GardenPatchScheduler parentScheduler, PlotPatch patch, Plot plot, ILogService logService,
             GameActions op, GlobalData gData, IConfigurationService<Configuration> confService, ErrorMessageMonitor errorMessageMonitor)
         {
             this.parentScheduler = parentScheduler;
+            this.patch = patch;
             this.Plot = plot;
             this.logService = logService;
             this.op = op;
@@ -89,7 +91,7 @@ namespace Autogardener.Modules.Schedulers
 
         public void AddHarvestingTasks()
         {
-            if (Plot.Design?.DoNotHarvest ?? false)
+            if (patch.Design(Plot)?.DoNotHarvest ?? false)
             {
                 AddQuitTask();
                 AddFinishTask();
@@ -122,7 +124,7 @@ namespace Autogardener.Modules.Schedulers
         {
             if (confService.GetConfiguration().Replant)
             {
-                taskQueue.AddLast(new VerifyCanPlantTask(this, gData, "Verify that we have the resources to plant", op));
+                taskQueue.AddLast(new VerifyCanPlantTask(this, patch, gData, "Verify that we have the resources to plant", op));
             }
             else
             {
@@ -135,8 +137,8 @@ namespace Autogardener.Modules.Schedulers
         {
             string plantOption = gData.GetGardeningOptionStringLocalized(GlobalData.GardeningStrings.PlantSeeds);
             taskQueue.AddLast(new SelectStringTask("Select \"Plant Seeds\"", plantOption, op));
-            taskQueue.AddLast(new PickSeedsTask("Pick seeds", op));
-            taskQueue.AddLast(new PickSoilTask("Pick soil", op));
+            taskQueue.AddLast(new PickSeedsTask("Pick seeds", patch, op));
+            taskQueue.AddLast(new PickSoilTask("Pick soil", patch,op));
             taskQueue.AddLast(new ConfirmGardeningAddonTask("Click confirm on gardening addon", op));
             taskQueue.AddLast(new AcceptGardeningAddonYesNoTask("Click yes on gardening addon confirmation", op));
             AddTasksToGetBackToOptionsMenu();

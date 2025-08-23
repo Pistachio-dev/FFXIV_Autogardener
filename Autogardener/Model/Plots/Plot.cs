@@ -23,8 +23,6 @@ namespace Autogardener.Model.Plots
             Location = new SerializableVector3(ob.Position.X, ob.Position.Y, ob.Position.Z);
         }
 
-        public PlotDesign? Design { get; set; } = null;
-
         public uint CurrentSeed { get; set; } //ItemId
 
         public uint CurrentSoil { get; set; }

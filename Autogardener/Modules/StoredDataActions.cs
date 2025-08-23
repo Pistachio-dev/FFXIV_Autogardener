@@ -192,11 +192,6 @@ namespace Autogardener.Modules
                 chatGui.PrintError("Plot and design do not match!");
                 return false;
             }
-            for (var i = 0; i < plotPatch.Plots.Count; i++){
-                var plot = plotPatch.Plots[i];
-                var plotDesign = design.PlotDesigns[i];
-                plot.Design = plotDesign;
-            }
 
             return true;
         }

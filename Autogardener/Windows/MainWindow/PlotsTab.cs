@@ -164,14 +164,14 @@ namespace Autogardener.Windows.MainWindow
 
         }
 
-        private void DrawCurrentPlot(PlotPatch plot)
+        private void DrawCurrentPlot(PlotPatch patch)
         {
-            if (plot.Plots.Count == 0)
+            if (patch.Plots.Count == 0)
             {
                 ImGui.TextUnformatted("This plot has no planting slots, somehow. This is strange.");
                 return;
             }
-            int[][] displayLayout = GetPlotLayout(plot.Plots.Count);
+            int[][] displayLayout = GetPlotLayout(patch.Plots.Count);
             foreach (var row in displayLayout)
             {
                 foreach (var index in row)
@@ -182,13 +182,13 @@ namespace Autogardener.Windows.MainWindow
                     }
                     else
                     {
-                        if (index >= plot.Plots.Count)
+                        if (index >= patch.Plots.Count)
                         {
                             logService.Warning($"Planting hole index {index} is out of bounds");
                         }
                         else
                         {
-                            DrawPlotStatus(plot.Plots[index], (uint)index);
+                            DrawPlotStatus(patch, patch.Plots[index], (uint)index);
                         }
                     }
 
@@ -198,23 +198,24 @@ namespace Autogardener.Windows.MainWindow
             }           
         }
 
-        private void DrawPlotStatus(Plot hole, uint index)
+        private void DrawPlotStatus(PlotPatch patch, Plot plot, uint index)
         {
             ImGui.PushItemWidth(200);
             ImGui.PushStyleVar(ImGuiStyleVar.FrameBorderSize, 1f);
             ImGui.BeginChildFrame(index, new Vector2(200, 200));
-            ImGui.TextColored(LightGreen, globalData.GetSeedStringName(hole.CurrentSeed));
-            ImGui.TextColored(NeutralBrown, globalData.GetSoilStringName(hole.CurrentSoil));
-            ImGui.TextColored(NeutralGreen, $"Last tended: {GetHumanizedTimeElapsed(hole.LastTendedUtc)}");
-            ImGui.TextColored(MidDarkGreen, $"Last fertilized: {GetHumanizedTimeElapsed(hole.LastFertilizedUtc)}");
+            ImGui.TextColored(LightGreen, globalData.GetSeedStringName(plot.CurrentSeed));
+            ImGui.TextColored(NeutralBrown, globalData.GetSoilStringName(plot.CurrentSoil));
+            ImGui.TextColored(NeutralGreen, $"Last tended: {GetHumanizedTimeElapsed(plot.LastTendedUtc)}");
+            ImGui.TextColored(MidDarkGreen, $"Last fertilized: {GetHumanizedTimeElapsed(plot.LastFertilizedUtc)}");
 
-            if (hole.Design != null)
+            PlotDesign? design = patch.Design(plot);
+            if (design != null)
             {
                 ImGui.Separator();
                 ImGui.TextUnformatted("Plan:");
-                ImGui.TextColored(MidLightGreen, globalData.GetSeedStringName(hole.Design.DesignatedSeed));
-                ImGui.TextColored(MidDarkBrown, globalData.GetSoilStringName(hole.Design.DesignatedSoil));
-                ImGui.TextColored(NeutralGreen, $"Harvest: {(hole.Design.DoNotHarvest ? "Keep grown" : "Yes")}");
+                ImGui.TextColored(MidLightGreen, globalData.GetSeedStringName(design.DesignatedSeed));
+                ImGui.TextColored(MidDarkBrown, globalData.GetSoilStringName(design.DesignatedSoil));
+                ImGui.TextColored(NeutralGreen, $"Harvest: {(design.DoNotHarvest ? "Keep grown" : "Yes")}");
             }
             ImGui.EndChildFrame();
             ImGui.PopStyleVar();
