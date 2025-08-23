@@ -2,6 +2,7 @@ using Autogardener.Model;
 using Autogardener.Model.ActionChains;
 using Autogardener.Model.Plots;
 using Dalamud.Bindings.ImGui;
+using Dalamud.Interface;
 using Dalamud.Interface.Components;
 using System.Linq;
 
@@ -12,6 +13,7 @@ namespace Autogardener.Windows.MainWindow
         private void DrawChainedActionsTab()
         {
             var save = saveManager.GetCharacterSaveInMemory();
+            ImGuiComponents.IconButtonWithText(Dalamud.Interface.FontAwesomeIcon.BoltLightning, "Execute action chain", new Vector4(0.6f, 0.6f, 0, 1));
             DrawChainAddButtons(save);
             DrawChainList(save);
             ImGui.EndTabItem();
@@ -23,13 +25,13 @@ namespace Autogardener.Windows.MainWindow
             {
                 return;
             }
-            if (ImGui.Button("Add plot destination"))
+            if (ImGuiComponents.IconButtonWithText(FontAwesomeIcon.Leaf, "Add plot destination", MidDarkGreen))
             {
                 save.Actions.Add(new ChainedAction { Type = ChainedActionType.GoToPlot, PatchId = save.Plots.First().Id });
             }
             ImGuiComponents.HelpMarker("You will run to the plot and tend to it automatically");
             ImGui.SameLine();
-            if (ImGui.Button("Add chat command"))
+            if (ImGuiComponents.IconButtonWithText(FontAwesomeIcon.Computer, "Add chat command", Blue))
             {
                 save.Actions.Add(new ChainedAction { Type = ChainedActionType.ExecuteCommand });
             }
