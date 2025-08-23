@@ -9,6 +9,7 @@ namespace Autogardener.Modules.Tasks.IndividualTasks
     {
         public string TaskName { get; }
         protected readonly GameActions op;
+        private readonly bool softBailout; // On a bailout, skip this task and not the whole patch
         private const int MaxTaskAttempts = 50;
         private const int ConfirmationAttemptsBeforeRetry = 5;
         private int throttleTime = 33; // One frame at 30 fps
@@ -19,15 +20,21 @@ namespace Autogardener.Modules.Tasks.IndividualTasks
         
         
         private bool waitingConfirmation = false;
-        internal GardeningTaskBase(string name, GameActions op)
+        internal GardeningTaskBase(string name, GameActions op, bool softBailout = false)
         {
             TaskName = name;
             this.op = op;
+            this.softBailout = softBailout;
         }
 
         public abstract bool PreRun(Plot plot);
         public abstract bool Task(Plot plot);
         public abstract bool Confirmation(Plot plot);
+
+        public virtual void OnSoftBailout(Plot plot)
+        {
+            op.Log.Warning($"Soft bailout on task \"{TaskName}\"");
+        }
 
         // Run PreRun
         internal GardeningTaskResult Run(PlotTendScheduler scheduler)
@@ -40,6 +47,11 @@ namespace Autogardener.Modules.Tasks.IndividualTasks
 
             if (taskAttempts > MaxTaskAttempts)
             {
+                if (softBailout)
+                {
+                    OnSoftBailout(plot);
+                    return GardeningTaskResult.Bailout_Softbailout;
+                }
                 op.Log.Warning($"Task \"{TaskName}\" reached the max try amount. Bailing out. Attempts: {taskAttempts}. Confirmation attempts: {confirmationAttempts}");
                 return GardeningTaskResult.Bailout_RetriesExceeded;
             }

@@ -10,7 +10,7 @@ namespace Autogardener.Modules.Tasks.IndividualTasks
 {
     public class FertilizeTask : GardeningTaskBase
     {
-        public FertilizeTask(string name, ErrorMessageMonitor errorMonitor, GlobalData gData, GameActions op) : base(name, op)
+        public FertilizeTask(string name, ErrorMessageMonitor errorMonitor, GlobalData gData, GameActions op) : base(name, op, true)
         {
             this.errorMonitor = errorMonitor;
             this.gData = gData;
@@ -64,6 +64,12 @@ namespace Autogardener.Modules.Tasks.IndividualTasks
             }
 
             return couldNotUseFertilizer || currentQuantity < fertilizerCount;
+        }
+
+        public override void OnSoftBailout(Plot plot)
+        {
+            base.OnSoftBailout(plot);
+            op.ChatGui.PrintError($"Something is blocking fertilizing. Skipping for this plot.");
         }
     }
 }

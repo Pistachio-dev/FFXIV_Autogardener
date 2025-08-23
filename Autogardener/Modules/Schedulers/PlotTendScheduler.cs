@@ -172,6 +172,7 @@ namespace Autogardener.Modules.Schedulers
                     case GardeningTaskResult.Incomplete:
                         return;
                     case GardeningTaskResult.Complete:
+                    case GardeningTaskResult.Bailout_Softbailout:
                         currentTaskIndex++;
                         return;
                     case GardeningTaskResult.Bailout_RetriesExceeded:
