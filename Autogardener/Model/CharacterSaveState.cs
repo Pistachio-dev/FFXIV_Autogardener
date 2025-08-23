@@ -1,3 +1,4 @@
+using Autogardener.Model.ActionChains;
 using Autogardener.Model.Designs;
 using Autogardener.Model.Plots;
 
@@ -11,5 +12,7 @@ namespace Autogardener.Model
         {
             PlotPatchDesign.CreateEmptyWithSlots(8, "Default")
         };
+
+        public List<ChainedAction> Actions { get; set; } = new();
     }
 }

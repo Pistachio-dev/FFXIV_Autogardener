@@ -2,13 +2,10 @@ using Autogardener.Model;
 using Autogardener.Model.Designs;
 using Autogardener.Model.Plots;
 using Autogardener.Model.ResourcesCheck;
-using Dalamud.Game.ClientState.Objects;
-using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Game.Inventory;
 using Dalamud.Plugin.Services;
 using DalamudBasics.Logging;
 using DalamudBasics.SaveGames;
-using ECommons.Automation.NeoTaskManager;
 using System.Linq;
 
 namespace Autogardener.Modules
@@ -217,6 +214,18 @@ namespace Autogardener.Modules
             }
 
             return result;
+        }
+
+        public void RemoveAction(Guid guid)
+        {
+            var state = saveManager.GetCharacterSaveInMemory();
+            var elementToRemove = state.Actions.FirstOrDefault(a => a.Id == guid);
+            if (elementToRemove != null)
+            {
+                state.Actions.Remove(elementToRemove);
+                saveManager.WriteCharacterSave();
+            }
+            
         }
     }
 }
