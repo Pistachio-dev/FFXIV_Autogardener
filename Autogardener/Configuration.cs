@@ -16,6 +16,7 @@ public class Configuration : IConfiguration
 
     public bool Replant { get; set; } = true;
 
+    public bool Harvest { get; set; } = false;
     public bool ShowOnlyItemsInInventory { get; set; } = true;
 
     public int StepDelayInMs { get; set; } = 500;

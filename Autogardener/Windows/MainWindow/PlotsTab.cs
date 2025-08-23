@@ -81,6 +81,13 @@ namespace Autogardener.Windows.MainWindow
             }
             DrawTooltip("Cancel any actions running or scheduled");
 
+            bool harvest = config.Harvest;
+            if (ImGui.Checkbox("Harvest unless marked", ref harvest))
+            {
+                config.Harvest = harvest;
+                configService.SaveConfiguration();
+            }
+            DrawTooltip("Will harvest grown plants unless marked as \"Do not harvest\" on the design.");
             bool useFertilizer = config.UseFertilizer;
             if (ImGui.Checkbox("Use fertilizer", ref useFertilizer))
             {
@@ -94,7 +101,7 @@ namespace Autogardener.Windows.MainWindow
                 config.Replant = rePlant;
                 configService.SaveConfiguration();
             }
-            DrawTooltip("After harvesting a plant, will plant the seeds given in the design.");
+            DrawTooltip("After harvesting a plant, will plant the seeds given in the design.");            
 
         }
 

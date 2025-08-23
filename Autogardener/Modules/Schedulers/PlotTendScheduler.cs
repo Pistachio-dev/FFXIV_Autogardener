@@ -91,7 +91,7 @@ namespace Autogardener.Modules.Schedulers
 
         public void AddHarvestingTasks()
         {
-            if (patch.Design(Plot)?.DoNotHarvest ?? false)
+            if (!confService.GetConfiguration().Harvest || (patch.Design(Plot)?.DoNotHarvest ?? false))
             {
                 AddQuitTask();
                 AddFinishTask();
