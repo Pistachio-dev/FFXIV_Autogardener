@@ -1,6 +1,7 @@
 using Autogardener.Model;
 using Autogardener.Modules;
 using Autogardener.Modules.Actions;
+using Autogardener.Modules.Movement;
 using Autogardener.Modules.Schedulers;
 using Autogardener.Modules.Tasks;
 using Autogardener.Windows;
@@ -113,6 +114,7 @@ public sealed class Plugin : IDalamudPlugin
         serviceCollection.AddSingleton<HighLevelScheduler>();
         serviceCollection.AddSingleton<DataExtraction>();
         serviceCollection.AddSingleton<Inventory>();
+        serviceCollection.AddSingleton<MovementController>();
         return serviceCollection.BuildServiceProvider();
     }
 
@@ -123,6 +125,7 @@ public sealed class Plugin : IDalamudPlugin
         serviceProvider.GetRequiredService<IChatListener>().InitializeAndRun("[AG]");
         serviceProvider.GetRequiredService<ErrorMessageMonitor>().Attach();
         framework.Update += MakeSaveReady;
+        serviceProvider.GetRequiredService<MovementController>().Attach(framework);
     }
 
     private void OnCommand(string command, string args)

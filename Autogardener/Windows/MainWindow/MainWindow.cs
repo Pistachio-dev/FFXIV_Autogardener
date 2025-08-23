@@ -1,5 +1,6 @@
 using Autogardener.Model;
 using Autogardener.Modules;
+using Autogardener.Modules.Movement;
 using Autogardener.Modules.Schedulers;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Plugin.Services;
@@ -24,6 +25,7 @@ public partial class MainWindow : PluginWindowBase, IDisposable
     private IChatGui chatGui;
     public IConfigurationService<Configuration> configService;
     public HighLevelScheduler hlScheduler;
+    private MovementController movementController;
     
     private static readonly Vector4 LightGreen = new Vector4(0.769f, 0.9f, 0.6f, 1);
     private static readonly Vector4 MidLightGreen = new Vector4(0.58f, 0.75f, 0.37f, 1);
@@ -62,6 +64,8 @@ public partial class MainWindow : PluginWindowBase, IDisposable
         {
             saveManager.GetCharacterSaveInMemory();
         });
+
+        movementController = serviceProvider.GetRequiredService<MovementController>();
         
     }
 
@@ -81,9 +85,9 @@ public partial class MainWindow : PluginWindowBase, IDisposable
                 DrawDesignsTab(save);
                 ImGui.EndTabItem();
             }
-            if (ImGui.BeginTabItem("Other"))
+            if (ImGui.BeginTabItem("Chained actions"))
             {
-                ImGui.EndTabItem();
+                DrawChainedActionsTab();
             }
             ImGui.EndTabBar();
         }
