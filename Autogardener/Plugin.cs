@@ -100,7 +100,7 @@ public sealed class Plugin : IDalamudPlugin
         serviceCollection.AddAllDalamudBasicsServices<Configuration>(pluginInterface);
         string saveFileName = Path.Combine(pluginInterface.GetPluginConfigDirectory(), "SavedData.json");
         serviceCollection.AddSingleton<ISaveManager<CharacterSaveState>>(
-            (sp) => new SaveManager<CharacterSaveState>(saveFileName, logService, clientState));
+            (sp) => new SaveManager<CharacterSaveState>(saveFileName, logService, clientState, sp.GetRequiredService<IFramework>()));
         serviceCollection.AddSingleton<StringDebugUtils>();
         serviceCollection.AddSingleton<Utils>();
         serviceCollection.AddSingleton<PlotWatcher>();

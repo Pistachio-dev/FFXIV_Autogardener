@@ -25,6 +25,7 @@ public partial class MainWindow : PluginWindowBase, IDisposable
     private IChatGui chatGui;
     public IConfigurationService<Configuration> configService;
     public HighLevelScheduler hlScheduler;
+    private IClientState clientState;
     private MovementController movementController;
     
     private static readonly Vector4 LightGreen = new Vector4(0.769f, 0.9f, 0.6f, 1);
@@ -59,6 +60,7 @@ public partial class MainWindow : PluginWindowBase, IDisposable
         chatGui = serviceProvider.GetRequiredService<IChatGui>();
         configService = serviceProvider.GetRequiredService<IConfigurationService<Configuration>>();
         hlScheduler = serviceProvider.GetRequiredService<HighLevelScheduler>();
+        clientState = serviceProvider.GetRequiredService<IClientState>();
         
         framework.RunOnFrameworkThread(() =>
         {
@@ -71,9 +73,21 @@ public partial class MainWindow : PluginWindowBase, IDisposable
 
     protected override unsafe void SafeDraw()
     {
-        if (ImGui.BeginTabBar("MainTabBar"))
+        var save = saveManager.GetCharacterSaveInMemory();
+        if (save == null)
         {
-            var save = saveManager.GetCharacterSaveInMemory();
+            ImGui.TextUnformatted("Save load/creation failed!");
+            return;
+        }
+        
+        if (!clientState.IsLoggedIn)
+        {
+            ImGui.TextUnformatted("Not logged in.");
+            return;
+        }
+
+        if (ImGui.BeginTabBar("MainTabBar"))
+        {           
             if (ImGui.BeginTabItem("Plots"))
             {
 
