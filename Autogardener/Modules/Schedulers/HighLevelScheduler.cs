@@ -110,6 +110,7 @@ namespace Autogardener.Modules.Schedulers
             {
                 schedulerQueue.Dequeue();
                 Tick(framework);
+                return;
             }
 
             schedulerQueue.Peek().Tick();
