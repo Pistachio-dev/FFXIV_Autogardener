@@ -14,11 +14,11 @@
       "gardening"
     ],
     "DalamudApiLevel": 13,
-    "AssemblyVersion": "0.2.0.0",
-    "Changelog": "- Added automovement to garden patches. This can also be used as a chain of plots and chat commands to automatically tend multiple plots in a row. For instance, tend two at your private state, then us /li fc from Lifestream, and tend to other three in the FC house.\n- Fixed system getting stuck if you try to harvest with a full inventory\n- If the plugin gets stuck on Fertilizing, it just skips the step instead of the whole plot",
-    "DownloadLinkInstall": "https://github.com/Pistachio-dev/FFXIV_Autogardener/releases/download/0.2.0.0_release/Autogardener.zip",
-    "DownloadLinkUpdate": "https://github.com/Pistachio-dev/FFXIV_Autogardener/releases/download/0.2.0.0_release/Autogardener.zip",
-    "LastUpdate": 1755980283,
+    "AssemblyVersion": "0.2.0.1",
+    "Changelog": "- Tweaked Fertilize task\n- Added a toggle to disable autoharvest\n- Updated scarecrow picture with positionals",
+    "DownloadLinkInstall": "https://github.com/Pistachio-dev/FFXIV_Autogardener/releases/download/0.2.0.1_release/Autogardener.zip",
+    "DownloadLinkUpdate": "https://github.com/Pistachio-dev/FFXIV_Autogardener/releases/download/0.2.0.1_release/Autogardener.zip",
+    "LastUpdate": 1755989926,
     "InternalName": "Autogardener"
   }
 ]
