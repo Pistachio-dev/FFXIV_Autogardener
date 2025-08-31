@@ -27,8 +27,8 @@ namespace Autogardener.Windows.MainWindow
                 ImGui.BeginDisabled();
             }
             string newDesignButtonText = nearestPlot == null
-                ? "Create new design for nearest plot"
-                : $"Create new design for {nearestPlot.Name}";
+                ? "Create new design for nearest plot's format"
+                : $"Create new design for {(nearestPlot.IsFlowerpot ? "Flowerpot" : $"patch with {nearestPlot.Plots.Count} slots")}";
             if (ImGuiComponents.IconButtonWithText(FontAwesomeIcon.PaintBrush, newDesignButtonText, NeutralGreen))
             {
                 currentDesign = storedDataActions.CreateNewDesign();
