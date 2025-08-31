@@ -21,7 +21,8 @@ namespace Autogardener.Modules
 
         private readonly ILogService logService;
         private readonly IClientState clientState;
-        
+        private readonly IChatGui chatGui;
+
         public string GetSeedStringName(uint id)
         {
             if (Seeds.ContainsKey(id))
@@ -66,10 +67,11 @@ namespace Autogardener.Modules
 
         public Dictionary<uint, Addon> AddonText { get; set; }
 
-        public GlobalData(ILogService logService, IClientState clientState)
+        public GlobalData(ILogService logService, IClientState clientState, IChatGui chatGui)
         {
             this.logService = logService;
             this.clientState = clientState;
+            this.chatGui = chatGui;
             LoadGlobalData(); // Do a lazy load later.
         }
 
@@ -87,17 +89,22 @@ namespace Autogardener.Modules
 
         public string GetGardeningOptionStringLocalized(GardeningStrings option)
         {
+            if (clientState.ClientLanguage == Dalamud.Game.ClientLanguage.Japanese)
+            {
+                chatGui.PrintError("Japanese language is not supported, sorry");
+                throw new NotImplementedException();
+            }
             return clientState.ClientLanguage switch
             {
-                Dalamud.Game.ClientLanguage.English => GardeningStringsEnglish[option],
-                Dalamud.Game.ClientLanguage.French => GardeningStringsFrench[option],
-                Dalamud.Game.ClientLanguage.German => GardeningStringsGerman[option],
-                Dalamud.Game.ClientLanguage.Japanese => GardeningStringsJapanese[option],
+                Dalamud.Game.ClientLanguage.English => gardeningStringsEnglish[option],
+                Dalamud.Game.ClientLanguage.French => gardeningStringsFrench[option],
+                Dalamud.Game.ClientLanguage.German => gardeningStringsGerman[option],
+                Dalamud.Game.ClientLanguage.Japanese => throw new NotImplementedException(),
                 _ => throw new NotImplementedException()
             };
         }
 
-        private Dictionary<GardeningStrings, string> GardeningStringsFrench = new()
+        private readonly Dictionary<GardeningStrings, string> gardeningStringsFrench = new()
         {
             { GardeningStrings.PlantSeeds, "Ensemencer" },
             { GardeningStrings.Fertilize, "Mettre de l'engrais" },
@@ -111,43 +118,20 @@ namespace Autogardener.Modules
             { GardeningStrings.ForUseInPlanters, "Réservé aux pots de fleurs"}
         };
 
-        private Dictionary<GardeningStrings, string> GardeningStringsEnglish = new()
+        private readonly Dictionary<GardeningStrings, string> gardeningStringsGerman = new()
         {
-            { GardeningStrings.PlantSeeds, "Plant Seeds" },
-            { GardeningStrings.Fertilize, "Fertilize Crop" },
-            { GardeningStrings.TendCrop, "Tend Crop" },
-            { GardeningStrings.RemoveCrop, "Remove Crop" },
-            { GardeningStrings.HarvestCrop, "Harvest Crop" },
-            { GardeningStrings.Quit, "Quit" },
-            { GardeningStrings.Growing, "This crop is doing well." },// Has the plant name in the line above it
-            { GardeningStrings.Purple, "This crop has seen better days." },
-            { GardeningStrings.ReadyToHarvest, "This crop is ready to be harvested." }, // Has the plant name in the line above it
-            { GardeningStrings.Shard, "Shard" },
-            { GardeningStrings.xLight, "light" }, // Has the plant name in the line above it
-            { GardeningStrings.AlreadyFertilized, "This crop has already been sufficiently fertilized."},
-            { GardeningStrings.NotEnoughInventorySpace, "Unable to obtain item. Insufficient inventory space."},
-            { GardeningStrings.ForUseInPlanters, "For use in planters"}
+            { GardeningStrings.PlantSeeds, "Aussäen" },
+            { GardeningStrings.Fertilize, "Düngen" },
+            { GardeningStrings.TendCrop, "Pflegen" },
+            { GardeningStrings.RemoveCrop, "Pflanze vernichten" },
+            { GardeningStrings.HarvestCrop, "Ernten" },
+            { GardeningStrings.Quit, "Abbrechen" },
+            { GardeningStrings.AlreadyFertilized, "Diese Pflanze ist bereits ausreichend gedüngt."},
+            { GardeningStrings.NotEnoughInventorySpace, "Du kannst den Gegenstand nicht annehmen, weil du keinen Platz im Inventar hast."},
+            { GardeningStrings.ForUseInPlanters, "Zur Anpflanzung in einem Blumentopf."}
         };
 
-        private Dictionary<GardeningStrings, string> GardeningStringsGerman = new()
-        {
-            { GardeningStrings.PlantSeeds, "Plant Seeds" },
-            { GardeningStrings.Fertilize, "Fertilize Crop" },
-            { GardeningStrings.TendCrop, "Tend Crop" },
-            { GardeningStrings.RemoveCrop, "Remove Crop" },
-            { GardeningStrings.HarvestCrop, "Harvest Crop" },
-            { GardeningStrings.Quit, "Quit" },
-            { GardeningStrings.Growing, "This crop is doing well." },// Has the plant name in the line above it
-            { GardeningStrings.Purple, "This crop has seen better days." },
-            { GardeningStrings.ReadyToHarvest, "This crop is ready to be harvested." }, // Has the plant name in the line above it
-            { GardeningStrings.Shard, "Shard" },
-            { GardeningStrings.xLight, "light" }, // Has the plant name in the line above it
-            { GardeningStrings.AlreadyFertilized, "This crop has already been sufficiently fertilized."},
-            { GardeningStrings.NotEnoughInventorySpace, "Unable to obtain item. Insufficient inventory space."},
-            { GardeningStrings.ForUseInPlanters, "For use in planters"}
-        };
-
-        private Dictionary<GardeningStrings, string> GardeningStringsJapanese = new()
+        private readonly Dictionary<GardeningStrings, string> gardeningStringsEnglish = new()
         {
             { GardeningStrings.PlantSeeds, "Plant Seeds" },
             { GardeningStrings.Fertilize, "Fertilize Crop" },

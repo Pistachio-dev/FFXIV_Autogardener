@@ -1,11 +1,7 @@
-using Autogardener.Model.Plots;
+using Dalamud.Plugin.Services;
 using DalamudBasics.Logging;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace Autogardener.Modules.Actions
 {
@@ -13,11 +9,13 @@ namespace Autogardener.Modules.Actions
     {
         private readonly ILogService logService;
         private readonly GlobalData globalData;
+        private readonly IClientState clientState;
 
-        public DataExtraction(ILogService logService, GlobalData globalData)
+        public DataExtraction(ILogService logService, GlobalData globalData, IClientState clientState)
         {
             this.logService = logService;
             this.globalData = globalData;
+            this.clientState = clientState;
         }            
 
         public (uint id, string name) ExtractPlantNameAndId(string dialogueText)
@@ -31,7 +29,7 @@ namespace Autogardener.Modules.Actions
             var plantName = matches[0].Groups[0].Value;
 
             var result = SearchSeed(plantName);
-            if (result.id == 0)
+            if (result.id == 0 && clientState.ClientLanguage == Dalamud.Game.ClientLanguage.English)
             {
                 return ExtractXlightNameAndId(plantName);
             }
