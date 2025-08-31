@@ -189,9 +189,10 @@ namespace Autogardener.Windows.MainWindow
                     }
                     else
                     {
-                        if (index >= patch.Plots.Count)
+                        if (index > patch.Plots.Count)
                         {
                             logService.Warning($"Planting hole index {index} is out of bounds");
+                            return;
                         }
                         else
                         {

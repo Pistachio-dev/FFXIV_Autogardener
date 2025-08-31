@@ -16,6 +16,7 @@ namespace Autogardener.Model.Designs
 
         public Guid Id { get; set; } = Guid.NewGuid();
 
+        public bool IsFlowerpot => PlotDesigns.Count == 1;
         public string Name { get; set; } = "New design";
 
         public string Description { get; set; } = string.Empty;

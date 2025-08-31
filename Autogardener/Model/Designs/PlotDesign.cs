@@ -5,7 +5,7 @@ namespace Autogardener.Model.Designs
         public PlotDesign(int relativeIndex)
         {
             RelativeIndex = relativeIndex;
-        }
+        }       
         public uint DesignatedSeed { get; set; } //ItemId
         public uint DesignatedSoil { get; set; } //ItemId
         public bool DoNotHarvest { get; set; } // For those plants that you leave up, for interbreeding

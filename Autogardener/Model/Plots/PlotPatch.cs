@@ -12,6 +12,7 @@ namespace Autogardener.Model.Plots
 
         public Guid Id { get; set; } = Guid.NewGuid();
 
+        public bool IsFlowerpot => Plots.Count == 1;
         public string DesignName => AppliedDesign?.Design.Name ?? "Unassigned plan";
         public AppliedPlotPatchDesign? AppliedDesign { get; set; } = null;
 

@@ -57,13 +57,16 @@ namespace Autogardener.Modules.Actions
             return !(TryGetAddonByName<AtkUnitBase>("HousingGardening", out var gardeningAddon) && gardeningAddon->IsVisible);
         }
 
-        public unsafe bool PickSeeds(uint seedItemId)
+        public unsafe bool PickSeeds(uint seedItemId, bool isFlowerpot)
         {
             if (!TryGetAddonByName<AtkUnitBase>("HousingGardening", out var gardeningAddon))
             {
                 return false;
             }
-            var seedIndex = GetIndexFromCollection(gData.Seeds.Keys.ToHashSet(), seedItemId);
+            var seedIndex = isFlowerpot
+                ? GetIndexFromCollection(gData.SeedsIncludingFlowerpots.Keys.ToHashSet(), seedItemId)
+                : GetIndexFromCollection(gData.Seeds.Keys.ToHashSet(), seedItemId);
+            log.Info($"Use flower pot seeds: {isFlowerpot}");
             log.Info($"Seed: {seedItemId}");
 
             return TryClickItem(gardeningAddon, 2, seedIndex);

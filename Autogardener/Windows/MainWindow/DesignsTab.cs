@@ -13,6 +13,8 @@ namespace Autogardener.Windows.MainWindow
         private int currentDesign = 0;
         private uint[] seedIds;
         private string[] seedNames;
+        private uint[] seedIdsIncludingFlowerpots;
+        private string[] seedNamesIncludingFlowerpots;
         private uint[] soilIds;
         private string[] soilNames;
 
@@ -138,15 +140,27 @@ namespace Autogardener.Windows.MainWindow
             return false;
 
         }
+        private void DrawSeedSelector(uint[] itemIds, string[] itemNames, PlotDesign design, uint index)
+        {
+            var seedComboIndex = design.DesignatedSeed == 0 ? 0 : itemIds.IndexOf(design.DesignatedSeed);
+            if (ImGui.Combo($"Seed##design{index}", ref seedComboIndex, itemNames, itemNames.Length) && currentDesign != 0)
+            {
+                design.DesignatedSeed = itemIds[seedComboIndex];
+                saveManager.WriteCharacterSave();
+            }
+        }
         private void DrawPlotDesign(PlotDesign design, uint index, PlotPatchDesign parentPatchDesign)
         {
             ImGui.PushStyleVar(ImGuiStyleVar.FrameBorderSize, 1f);
             ImGui.BeginChildFrame(100 + index, new Vector2(200, 200));
-            var seedComboIndex = design.DesignatedSeed == 0 ? 0 : seedIds.IndexOf(design.DesignatedSeed);
-            if (ImGui.Combo($"Seed##design{index}", ref seedComboIndex, seedNames, seedNames.Length) && currentDesign != 0)
+            
+            if (parentPatchDesign.IsFlowerpot)
+            {                
+                DrawSeedSelector(seedIdsIncludingFlowerpots, seedNamesIncludingFlowerpots, design, index);
+            }
+            else
             {
-                design.DesignatedSeed = seedIds[seedComboIndex];
-                saveManager.WriteCharacterSave();
+                DrawSeedSelector(seedIds, seedNames, design, index);
             }
 
             var soilComboIndex = design.DesignatedSoil == 0 ? 0 : soilIds.IndexOf(design.DesignatedSoil);
@@ -186,6 +200,7 @@ namespace Autogardener.Windows.MainWindow
 
             GenerateOrderedCollection(globalData.Seeds, out seedIds, out seedNames, filter);
             GenerateOrderedCollection(globalData.Soils, out soilIds, out soilNames, filter);
+            GenerateOrderedCollection(globalData.SeedsIncludingFlowerpots, out seedIdsIncludingFlowerpots, out seedNamesIncludingFlowerpots, filter);
         }
 
         private void GenerateOrderedCollection(Dictionary<uint, Lumina.Excel.Sheets.Item> original,

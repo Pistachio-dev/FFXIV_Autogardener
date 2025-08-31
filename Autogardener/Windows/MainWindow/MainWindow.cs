@@ -124,11 +124,11 @@ public partial class MainWindow : PluginWindowBase, IDisposable
         switch (plotCount)
         {
             case 1:
-                return [[1]]; // Pot
+                return [[0]]; // Pot
             case 4:
-                return [[1, 2], [3, 4]]; // Round garden patch
+                return [[0, 1], [2,3]]; // Round garden patch
             case 6:
-                return [[1, 2, 3], [4, 5, 6]]; // Oblong garden patch
+                return [[0, 1, 2], [3, 4, 5]]; // Oblong garden patch
             case 8:
                 return [[7, 6, 5],
                             [0, 9 ,4],

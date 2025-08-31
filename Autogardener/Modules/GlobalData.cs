@@ -59,6 +59,7 @@ namespace Autogardener.Modules
         }
 
         public Dictionary<uint, Item> Seeds { get; set; }
+        public Dictionary<uint, Item> SeedsIncludingFlowerpots { get; set; }
         public Dictionary<uint, Item> FlowerpotSeeds { get; set; }
         public Dictionary<uint, Item> Soils { get; set; }
         public Dictionary<uint, Item> Fertilizers { get; set; }
@@ -74,11 +75,11 @@ namespace Autogardener.Modules
 
         public void LoadGlobalData()
         {
-            var allSeeds = Svc.Data.GetExcelSheet<Item>().Where(x => x.ItemUICategory.RowId == 82 && x.FilterGroup == 20).ToDictionary(x => x.RowId, x => x);
+            SeedsIncludingFlowerpots = Svc.Data.GetExcelSheet<Item>().Where(x => x.ItemUICategory.RowId == 82 && x.FilterGroup == 20).ToDictionary(x => x.RowId, x => x);
             string flowerPotSignString = GetGardeningOptionStringLocalized(GardeningStrings.ForUseInPlanters);
-            FlowerpotSeeds = allSeeds.Where(item => item.Value.Description.ToString()
+            FlowerpotSeeds = SeedsIncludingFlowerpots.Where(item => item.Value.Description.ToString()
                 .Contains(flowerPotSignString, StringComparison.OrdinalIgnoreCase)).ToDictionary();
-            Seeds = allSeeds.Except(FlowerpotSeeds).ToDictionary();
+            Seeds = SeedsIncludingFlowerpots.Except(FlowerpotSeeds).ToDictionary();
             Soils = Svc.Data.GetExcelSheet<Item>().Where(x => x.ItemUICategory.RowId == 82 && x.FilterGroup == 21).ToDictionary(x => x.RowId, x => x);
             Fertilizers = Svc.Data.GetExcelSheet<Item>().Where(x => x.ItemUICategory.RowId == 82 && x.FilterGroup == 22).ToDictionary(x => x.RowId, x => x);
             AddonText = Svc.Data.GetExcelSheet<Addon>().ToDictionary(x => x.RowId, x => x);

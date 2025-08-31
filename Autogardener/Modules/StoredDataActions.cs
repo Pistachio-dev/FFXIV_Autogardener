@@ -78,6 +78,7 @@ namespace Autogardener.Modules
             var index = state.Designs.Count;
             var slots = GetNearestTrackedPlotPatch(false)?.Plots.Count ?? 8;
             state.Designs.Add(PlotPatchDesign.CreateEmptyWithSlots(slots, $"New design {index}"));
+            logService.Info($"Created new design with {slots} slots");
             logService.Info($"Current design count: {state.Designs.Count}");
             saveManager.WriteCharacterSave();
             return index;
@@ -206,7 +207,7 @@ namespace Autogardener.Modules
                 for (int i = 0; i < subInv.Length; i++)
                 {
                     GameInventoryItem slot = subInv[i];
-                    if (globalData.Seeds.ContainsKey(slot.ItemId) || globalData.Soils.ContainsKey(slot.ItemId))
+                    if (globalData.SeedsIncludingFlowerpots.ContainsKey(slot.ItemId) || globalData.Soils.ContainsKey(slot.ItemId))
                     {
                         result.Add(slot.ItemId);
                     }
