@@ -99,7 +99,7 @@ namespace Autogardener.Modules
 
         private Dictionary<GardeningStrings, string> GardeningStringsFrench = new()
         {
-            { GardeningStrings.PlantSeeds, "Ensemecer" },
+            { GardeningStrings.PlantSeeds, "Ensemencer" },
             { GardeningStrings.Fertilize, "Mettre de l'engrais" },
             { GardeningStrings.TendCrop, "Entretenir" },
             { GardeningStrings.RemoveCrop, "Arracher" },
