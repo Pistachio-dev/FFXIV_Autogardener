@@ -141,6 +141,7 @@ namespace Autogardener.Modules.Schedulers
             taskQueue.AddLast(new PickSoilTask("Pick soil", patch,op));
             taskQueue.AddLast(new ConfirmGardeningAddonTask("Click confirm on gardening addon", op));
             taskQueue.AddLast(new AcceptGardeningAddonYesNoTask("Click yes on gardening addon confirmation", op));
+            taskQueue.AddLast(new WriteNewlyPlantedInfoToPlot("Save info of what was planted", patch, op));
             AddTasksToGetBackToOptionsMenu();
             AddTasksConditionally();
         }
