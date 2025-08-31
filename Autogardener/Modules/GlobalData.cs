@@ -1,12 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Dalamud.Plugin.Services;
-using Dalamud.Utility;
 using DalamudBasics.Logging;
 using Lumina.Excel.Sheets;
+using System.Linq;
 
 namespace Autogardener.Modules
 {
@@ -64,6 +59,7 @@ namespace Autogardener.Modules
         }
 
         public Dictionary<uint, Item> Seeds { get; set; }
+        public Dictionary<uint, Item> FlowerpotSeeds { get; set; }
         public Dictionary<uint, Item> Soils { get; set; }
         public Dictionary<uint, Item> Fertilizers { get; set; }
 
@@ -78,7 +74,11 @@ namespace Autogardener.Modules
 
         public void LoadGlobalData()
         {
-            Seeds = Svc.Data.GetExcelSheet<Item>().Where(x => x.ItemUICategory.RowId == 82 && x.FilterGroup == 20).ToDictionary(x => x.RowId, x => x);
+            var allSeeds = Svc.Data.GetExcelSheet<Item>().Where(x => x.ItemUICategory.RowId == 82 && x.FilterGroup == 20).ToDictionary(x => x.RowId, x => x);
+            string flowerPotSignString = GetGardeningOptionStringLocalized(GardeningStrings.ForUseInPlanters);
+            FlowerpotSeeds = allSeeds.Where(item => item.Value.Description.ToString()
+                .Contains(flowerPotSignString, StringComparison.OrdinalIgnoreCase)).ToDictionary();
+            Seeds = allSeeds.Except(FlowerpotSeeds).ToDictionary();
             Soils = Svc.Data.GetExcelSheet<Item>().Where(x => x.ItemUICategory.RowId == 82 && x.FilterGroup == 21).ToDictionary(x => x.RowId, x => x);
             Fertilizers = Svc.Data.GetExcelSheet<Item>().Where(x => x.ItemUICategory.RowId == 82 && x.FilterGroup == 22).ToDictionary(x => x.RowId, x => x);
             AddonText = Svc.Data.GetExcelSheet<Addon>().ToDictionary(x => x.RowId, x => x);
@@ -107,7 +107,8 @@ namespace Autogardener.Modules
             { GardeningStrings.Shard, "Shard" },
             { GardeningStrings.xLight, "light" }, // Has the plant name in the line above it
             { GardeningStrings.AlreadyFertilized, "This crop has already been sufficiently fertilized."},
-            { GardeningStrings.NotEnoughInventorySpace, "Unable to obtain item. Insufficient inventory space."}
+            { GardeningStrings.NotEnoughInventorySpace, "Unable to obtain item. Insufficient inventory space."},
+            { GardeningStrings.ForUseInPlanters, "For use in planters"}
         };
 
         public enum GardeningStrings
@@ -125,6 +126,7 @@ namespace Autogardener.Modules
             xLight,
             AlreadyFertilized,
             NotEnoughInventorySpace,
+            ForUseInPlanters
         }
     }
 }
