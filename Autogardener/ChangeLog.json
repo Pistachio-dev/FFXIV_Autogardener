@@ -1,5 +1,11 @@
 [
   {
+    "AssemblyVersion": "0.2.1.0",
+    "DalamudApiLevel": 13,
+    "ChangeLog": "- Fixed save manager loading an empty save before login and then not updating it on character login\nFixed some errors happening when not logged in",
+    "IsTest": false
+  },
+  {
     "AssemblyVersion": "0.2.0.1",
     "DalamudApiLevel": 13,
     "ChangeLog": "- Tweaked Fertilize task\n- Added a toggle to disable autoharvest\n- Updated scarecrow picture with positionals",

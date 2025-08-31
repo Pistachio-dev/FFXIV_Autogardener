@@ -14,11 +14,11 @@
       "gardening"
     ],
     "DalamudApiLevel": 13,
-    "AssemblyVersion": "0.2.0.1",
-    "Changelog": "- Tweaked Fertilize task\n- Added a toggle to disable autoharvest\n- Updated scarecrow picture with positionals",
-    "DownloadLinkInstall": "https://github.com/Pistachio-dev/FFXIV_Autogardener/releases/download/0.2.0.1_release/Autogardener.zip",
-    "DownloadLinkUpdate": "https://github.com/Pistachio-dev/FFXIV_Autogardener/releases/download/0.2.0.1_release/Autogardener.zip",
-    "LastUpdate": 1755989926,
+    "AssemblyVersion": "0.2.1.0",
+    "Changelog": "- Fixed save manager loading an empty save before login and then not updating it on character login\nFixed some errors happening when not logged in",
+    "DownloadLinkInstall": "https://github.com/Pistachio-dev/FFXIV_Autogardener/releases/download/0.2.1.0_release/Autogardener.zip",
+    "DownloadLinkUpdate": "https://github.com/Pistachio-dev/FFXIV_Autogardener/releases/download/0.2.1.0_release/Autogardener.zip",
+    "LastUpdate": 1756126093,
     "InternalName": "Autogardener"
   }
 ]
