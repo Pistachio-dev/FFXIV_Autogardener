@@ -14,11 +14,11 @@
       "gardening"
     ],
     "DalamudApiLevel": 13,
-    "AssemblyVersion": "0.2.1.0",
-    "Changelog": "- Fixed save manager loading an empty save before login and then not updating it on character login\nFixed some errors happening when not logged in",
-    "DownloadLinkInstall": "https://github.com/Pistachio-dev/FFXIV_Autogardener/releases/download/0.2.1.0_release/Autogardener.zip",
-    "DownloadLinkUpdate": "https://github.com/Pistachio-dev/FFXIV_Autogardener/releases/download/0.2.1.0_release/Autogardener.zip",
-    "LastUpdate": 1756126093,
+    "AssemblyVersion": "0.3.0.0",
+    "Changelog": "- Fixed seeds and soils indexes being mixed. Woopsie.\n- Fixed having flowerpot-only seeds messing up planting outdoors\n- Added support for flowerpots\n- Added support for french and german language clients\n- Planting with the plugin now also updates the data for the plot\n- The button to create a new design now mentions the number of slots in the nearest plot, instead of the name",
+    "DownloadLinkInstall": "https://github.com/Pistachio-dev/FFXIV_Autogardener/releases/download/0.3.0.0_release/Autogardener.zip",
+    "DownloadLinkUpdate": "https://github.com/Pistachio-dev/FFXIV_Autogardener/releases/download/0.3.0.0_release/Autogardener.zip",
+    "LastUpdate": 1756671469,
     "InternalName": "Autogardener"
   }
 ]
