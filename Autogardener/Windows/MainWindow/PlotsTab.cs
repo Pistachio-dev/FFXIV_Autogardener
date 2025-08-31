@@ -54,10 +54,11 @@ namespace Autogardener.Windows.MainWindow
                 }
 
                 DrawDesignSelector(plot, save);
+                ImGuiComponents.HelpMarker("If you made changes to the design and they don't show, try reselecting it.");
                 if (plot.AppliedDesign?.Design != null)
                 {
                     DrawDesignItems(plot.AppliedDesign.Design);
-                }
+                }                
                 
                 DrawCurrentPlot(save.Plots[currentPlot]);
 
