@@ -66,7 +66,7 @@ namespace Autogardener.Modules.Actions
             var seedIndex = GetIndexFromCollection(gData.Seeds.Keys.ToHashSet(), seedItemId);
             log.Info($"Seed: {seedItemId}");
 
-            return TryClickItem(gardeningAddon, 1, seedIndex);
+            return TryClickItem(gardeningAddon, 2, seedIndex);
         }
 
         public unsafe bool PickSoil(uint soilItemId)
@@ -78,7 +78,7 @@ namespace Autogardener.Modules.Actions
             var soilIndex = GetIndexFromCollection(gData.Soils.Keys.ToHashSet(), soilItemId);
             log.Info($"Soil: {soilItemId}");
 
-            return TryClickItem(gardeningAddon, 2, soilIndex);
+            return TryClickItem(gardeningAddon, 1, soilIndex);
         }
 
         private unsafe int GetIndexFromCollection(HashSet<uint> idCollection, uint targetId)
