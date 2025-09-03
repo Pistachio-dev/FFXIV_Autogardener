@@ -122,9 +122,11 @@ namespace Autogardener.Modules
                 
                 foreach (var patch in FilterByTerritory(patches))
                 {
-                    var gameObject = territoryWatcher.IsTerritoryResidentialIndoors()
-                        ? objectTable.FirstOrDefault(o => o.GameObjectId == patch.Plots.FirstOrDefault()?.GameObjectId)
-                        : objectTable.EventObjects.FirstOrDefault(o => o.GameObjectId == patch.Plots.FirstOrDefault()?.GameObjectId);
+                    var gameObject = objectTable.EventObjects.FirstOrDefault(o => o.GameObjectId == patch.Plots.FirstOrDefault()?.GameObjectId);
+                    if (gameObject == null)
+                    {
+                        gameObject = objectTable.FirstOrDefault(o => o.GameObjectId == patch.Plots.FirstOrDefault()?.GameObjectId);
+                    }
                     if (gameObject == null)
                     {
                         if (warnOfMissing)

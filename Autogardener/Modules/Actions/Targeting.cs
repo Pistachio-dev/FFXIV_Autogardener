@@ -50,7 +50,11 @@ namespace Autogardener.Modules.Actions
         {
             logService.Warning($"ObjectId searched: {gameObjectId}");
             logService.Warning($"TargetObjectId: {targetManager.Target?.GameObjectId} type {targetManager.Target?.ObjectKind}");            
-            var go = objectTable.FirstOrDefault(go => go.GameObjectId == gameObjectId);            
+            var go = objectTable.EventObjects.FirstOrDefault(go => go.GameObjectId == gameObjectId);
+            if (go == null)
+            {
+                objectTable.EventObjects.FirstOrDefault(go => go.GameObjectId == gameObjectId);
+            }
             logService.Warning("Index:" + go?.ObjectIndex.ToString());
             logService.Warning($"GameObject searched: {go?.GameObjectId}: {go?.Position}");
             logService.Warning($"Player: {clientState.LocalPlayer?.Position}");
