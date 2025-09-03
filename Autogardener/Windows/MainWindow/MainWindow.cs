@@ -1,4 +1,5 @@
 using Autogardener.Model;
+using Autogardener.Model.Plots;
 using Autogardener.Modules;
 using Autogardener.Modules.Movement;
 using Autogardener.Modules.Schedulers;
@@ -9,6 +10,8 @@ using DalamudBasics.GUI.Windows;
 using DalamudBasics.Logging;
 using DalamudBasics.SaveGames;
 using ECommons.Automation.NeoTaskManager;
+using ECommons.Throttlers;
+using Lumina.Excel.Sheets;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Autogardener.Windows.MainWindow;
@@ -26,6 +29,7 @@ public partial class MainWindow : PluginWindowBase, IDisposable
     public IConfigurationService<Configuration> configService;
     public HighLevelScheduler hlScheduler;
     private IClientState clientState;
+    private IDataManager dataManager;
     private MovementController movementController;
     
     private static readonly Vector4 LightGreen = new Vector4(0.769f, 0.9f, 0.6f, 1);
@@ -61,6 +65,7 @@ public partial class MainWindow : PluginWindowBase, IDisposable
         configService = serviceProvider.GetRequiredService<IConfigurationService<Configuration>>();
         hlScheduler = serviceProvider.GetRequiredService<HighLevelScheduler>();
         clientState = serviceProvider.GetRequiredService<IClientState>();
+        dataManager = serviceProvider.GetRequiredService<IDataManager>();
         
         framework.RunOnFrameworkThread(() =>
         {
@@ -136,6 +141,17 @@ public partial class MainWindow : PluginWindowBase, IDisposable
             default:
                 return [];
         }
+    }
+
+    private PlotPatch? lastNearestPlot = null;
+    private PlotPatch? GetNearestPlotThrottled()
+    {
+        if (EzThrottler.Throttle("Plot scan", 300))
+        {
+            lastNearestPlot = storedDataActions.GetNearestTrackedPlotPatch(false);
+        }
+        
+        return lastNearestPlot;
     }
     public void Dispose()
     { }   

@@ -18,8 +18,8 @@ namespace Autogardener.Windows.MainWindow
 
 
         private void DrawPlotsTab(CharacterSaveState save)
-        {            
-            var nearestPlot = storedDataActions.GetNearestTrackedPlotPatch(false);
+        {
+            var nearestPlot = GetNearestPlotThrottled();
             if (nearestPlot != null)
             {
                 ImGui.TextUnformatted("Nearest plot:");
@@ -32,7 +32,7 @@ namespace Autogardener.Windows.MainWindow
                 ImGui.TextUnformatted("Too far away from any registered plot");
             }
 
-            if (ImGuiComponents.IconButtonWithText(FontAwesomeIcon.Search, "Scan nearest plot", Blue))
+            if (ImGuiComponents.IconButtonWithText(FontAwesomeIcon.Search, "Scan nearby plots", Blue))
             {
                 storedDataActions.RegisterNearestPlotPatch();
                 currentPlot = Math.Max(0, save.Plots.IndexOf(p => p.Id == storedDataActions.GetNearestTrackedPlotPatch(false)?.Id));
