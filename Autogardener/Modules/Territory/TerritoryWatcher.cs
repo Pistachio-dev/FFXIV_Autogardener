@@ -44,8 +44,6 @@ public class TerritoryWatcher
         });
     }
 
-    public bool IsDataReliable() => LastHousingOutdoorTerritory != 0;
-
     private void ClientState_TerritoryChanged(ushort obj)
     {
         if(TerritoryUtils.IsTerritoryResidentialDistrict(obj))
@@ -82,6 +80,12 @@ public class TerritoryWatcher
         };
 
         return $"{areaName}{houseName}";
+    }
+
+    public bool IsTerritoryResidentialIndoors()
+    {
+        var territory = clientState.TerritoryType;
+        return (TerritoryUtils.IsInsideHouse(territory) || TerritoryUtils.IsInsidePrivateChambers(territory));
     }
 
     public string GetTerritoryPrefix()

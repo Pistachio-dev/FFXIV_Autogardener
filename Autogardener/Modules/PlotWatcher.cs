@@ -119,21 +119,24 @@ namespace Autogardener.Modules
             if (EzThrottler.Throttle("Check for gone or moved plots", 5000))
             {
                 bool warnOfMissing = EzThrottler.Throttle("Print missing plot warning", 15000);
+                
                 foreach (var patch in FilterByTerritory(patches))
                 {
-                    var gameObject = objectTable.EventObjects.FirstOrDefault(o => o.GameObjectId == patch.Plots.FirstOrDefault()?.GameObjectId);
-
+                    var gameObject = territoryWatcher.IsTerritoryResidentialIndoors()
+                        ? objectTable.FirstOrDefault(o => o.GameObjectId == patch.Plots.FirstOrDefault()?.GameObjectId)
+                        : objectTable.EventObjects.FirstOrDefault(o => o.GameObjectId == patch.Plots.FirstOrDefault()?.GameObjectId);
                     if (gameObject == null)
                     {
                         if (warnOfMissing)
                         {
+                            log.Warning($"Name {patch.Name} Terr:{patch.TerritoryPrefix} GoId: {patch.Plots.FirstOrDefault()?.GameObjectId}");
                             var warningString = $"Plot {patch.Name} should be here, but Autogardener can't find it. Try removing it and rescanning.";
                             log.Warning(warningString);
                             chatGui.PrintError(warningString);
                         }
 
                         continue;
-                    }                    
+                    }
 
                     if (Vector3.Distance(gameObject.Position, patch.Location) > 1)
                     {
