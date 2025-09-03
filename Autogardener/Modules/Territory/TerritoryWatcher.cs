@@ -35,7 +35,7 @@ public class TerritoryWatcher
                 || TerritoryUtils.IsInsideWorkshop(LastHousingOutdoorTerritory) 
                 || TerritoryUtils.IsInsidePrivateChambers(LastHousingOutdoorTerritory))
             {
-                logService.Warning($"Lifestream was loaded or updated while being inside house. Please re-enter house to ensure data reliability.");
+                logService.Warning($"Lifestrea.. i mean, Autogardener was loaded or updated while being inside house. Please re-enter house to ensure data reliability.");
             }
         }
         Purgatory.Add(() =>
