@@ -47,7 +47,7 @@ namespace Autogardener.Model.Plots
         {
             if (otherPlotPatchObject == null || !(otherPlotPatchObject is PlotPatch otherPlotPatch))
             {
-                return false; ;
+                return false;
             }
             if (!(otherPlotPatch.Plots.Count == Plots.Count))
             {

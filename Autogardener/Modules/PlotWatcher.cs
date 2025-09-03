@@ -1,6 +1,7 @@
 using Autogardener.Model;
 using Autogardener.Model.Plots;
 using Dalamud.Bindings.ImGui;
+using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Interface.Utility;
 using Dalamud.Plugin.Services;
 using DalamudBasics.Logging;
@@ -164,12 +165,14 @@ namespace Autogardener.Modules
                 .Where(o => o != null && GlobalData.GardenPlotDataIds.Contains(o.DataId)).OrderBy(o => o.GameObjectId).ToList();
             var plotNumber = 1;
             int plotCounter = 0;
+            IGameObject? lastPlotObject = null;
             foreach (var plotObject in plotObjects)
             {
                 log.Debug($"Building plant hole {plotObject.GameObjectId}");
                 if (plotPatchInConstruction == null
                     || Math.Abs((decimal)(plotPatchInConstruction?.Plots.Last().GameObjectId ?? 0) - plotObject.GameObjectId) != 1 //Discontiguous id
-                    || plotCounter == 8)
+                    || plotCounter == 8 //Max amount of plots in a patch
+                    || lastPlotObject != null && lastPlotObject.Position != plotObject.Position) // All plots in a patch have the same position
                 {
                     log.Debug("New Plot object created");
                     // Discontiguous, or first hole. Create new plot.
@@ -187,6 +190,7 @@ namespace Autogardener.Modules
                                                     plotObject.ObjectIndex, plotObject.DataId, new SerializableVector3(plotObject.Position));
                 plotPatchInConstruction?.Plots.Add(newHole);
                 plotCounter++;
+                lastPlotObject = plotObject;
             }
 
             if (plotPatchInConstruction != null)
