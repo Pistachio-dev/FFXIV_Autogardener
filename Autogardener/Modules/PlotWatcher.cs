@@ -1,5 +1,6 @@
 using Autogardener.Model;
 using Autogardener.Model.Plots;
+using Autogardener.Modules.Territory;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Interface.Utility;
@@ -23,10 +24,12 @@ namespace Autogardener.Modules
         private readonly IGameGui gameGui;
         private readonly TaskManager taskManager;
         private readonly ISaveManager<CharacterSaveState> saveManager;
+        private readonly TerritoryWatcher territoryWatcher;
         private bool drawHighlights = true;
 
         public PlotWatcher(ILogService log, IObjectTable objectTable, IClientState clientState,
-            IFramework framework, IGameGui gameGui, TaskManager taskManager, ISaveManager<CharacterSaveState> saveManager)
+            IFramework framework, IGameGui gameGui, TaskManager taskManager, ISaveManager<CharacterSaveState> saveManager,
+            TerritoryWatcher territoryWatcher)
         {        
             this.log = log;
             this.objectTable = objectTable;
@@ -35,6 +38,7 @@ namespace Autogardener.Modules
             this.gameGui = gameGui;
             this.taskManager = taskManager;
             this.saveManager = saveManager;
+            this.territoryWatcher = territoryWatcher;
             //this.framework.RunOnFrameworkThread(UpdatePlotList);
             // Add an "scan" button.
         }
@@ -178,11 +182,14 @@ namespace Autogardener.Modules
                     // Discontiguous, or first hole. Create new plot.
                     if (plotPatchInConstruction != null)
                     {
+                        var territoryPrefix = territoryWatcher.GetTerritoryPrefix();
+                        string plotTypeName = plotPatchInConstruction.Plots.Count == 1 ? "Flowerpot" : $"x{plotPatchInConstruction.Plots.Count}";
+                        plotPatchInConstruction.Name = $"{territoryPrefix} {plotTypeName} {plotNumber}";
                         foundPlotPatches.Add(plotPatchInConstruction);
                         plotCounter = 0;
                     }
 
-                    plotPatchInConstruction = new PlotPatch($"Plot {plotNumber}");
+                    plotPatchInConstruction = new PlotPatch($"temporary name", territoryWatcher.GetTerritoryPrefix());
                     plotNumber++;
                 }
 

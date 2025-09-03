@@ -4,6 +4,7 @@ using Autogardener.Modules.Actions;
 using Autogardener.Modules.Movement;
 using Autogardener.Modules.Schedulers;
 using Autogardener.Modules.Tasks;
+using Autogardener.Modules.Territory;
 using Autogardener.Windows;
 using Autogardener.Windows.MainWindow;
 using Dalamud.Game.Command;
@@ -116,6 +117,7 @@ public sealed class Plugin : IDalamudPlugin
         serviceCollection.AddSingleton<DataExtraction>();
         serviceCollection.AddSingleton<Inventory>();
         serviceCollection.AddSingleton<MovementController>();
+        serviceCollection.AddSingleton<TerritoryWatcher>();
         return serviceCollection.BuildServiceProvider();
     }
 

@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Autogardener.Modules.Territory
+namespace Autogardener.Model.Territory
 {
-    public enum OpenTerritoryType
+    public enum ResidentialArea
     {
         LavenderBeds,
         Mist,

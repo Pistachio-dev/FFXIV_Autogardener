@@ -4,11 +4,14 @@ using System.Linq;
 namespace Autogardener.Model.Plots
 {
     public class PlotPatch
-    {        
-        public PlotPatch(string name)
+    {
+        public PlotPatch(string name, string territoryPrefix)
         {
             Name = name;
+            TerritoryPrefix = territoryPrefix;
         }
+
+        public string TerritoryPrefix { get; set; }
 
         public Guid Id { get; set; } = Guid.NewGuid();
 

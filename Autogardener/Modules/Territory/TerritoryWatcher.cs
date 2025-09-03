@@ -1,3 +1,4 @@
+using Autogardener.Model.Territory;
 using Dalamud.Plugin.Services;
 using DalamudBasics.Logging;
 using ECommons.ExcelServices;
@@ -50,7 +51,7 @@ public class TerritoryWatcher
         }
     }
 
-    private string GetTerritoryShortName(OpenTerritoryType area, HouseType house)
+    private string GetTerritoryShortName(ResidentialArea area, HouseType house)
     {
         if (TerritoryUtils.IsTerritoryResidentialDistrict(clientState.TerritoryType))
         {
@@ -60,11 +61,11 @@ public class TerritoryWatcher
         StringBuilder s = new StringBuilder();
         string areaName = area switch
         {
-            OpenTerritoryType.LavenderBeds => "LB ",
-            OpenTerritoryType.Mist => "Mist ",
-            OpenTerritoryType.Goblet => "Goblet ",
-            OpenTerritoryType.Shirogane => "Shiro ",
-            OpenTerritoryType.Empyreum => "Emp ",
+            ResidentialArea.LavenderBeds => "LB ",
+            ResidentialArea.Mist => "Mist ",
+            ResidentialArea.Goblet => "Goblet ",
+            ResidentialArea.Shirogane => "Shiro ",
+            ResidentialArea.Empyreum => "Emp ",
             _ => string.Empty
         };
         string houseName = house switch
@@ -80,17 +81,17 @@ public class TerritoryWatcher
         return $"{areaName}{houseName}";
     }
 
-    public string GetRealTerritoryType()
+    public string GetTerritoryPrefix()
     {
         if(Svc.ClientState.TerritoryType.EqualsAny<ushort>(Houses.Private_Cottage_Empyreum, Houses.Private_Cottage_Mist, Houses.Private_Cottage_Shirogane, Houses.Private_Cottage_The_Goblet, Houses.Private_Cottage_The_Lavender_Beds, 1249))
         {
             return LastHousingOutdoorTerritory switch
             {
-                ResidentalAreas.Mist => GetTerritoryShortName(OpenTerritoryType.Mist, HouseType.Large),
-                ResidentalAreas.The_Lavender_Beds => GetTerritoryShortName(OpenTerritoryType.LavenderBeds, HouseType.Large),
-                ResidentalAreas.The_Goblet => GetTerritoryShortName(OpenTerritoryType.Goblet, HouseType.Large),
-                ResidentalAreas.Shirogane => GetTerritoryShortName(OpenTerritoryType.Shirogane, HouseType.Large),
-                ResidentalAreas.Empyreum => GetTerritoryShortName(OpenTerritoryType.Empyreum, HouseType.Large),
+                ResidentalAreas.Mist => GetTerritoryShortName(ResidentialArea.Mist, HouseType.Large),
+                ResidentalAreas.The_Lavender_Beds => GetTerritoryShortName(ResidentialArea.LavenderBeds, HouseType.Large),
+                ResidentalAreas.The_Goblet => GetTerritoryShortName(ResidentialArea.Goblet, HouseType.Large),
+                ResidentalAreas.Shirogane => GetTerritoryShortName(ResidentialArea.Shirogane, HouseType.Large),
+                ResidentalAreas.Empyreum => GetTerritoryShortName(ResidentialArea.Empyreum, HouseType.Large),
                 _ => string.Empty
             };
         }
@@ -98,11 +99,11 @@ public class TerritoryWatcher
         {
             return LastHousingOutdoorTerritory switch
             {
-                ResidentalAreas.Mist => GetTerritoryShortName(OpenTerritoryType.Mist, HouseType.Medium),
-                ResidentalAreas.The_Lavender_Beds => GetTerritoryShortName(OpenTerritoryType.LavenderBeds, HouseType.Medium),
-                ResidentalAreas.The_Goblet => GetTerritoryShortName(OpenTerritoryType.Goblet, HouseType.Medium),
-                ResidentalAreas.Shirogane => GetTerritoryShortName(OpenTerritoryType.Shirogane, HouseType.Medium),
-                ResidentalAreas.Empyreum => GetTerritoryShortName(OpenTerritoryType.Empyreum, HouseType.Medium),
+                ResidentalAreas.Mist => GetTerritoryShortName(ResidentialArea.Mist, HouseType.Medium),
+                ResidentalAreas.The_Lavender_Beds => GetTerritoryShortName(ResidentialArea.LavenderBeds, HouseType.Medium),
+                ResidentalAreas.The_Goblet => GetTerritoryShortName(ResidentialArea.Goblet, HouseType.Medium),
+                ResidentalAreas.Shirogane => GetTerritoryShortName(ResidentialArea.Shirogane, HouseType.Medium),
+                ResidentalAreas.Empyreum => GetTerritoryShortName(ResidentialArea.Empyreum, HouseType.Medium),
                 _ => string.Empty
             };
         }
@@ -110,11 +111,11 @@ public class TerritoryWatcher
         {
             return LastHousingOutdoorTerritory switch
             {
-                ResidentalAreas.Mist => GetTerritoryShortName(OpenTerritoryType.Mist, HouseType.Large),
-                ResidentalAreas.The_Lavender_Beds => GetTerritoryShortName(OpenTerritoryType.LavenderBeds, HouseType.Large),
-                ResidentalAreas.The_Goblet => GetTerritoryShortName(OpenTerritoryType.Goblet, HouseType.Large),
-                ResidentalAreas.Shirogane => GetTerritoryShortName(OpenTerritoryType.Shirogane, HouseType.Large),
-                ResidentalAreas.Empyreum => GetTerritoryShortName(OpenTerritoryType.Empyreum, HouseType.Large),
+                ResidentalAreas.Mist => GetTerritoryShortName(ResidentialArea.Mist, HouseType.Large),
+                ResidentalAreas.The_Lavender_Beds => GetTerritoryShortName(ResidentialArea.LavenderBeds, HouseType.Large),
+                ResidentalAreas.The_Goblet => GetTerritoryShortName(ResidentialArea.Goblet, HouseType.Large),
+                ResidentalAreas.Shirogane => GetTerritoryShortName(ResidentialArea.Shirogane, HouseType.Large),
+                ResidentalAreas.Empyreum => GetTerritoryShortName(ResidentialArea.Empyreum, HouseType.Large),
                 _ => string.Empty
             };
         }
