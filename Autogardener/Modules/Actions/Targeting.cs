@@ -48,14 +48,20 @@ namespace Autogardener.Modules.Actions
 
         public unsafe bool IsTooFarToInteractWith(ulong gameObjectId)
         {
+            logService.Warning($"ObjectId searched: {gameObjectId}");
+            logService.Warning($"TargetObjectId: {targetManager.Target?.GameObjectId}");
             var go = objectTable.EventObjects.FirstOrDefault(go => go.GameObjectId == gameObjectId);
+            logService.Warning($"GameObject searched: {go?.GameObjectId}: {go?.Position}");
+            logService.Warning($"Player: {clientState.LocalPlayer?.Position}");
             var player = clientState.LocalPlayer;
             if (go == null || player == null)
             {
+                logService.Warning("Plot object not found");
                 return true; // Can't target what does not exist.
             }
 
             var distance = Math.Abs(Vector3.Distance(go.Position, player.Position));
+            logService.Debug($"Distance to plot: " + distance);
             return distance > GlobalData.MaxInteractDistance;
         }
     }

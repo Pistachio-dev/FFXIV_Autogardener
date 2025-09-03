@@ -6,6 +6,7 @@ using Dalamud.Game.Inventory;
 using Dalamud.Plugin.Services;
 using DalamudBasics.Logging;
 using DalamudBasics.SaveGames;
+using ECommons.Throttlers;
 using System.Linq;
 
 namespace Autogardener.Modules
@@ -159,6 +160,14 @@ namespace Autogardener.Modules
                 plotWatcher.UpdatePlotPatchList();
             }
 
+            if (state == null)
+            {
+                logService.Error($"Failure on state load");
+                return null;
+            }
+
+            plotWatcher.CheckForGoneOrMovedPlotsThrottled(state.Plots);
+
             Vector3 playerLocation = clientState.LocalPlayer?.Position ?? Vector3.Zero;
             if (playerLocation == Vector3.Zero)
             {
@@ -170,17 +179,14 @@ namespace Autogardener.Modules
                 = state.Plots.Select(x => (x, Math.Abs(Vector3.Distance(x.Location, playerLocation))))
                 .Where(tuple => tuple.Item2 < GlobalData.MaxInteractDistance);
 
-            try
-            {
-                (PlotPatch nearestPlotPatch, float distance) = plotsPatchesWithDistances.OrderBy(t => t.distance).First();
-                //logService.Debug($"Nearest plot found with {nearestPlotPatch.Plots.Count} slots at distance {distance}");
-                return nearestPlotPatch;
-            }
-            catch (InvalidOperationException)
+
+            (PlotPatch nearestPlotPatch, float distance) = plotsPatchesWithDistances.OrderBy(t => t.distance).FirstOrDefault();                
+            if (nearestPlotPatch == null && EzThrottler.Throttle("No plots in the immediate area", int.MaxValue))
             {
                 logService.Debug("Could not register nearest plot: no plots in the immediate area");
-                return null;
             }
+
+            return nearestPlotPatch;
         }
 
         public bool ApplyDesign(ref PlotPatch plotPatch, PlotPatchDesign design)

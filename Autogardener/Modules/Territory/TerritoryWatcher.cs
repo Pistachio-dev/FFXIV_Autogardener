@@ -14,16 +14,20 @@ public class TerritoryWatcher
     private readonly ILogService logService;
     private readonly IClientState clientState;
     private readonly IDataManager dataService;
+    private readonly IFramework framework;
 
-    public TerritoryWatcher(ILogService logService, IClientState clientState, IDataManager dataService)
+    public TerritoryWatcher(ILogService logService, IClientState clientState, IDataManager dataService, IFramework framework)
     {
         this.logService = logService;
         this.clientState = clientState;
         this.dataService = dataService;
+        this.framework = framework;
+        framework.RunOnFrameworkThread(Initialize);
     }
+
     public void Initialize()
     {
-        Svc.ClientState.TerritoryChanged += ClientState_TerritoryChanged;
+        clientState.TerritoryChanged += ClientState_TerritoryChanged;
         if(Player.Available)
         {
             ClientState_TerritoryChanged(Svc.ClientState.TerritoryType);
@@ -36,7 +40,7 @@ public class TerritoryWatcher
         }
         Purgatory.Add(() =>
         {
-            Svc.ClientState.TerritoryChanged -= ClientState_TerritoryChanged;
+            clientState.TerritoryChanged -= ClientState_TerritoryChanged;
         });
     }
 
@@ -58,7 +62,6 @@ public class TerritoryWatcher
             house = HouseType.NotAHouse;
         }
 
-        StringBuilder s = new StringBuilder();
         string areaName = area switch
         {
             ResidentialArea.LavenderBeds => "LB ",
@@ -83,7 +86,20 @@ public class TerritoryWatcher
 
     public string GetTerritoryPrefix()
     {
-        if(Svc.ClientState.TerritoryType.EqualsAny<ushort>(Houses.Private_Cottage_Empyreum, Houses.Private_Cottage_Mist, Houses.Private_Cottage_Shirogane, Houses.Private_Cottage_The_Goblet, Houses.Private_Cottage_The_Lavender_Beds, 1249))
+        if (TerritoryUtils.IsTerritoryResidentialDistrict(clientState.TerritoryType))
+        {
+            return clientState.TerritoryType switch
+            {
+                ResidentalAreas.Mist => GetTerritoryShortName(ResidentialArea.Mist, HouseType.NotAHouse),
+                ResidentalAreas.The_Lavender_Beds => GetTerritoryShortName(ResidentialArea.LavenderBeds, HouseType.NotAHouse),
+                ResidentalAreas.The_Goblet => GetTerritoryShortName(ResidentialArea.Goblet, HouseType.NotAHouse),
+                ResidentalAreas.Shirogane => GetTerritoryShortName(ResidentialArea.Shirogane, HouseType.NotAHouse),
+                ResidentalAreas.Empyreum => GetTerritoryShortName(ResidentialArea.Empyreum, HouseType.NotAHouse),
+                _ => GetTerritoryShortName(ResidentialArea.Other, HouseType.NotAHouse)
+            };
+        }
+
+        if (clientState.TerritoryType.EqualsAny<ushort>(Houses.Private_Cottage_Empyreum, Houses.Private_Cottage_Mist, Houses.Private_Cottage_Shirogane, Houses.Private_Cottage_The_Goblet, Houses.Private_Cottage_The_Lavender_Beds, 1249))
         {
             return LastHousingOutdoorTerritory switch
             {
@@ -92,10 +108,10 @@ public class TerritoryWatcher
                 ResidentalAreas.The_Goblet => GetTerritoryShortName(ResidentialArea.Goblet, HouseType.Large),
                 ResidentalAreas.Shirogane => GetTerritoryShortName(ResidentialArea.Shirogane, HouseType.Large),
                 ResidentalAreas.Empyreum => GetTerritoryShortName(ResidentialArea.Empyreum, HouseType.Large),
-                _ => string.Empty
+                _ => GetTerritoryShortName(ResidentialArea.Other, HouseType.NotAHouse)
             };
         }
-        if(Svc.ClientState.TerritoryType.EqualsAny<ushort>(Houses.Private_House_Empyreum, Houses.Private_House_Mist, Houses.Private_House_Shirogane, Houses.Private_House_The_Goblet, Houses.Private_House_The_Lavender_Beds, 1250))
+        if(clientState.TerritoryType.EqualsAny<ushort>(Houses.Private_House_Empyreum, Houses.Private_House_Mist, Houses.Private_House_Shirogane, Houses.Private_House_The_Goblet, Houses.Private_House_The_Lavender_Beds, 1250))
         {
             return LastHousingOutdoorTerritory switch
             {
@@ -104,10 +120,10 @@ public class TerritoryWatcher
                 ResidentalAreas.The_Goblet => GetTerritoryShortName(ResidentialArea.Goblet, HouseType.Medium),
                 ResidentalAreas.Shirogane => GetTerritoryShortName(ResidentialArea.Shirogane, HouseType.Medium),
                 ResidentalAreas.Empyreum => GetTerritoryShortName(ResidentialArea.Empyreum, HouseType.Medium),
-                _ => string.Empty
+                _ => GetTerritoryShortName(ResidentialArea.Other, HouseType.NotAHouse)
             };
         }
-        if(Svc.ClientState.TerritoryType.EqualsAny<ushort>(Houses.Private_Mansion_Empyreum, Houses.Private_Mansion_Mist, Houses.Private_Mansion_Shirogane, Houses.Private_Mansion_The_Goblet, Houses.Private_Mansion_The_Lavender_Beds, 1251))
+        if(clientState.TerritoryType.EqualsAny<ushort>(Houses.Private_Mansion_Empyreum, Houses.Private_Mansion_Mist, Houses.Private_Mansion_Shirogane, Houses.Private_Mansion_The_Goblet, Houses.Private_Mansion_The_Lavender_Beds, 1251))
         {
             return LastHousingOutdoorTerritory switch
             {
@@ -116,7 +132,7 @@ public class TerritoryWatcher
                 ResidentalAreas.The_Goblet => GetTerritoryShortName(ResidentialArea.Goblet, HouseType.Large),
                 ResidentalAreas.Shirogane => GetTerritoryShortName(ResidentialArea.Shirogane, HouseType.Large),
                 ResidentalAreas.Empyreum => GetTerritoryShortName(ResidentialArea.Empyreum, HouseType.Large),
-                _ => string.Empty
+                _ => GetTerritoryShortName(ResidentialArea.Other, HouseType.NotAHouse)
             };
         }
         return string.Empty;

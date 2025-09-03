@@ -8,6 +8,7 @@ using Dalamud.Plugin.Services;
 using DalamudBasics.Logging;
 using DalamudBasics.SaveGames;
 using ECommons.Automation.NeoTaskManager;
+using ECommons.Throttlers;
 using System.Linq;
 
 namespace Autogardener.Modules
@@ -25,11 +26,12 @@ namespace Autogardener.Modules
         private readonly TaskManager taskManager;
         private readonly ISaveManager<CharacterSaveState> saveManager;
         private readonly TerritoryWatcher territoryWatcher;
+        private readonly IChatGui chatGui;
         private bool drawHighlights = true;
 
         public PlotWatcher(ILogService log, IObjectTable objectTable, IClientState clientState,
             IFramework framework, IGameGui gameGui, TaskManager taskManager, ISaveManager<CharacterSaveState> saveManager,
-            TerritoryWatcher territoryWatcher)
+            TerritoryWatcher territoryWatcher, IChatGui chatGui)
         {        
             this.log = log;
             this.objectTable = objectTable;
@@ -39,6 +41,7 @@ namespace Autogardener.Modules
             this.taskManager = taskManager;
             this.saveManager = saveManager;
             this.territoryWatcher = territoryWatcher;
+            this.chatGui = chatGui;
             //this.framework.RunOnFrameworkThread(UpdatePlotList);
             // Add an "scan" button.
         }
@@ -52,7 +55,7 @@ namespace Autogardener.Modules
         {
             var state = saveManager.GetCharacterSaveInMemory();
             List<PlotHighlightData> points = new();
-            foreach (var plot in state.Plots)
+            foreach (var plot in FilterByTerritory(state.Plots))
             {
                 if (gameGui.WorldToScreen(plot.Location, out var screenPos))
                 {
@@ -111,6 +114,43 @@ namespace Autogardener.Modules
             }
         }
 
+        public void CheckForGoneOrMovedPlotsThrottled(List<PlotPatch> patches)
+        {
+            if (EzThrottler.Throttle("Check for gone or moved plots", 5000))
+            {
+                bool warnOfMissing = EzThrottler.Throttle("Print missing plot warning", 15000);
+                foreach (var patch in FilterByTerritory(patches))
+                {
+                    var gameObject = objectTable.EventObjects.FirstOrDefault(o => o.GameObjectId == patch.Plots.FirstOrDefault()?.GameObjectId);
+
+                    if (gameObject == null)
+                    {
+                        if (warnOfMissing)
+                        {
+                            var warningString = $"Plot {patch.Name} should be here, but Autogardener can't find it. Try removing it and rescanning.";
+                            log.Warning(warningString);
+                            chatGui.PrintError(warningString);
+                        }
+
+                        continue;
+                    }                    
+
+                    if (Vector3.Distance(gameObject.Position, patch.Location) > 1)
+                    {
+                        var warningString = $"Plot {patch.Name} was moved. Updating.";
+                        foreach (var plot in patch.Plots)
+                        {
+                            plot.Location = new SerializableVector3(gameObject.Position.X, gameObject.Position.Y, gameObject.Position.Z);
+                        }
+                        log.Warning(warningString);
+                        chatGui.Print(warningString);
+
+                        saveManager.WriteCharacterSave();
+                    }
+                }
+            }
+        }
+
         public void UpdatePlotPatchList()
         {
             var state = saveManager.GetCharacterSaveInMemory();
@@ -136,7 +176,7 @@ namespace Autogardener.Modules
             return false;
         }
         private List<PlotPatch> MergePlotLists(List<PlotPatch> known, List<PlotPatch> scanned)
-        {            
+        {
             List<PlotPatch> combinedPlots = new List<PlotPatch>(known);
             foreach (var plot in scanned)
             {
@@ -147,6 +187,12 @@ namespace Autogardener.Modules
             }
 
             return combinedPlots;
+        }
+
+        private List<PlotPatch> FilterByTerritory(List<PlotPatch> plots)
+        {
+            var territoryPrefix = territoryWatcher.GetTerritoryPrefix();
+            return plots.Where(p => territoryPrefix.IsNullOrEmpty() || p.TerritoryPrefix == territoryPrefix).ToList();
         }
 
         private List<PlotPatch> FilterByDistance(List<PlotPatch> plots, float maxDistance)
@@ -167,7 +213,7 @@ namespace Autogardener.Modules
             PlotPatch? plotPatchInConstruction = null;
             var plotObjects = objectTable
                 .Where(o => o != null && GlobalData.GardenPlotDataIds.Contains(o.DataId)).OrderBy(o => o.GameObjectId).ToList();
-            var plotNumber = 1;
+            var patchNumber = 1;
             int plotCounter = 0;
             IGameObject? lastPlotObject = null;
             foreach (var plotObject in plotObjects)
@@ -182,15 +228,13 @@ namespace Autogardener.Modules
                     // Discontiguous, or first hole. Create new plot.
                     if (plotPatchInConstruction != null)
                     {
-                        var territoryPrefix = territoryWatcher.GetTerritoryPrefix();
-                        string plotTypeName = plotPatchInConstruction.Plots.Count == 1 ? "Flowerpot" : $"x{plotPatchInConstruction.Plots.Count}";
-                        plotPatchInConstruction.Name = $"{territoryPrefix} {plotTypeName} {plotNumber}";
+                        FinalizeName(plotPatchInConstruction, patchNumber);
                         foundPlotPatches.Add(plotPatchInConstruction);
                         plotCounter = 0;
                     }
 
                     plotPatchInConstruction = new PlotPatch($"temporary name", territoryWatcher.GetTerritoryPrefix());
-                    plotNumber++;
+                    patchNumber++;
                 }
 
                 var newHole = new Plot(plotObject.GameObjectId, plotObject.EntityId,
@@ -202,11 +246,22 @@ namespace Autogardener.Modules
 
             if (plotPatchInConstruction != null)
             {
+                FinalizeName(plotPatchInConstruction, patchNumber);
+
                 foundPlotPatches.Add(plotPatchInConstruction);
             }
 
             foundPlotPatches = foundPlotPatches.Where(p => p.Plots.Count != 0).ToList();
             return foundPlotPatches;
+        }
+
+        private PlotPatch FinalizeName(PlotPatch patch, int patchNumber)
+        {
+            var territoryPrefix = territoryWatcher.GetTerritoryPrefix();
+            string plotTypeName = patch.Plots.Count == 1 ? "Flowerpot" : $"x{patch.Plots.Count}";
+            patch.Name = $"{territoryPrefix}{plotTypeName} {patchNumber}";
+
+            return patch;
         }
     }
 }
