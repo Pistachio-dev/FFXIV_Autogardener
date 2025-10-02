@@ -54,6 +54,12 @@ namespace Autogardener.Modules
                 return;
             }
             PlotPatch? alreadySeenPlot = charState.Plots.FirstOrDefault(p => p.Equals(plotPatch));
+            chatGui.Print(Vector3.Distance(plotPatch.Location, alreadySeenPlot.Location).ToString());
+            if (Vector3.Distance(plotPatch.Location, alreadySeenPlot.Location) > 1)
+            {
+                chatGui.PrintError("Did you move the plot? Scan it again");
+                return;
+            }
             if (alreadySeenPlot != null)
             {
                 logService.Warning($"This plot is already scanned, with name {alreadySeenPlot.Name}");
@@ -64,12 +70,7 @@ namespace Autogardener.Modules
             {
                 charState.Plots.Add(plotPatch);
             }
-
-            if (plotPatch == null)
-            {
-                logService.Warning("Could not get the nearest plot patch");
-                return;
-            }
+            
         }
 
         public int CreateNewDesign()

@@ -142,19 +142,6 @@ namespace Autogardener.Modules
 
                         continue;
                     }
-
-                    if (Vector3.Distance(gameObject.Position, patch.Location) > 1)
-                    {
-                        var warningString = $"Plot {patch.Name} was moved. Updating.";
-                        foreach (var plot in patch.Plots)
-                        {
-                            plot.Location = new SerializableVector3(gameObject.Position.X, gameObject.Position.Y, gameObject.Position.Z);
-                        }
-                        log.Warning(warningString);
-                        chatGui.Print(warningString);
-
-                        saveManager.WriteCharacterSave();
-                    }
                 }
             }
         }
@@ -163,13 +150,32 @@ namespace Autogardener.Modules
         {
             var state = saveManager.GetCharacterSaveInMemory();
             var discoveredPlots = DiscoverPlots();
-            discoveredPlots = FilterByDistance(discoveredPlots, GlobalData.MaxInteractDistance);
+            UpdateLocationOfMovedPlots(state.Plots, discoveredPlots);
+            discoveredPlots = FilterByDistance(discoveredPlots, GlobalData.MaxInteractDistance);            
             List<PlotPatch> combinedPlots = MergePlotLists(state.Plots, discoveredPlots);
             bool saveToFile = HavePlotsChanged(state.Plots, combinedPlots);
             state.Plots = combinedPlots;
             if (saveToFile)
             {
                 saveManager.WriteCharacterSave();
+            }
+        }
+
+        private void UpdateLocationOfMovedPlots(List<PlotPatch> old, List<PlotPatch> scanned)
+        {
+            foreach (var oldPlot in old)
+            {
+                var matching = scanned.FirstOrDefault(p => p.Equals(oldPlot));
+                if (matching != null)
+                {
+                    if (Vector3.Distance(oldPlot.Location, matching.Location) > 0.1)
+                    {
+                        //Plot moved
+                        oldPlot.Location = matching.Location;
+                        log.Info($"Updated location for patch {oldPlot.Name}");
+                        chatGui.Print($"Updated location for patch {oldPlot.Name}");
+                    }
+                }
             }
         }
 
