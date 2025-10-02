@@ -64,7 +64,7 @@ namespace Autogardener.Modules.Schedulers
                         continue;
                     }
 
-                    schedulerQueue.Enqueue(new MovementScheduler(this, patch.Location, logService, chatGui, movementController));
+                    schedulerQueue.Enqueue(new MovementScheduler(this, patch.GetLocation(), logService, chatGui, movementController));
                     schedulerQueue.Enqueue(new GardenPatchScheduler(this, patch, logService, op, gData, confService, errorMessageMonitor));
                     continue;
                 }

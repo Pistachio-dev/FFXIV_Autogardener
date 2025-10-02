@@ -53,9 +53,8 @@ namespace Autogardener.Modules
                 chatGui.PrintError("No plot patch is near");
                 return;
             }
-            PlotPatch? alreadySeenPlot = charState.Plots.FirstOrDefault(p => p.Equals(plotPatch));
-            chatGui.Print(Vector3.Distance(plotPatch.Location, alreadySeenPlot.Location).ToString());
-            if (Vector3.Distance(plotPatch.Location, alreadySeenPlot.Location) > 1)
+            PlotPatch? alreadySeenPlot = charState.Plots.FirstOrDefault(p => p.Equals(plotPatch));            
+            if (Vector3.Distance(plotPatch.GetLocation(), alreadySeenPlot.GetLocation()) > 1)
             {
                 chatGui.PrintError("Did you move the plot? Scan it again");
                 return;
@@ -176,7 +175,7 @@ namespace Autogardener.Modules
             }
 
             IEnumerable<(PlotPatch plotPatch, float distance)> plotsPatchesWithDistances
-                = state.Plots.Select(x => (x, Math.Abs(Vector3.Distance(x.Location, playerLocation))))
+                = state.Plots.Select(x => (x, Math.Abs(Vector3.Distance(x.GetLocation(), playerLocation))))
                 .Where(tuple => tuple.Item2 < GlobalData.MaxInteractDistance);
 
 

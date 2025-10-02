@@ -60,7 +60,7 @@ namespace Autogardener.Modules
             List<PlotHighlightData> points = new();
             foreach (var plot in FilterByTerritory(state.Plots))
             {
-                if (gameGui.WorldToScreen(plot.Location, out var screenPos))
+                if (gameGui.WorldToScreen(plot.GetLocation(), out var screenPos))
                 {
                     points.Add(new PlotHighlightData(screenPos, plot.Name, plot.DesignName));
                 }
@@ -168,12 +168,15 @@ namespace Autogardener.Modules
                 var matching = scanned.FirstOrDefault(p => p.Equals(oldPlot));
                 if (matching != null)
                 {
-                    if (Vector3.Distance(oldPlot.Location, matching.Location) > 0.1)
+                    if (Vector3.Distance(oldPlot.GetLocation(), matching.GetLocation()) > 0.1)
                     {
+                        log.Warning($"Old: {oldPlot.GetLocation()}");
+                        log.Warning($"New: {matching.GetLocation()}");
                         //Plot moved
-                        oldPlot.Location = matching.Location;
+                        oldPlot.SetLocation(matching.GetLocation());
                         log.Info($"Updated location for patch {oldPlot.Name}");
                         chatGui.Print($"Updated location for patch {oldPlot.Name}");
+                        saveManager.WriteCharacterSave();
                     }
                 }
             }
@@ -185,7 +188,7 @@ namespace Autogardener.Modules
             var existing = plotsInArea.FirstOrDefault(p => p.Equals(plot));
             if (existing != null)
             {
-                if (Vector3.Distance(plot.Location, existing.Location) > 1)
+                if (Vector3.Distance(plot.GetLocation(), existing.GetLocation()) > 1)
                 {
                     chatGui.PrintError("Coordinates have changed. The plot was moved.");
                 }
@@ -197,7 +200,7 @@ namespace Autogardener.Modules
                     mapCoords.X, mapCoords.Y);
                 
                 gameGui.OpenMapWithMapLink(mapPayload);
-                log.Info($"X: {existing.Location.X}, Y: {existing.Location.Y}, Z: {existing.Location.Z}");
+                log.Info($"X: {existing.GetLocation().X}, Y: {existing.GetLocation().Y}, Z: {existing.GetLocation().Z}");
                 return;
             }
 
@@ -248,7 +251,7 @@ namespace Autogardener.Modules
                 return plots;
             }
 
-            var result = plots.Where(p => Vector3.Distance(p.Location, playerPos ?? Vector3.Zero) < maxDistance).ToList();
+            var result = plots.Where(p => Vector3.Distance(p.GetLocation(), playerPos ?? Vector3.Zero) < maxDistance).ToList();
             return result;
         }
 

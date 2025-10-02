@@ -23,15 +23,18 @@ namespace Autogardener.Model.Plots
 
         public List<Plot> Plots { get; set; } = new();
 
-        public Vector3 Location { get { return Plots.FirstOrDefault()?.Location.AsVector3() ?? Vector3.Zero; }
-            set
+        public Vector3 GetLocation()
+        {
+            return Plots.FirstOrDefault()?.Location.AsVector3() ?? Vector3.Zero;
+        }
+
+        public void SetLocation(Vector3 newLocation)
+        {
+            foreach (var plot in Plots)
             {
-                foreach (var plot in Plots)
-                {
-                    plot.Location.X = value.X;
-                    plot.Location.Y = value.Y;
-                    plot.Location.Z = value.Z;
-                }
+                plot.Location.X = newLocation.X;
+                plot.Location.Y = newLocation.Y;
+                plot.Location.Z = newLocation.Z;
             }
         }
 
