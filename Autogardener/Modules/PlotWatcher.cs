@@ -3,6 +3,7 @@ using Autogardener.Model.Plots;
 using Autogardener.Modules.Territory;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Game.ClientState.Objects.Types;
+using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.Interface.Utility;
 using Dalamud.Plugin.Services;
 using DalamudBasics.Logging;
@@ -27,11 +28,12 @@ namespace Autogardener.Modules
         private readonly ISaveManager<CharacterSaveState> saveManager;
         private readonly TerritoryWatcher territoryWatcher;
         private readonly IChatGui chatGui;
+        private readonly IDataManager dataManager;
         private bool drawHighlights = true;
 
         public PlotWatcher(ILogService log, IObjectTable objectTable, IClientState clientState,
             IFramework framework, IGameGui gameGui, TaskManager taskManager, ISaveManager<CharacterSaveState> saveManager,
-            TerritoryWatcher territoryWatcher, IChatGui chatGui)
+            TerritoryWatcher territoryWatcher, IChatGui chatGui, IDataManager dataManager)
         {        
             this.log = log;
             this.objectTable = objectTable;
@@ -42,6 +44,7 @@ namespace Autogardener.Modules
             this.saveManager = saveManager;
             this.territoryWatcher = territoryWatcher;
             this.chatGui = chatGui;
+            this.dataManager = dataManager;
             //this.framework.RunOnFrameworkThread(UpdatePlotList);
             // Add an "scan" button.
         }
@@ -168,6 +171,27 @@ namespace Autogardener.Modules
             {
                 saveManager.WriteCharacterSave();
             }
+        }
+
+        public void FlagPlot(PlotPatch plot)
+        {
+            var plotsInArea = DiscoverPlots();
+            var existing = plotsInArea.FirstOrDefault(p => p.Equals(plot));
+            if (existing != null)
+            {
+                var map = dataManager.GetExcelSheet<Lumina.Excel.Sheets.Map>().GetRow(clientState.MapId);
+                var gameObject = objectTable.FirstOrDefault(o => o.GameObjectId == existing.GameObjectId);
+                if (gameObject == null) return;                
+                Vector3 mapCoords = Dalamud.Utility.MapUtil.GetMapCoordinates(gameObject, true);
+                var mapPayload = new MapLinkPayload(clientState.TerritoryType, clientState.MapId,
+                    mapCoords.X, mapCoords.Y);
+                
+                gameGui.OpenMapWithMapLink(mapPayload);
+                log.Info($"X: {existing.Location.X}, Y: {existing.Location.Y}, Z: {existing.Location.Z}");
+                return;
+            }
+
+            chatGui.PrintError($"Plot \"{plot.Name}\" is not in this area.");
         }
 
         private bool HavePlotsChanged(List<PlotPatch> original, List<PlotPatch> newCombined)
