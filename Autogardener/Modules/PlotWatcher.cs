@@ -150,6 +150,7 @@ namespace Autogardener.Modules
         {
             var state = saveManager.GetCharacterSaveInMemory();
             var discoveredPlots = DiscoverPlots();
+            discoveredPlots = FilterOutFlowerPots(discoveredPlots);
             UpdateLocationOfMovedPlots(state.Plots, discoveredPlots);
             discoveredPlots = FilterByDistance(discoveredPlots, GlobalData.MaxInteractDistance);            
             List<PlotPatch> combinedPlots = MergePlotLists(state.Plots, discoveredPlots);
@@ -159,6 +160,16 @@ namespace Autogardener.Modules
             {
                 saveManager.WriteCharacterSave();
             }
+        }
+
+        public List<PlotPatch> FilterOutFlowerPots(List<PlotPatch> plotPatches)
+        {
+            int flowerPotsCount = plotPatches.Where(p => p.Plots.Count == 1).Count();
+            if (flowerPotsCount > 0)
+            {
+                chatGui.Print($"{flowerPotsCount} flowerpots detected. Those are not supported, sorry.");
+            }
+            return plotPatches.Where(p => p.Plots.Count > 1).ToList();
         }
 
         private void UpdateLocationOfMovedPlots(List<PlotPatch> old, List<PlotPatch> scanned)
@@ -270,7 +281,7 @@ namespace Autogardener.Modules
                 if (plotPatchInConstruction == null
                     || Math.Abs((decimal)(plotPatchInConstruction?.Plots.Last().GameObjectId ?? 0) - plotObject.GameObjectId) != 1 //Discontiguous id
                     || plotCounter == 8 //Max amount of plots in a patch
-                    || lastPlotObject != null && lastPlotObject.Position != plotObject.Position) // All plots in a patch have the same position
+                    || lastPlotObject != null && lastPlotObject.Position != plotObject.Position) // All plots in a patch have the same position. Flowerpots do not.
                 {
                     log.Debug("New Plot object created");
                     // Discontiguous, or first hole. Create new plot.
