@@ -3,6 +3,7 @@ using Autogardener.Model.Plots;
 using Autogardener.Modules.Territory;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Game.ClientState.Objects.Types;
+using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.Interface.Utility;
 using Dalamud.Plugin.Services;
 using DalamudBasics.Logging;
@@ -27,11 +28,12 @@ namespace Autogardener.Modules
         private readonly ISaveManager<CharacterSaveState> saveManager;
         private readonly TerritoryWatcher territoryWatcher;
         private readonly IChatGui chatGui;
+        private readonly IDataManager dataManager;
         private bool drawHighlights = true;
 
         public PlotWatcher(ILogService log, IObjectTable objectTable, IClientState clientState,
             IFramework framework, IGameGui gameGui, TaskManager taskManager, ISaveManager<CharacterSaveState> saveManager,
-            TerritoryWatcher territoryWatcher, IChatGui chatGui)
+            TerritoryWatcher territoryWatcher, IChatGui chatGui, IDataManager dataManager)
         {        
             this.log = log;
             this.objectTable = objectTable;
@@ -42,6 +44,7 @@ namespace Autogardener.Modules
             this.saveManager = saveManager;
             this.territoryWatcher = territoryWatcher;
             this.chatGui = chatGui;
+            this.dataManager = dataManager;
             //this.framework.RunOnFrameworkThread(UpdatePlotList);
             // Add an "scan" button.
         }
@@ -120,9 +123,9 @@ namespace Autogardener.Modules
             {
                 bool warnOfMissing = EzThrottler.Throttle("Print missing plot warning", 15000);
                 
-                foreach (var patch in FilterByTerritory(patches))
+                foreach (PlotPatch patch in FilterByTerritory(patches))
                 {
-                    var gameObject = objectTable.EventObjects.FirstOrDefault(o => o.GameObjectId == patch.Plots.FirstOrDefault()?.GameObjectId);
+                    var gameObject = objectTable.EventObjects.FirstOrDefault(o => o.GameObjectId == patch.GameObjectId);
                     if (gameObject == null)
                     {
                         gameObject = objectTable.FirstOrDefault(o => o.GameObjectId == patch.Plots.FirstOrDefault()?.GameObjectId);
@@ -139,19 +142,6 @@ namespace Autogardener.Modules
 
                         continue;
                     }
-
-                    if (Vector3.Distance(gameObject.Position, patch.Location) > 1)
-                    {
-                        var warningString = $"Plot {patch.Name} was moved. Updating.";
-                        foreach (var plot in patch.Plots)
-                        {
-                            plot.Location = new SerializableVector3(gameObject.Position.X, gameObject.Position.Y, gameObject.Position.Z);
-                        }
-                        log.Warning(warningString);
-                        chatGui.Print(warningString);
-
-                        saveManager.WriteCharacterSave();
-                    }
                 }
             }
         }
@@ -160,7 +150,8 @@ namespace Autogardener.Modules
         {
             var state = saveManager.GetCharacterSaveInMemory();
             var discoveredPlots = DiscoverPlots();
-            discoveredPlots = FilterByDistance(discoveredPlots, GlobalData.MaxInteractDistance);
+            UpdateLocationOfMovedPlots(state.Plots, discoveredPlots);
+            discoveredPlots = FilterByDistance(discoveredPlots, GlobalData.MaxInteractDistance);            
             List<PlotPatch> combinedPlots = MergePlotLists(state.Plots, discoveredPlots);
             bool saveToFile = HavePlotsChanged(state.Plots, combinedPlots);
             state.Plots = combinedPlots;
@@ -168,6 +159,50 @@ namespace Autogardener.Modules
             {
                 saveManager.WriteCharacterSave();
             }
+        }
+
+        private void UpdateLocationOfMovedPlots(List<PlotPatch> old, List<PlotPatch> scanned)
+        {
+            foreach (var oldPlot in old)
+            {
+                var matching = scanned.FirstOrDefault(p => p.Equals(oldPlot));
+                if (matching != null)
+                {
+                    if (Vector3.Distance(oldPlot.Location, matching.Location) > 0.1)
+                    {
+                        //Plot moved
+                        oldPlot.Location = matching.Location;
+                        log.Info($"Updated location for patch {oldPlot.Name}");
+                        chatGui.Print($"Updated location for patch {oldPlot.Name}");
+                    }
+                }
+            }
+        }
+
+        public void FlagPlot(PlotPatch plot)
+        {
+            var plotsInArea = DiscoverPlots();
+            var existing = plotsInArea.FirstOrDefault(p => p.Equals(plot));
+            if (existing != null)
+            {
+                if (Vector3.Distance(plot.Location, existing.Location) > 1)
+                {
+                    chatGui.PrintError("Coordinates have changed. The plot was moved.");
+                }
+                var map = dataManager.GetExcelSheet<Lumina.Excel.Sheets.Map>().GetRow(clientState.MapId);
+                var gameObject = objectTable.FirstOrDefault(o => o.GameObjectId == existing.GameObjectId);
+                if (gameObject == null) return;                
+                Vector3 mapCoords = Dalamud.Utility.MapUtil.GetMapCoordinates(gameObject, true);
+                var mapPayload = new MapLinkPayload(clientState.TerritoryType, clientState.MapId,
+                    mapCoords.X, mapCoords.Y);
+                
+                gameGui.OpenMapWithMapLink(mapPayload);
+                log.Info($"X: {existing.Location.X}, Y: {existing.Location.Y}, Z: {existing.Location.Z}");
+                return;
+            }
+
+            chatGui.PrintError($"Plot \"{plot.Name}\" is not in this area. " +
+                $"Maybe it was deleted, maybe it was in other ward, maybe you're in the wrong map.");
         }
 
         private bool HavePlotsChanged(List<PlotPatch> original, List<PlotPatch> newCombined)
@@ -197,7 +232,12 @@ namespace Autogardener.Modules
         private List<PlotPatch> FilterByTerritory(List<PlotPatch> plots)
         {
             var territoryPrefix = territoryWatcher.GetTerritoryPrefix();
-            return plots.Where(p => territoryPrefix.IsNullOrEmpty() || p.TerritoryPrefix == territoryPrefix).ToList();
+            if (territoryPrefix.IsNullOrEmpty())
+            {
+                return new List<PlotPatch>();
+            }
+
+            return plots.Where(p => p.TerritoryPrefix == territoryPrefix).ToList();
         }
 
         private List<PlotPatch> FilterByDistance(List<PlotPatch> plots, float maxDistance)

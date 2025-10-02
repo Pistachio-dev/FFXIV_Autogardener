@@ -31,7 +31,6 @@ namespace Autogardener.Windows.MainWindow
             {
                 ImGui.TextUnformatted("Too far away from any registered plot");
             }
-
             if (ImGuiComponents.IconButtonWithText(FontAwesomeIcon.Search, "Scan nearby plots", Blue))
             {
                 storedDataActions.RegisterNearestPlotPatch();
@@ -52,6 +51,13 @@ namespace Autogardener.Windows.MainWindow
                 {
                     return;
                 }
+                ImGui.SameLine();
+                if (ImGuiComponents.IconButton(FontAwesomeIcon.Flag, MidLightGreen))
+                {
+                    plotWatcher.FlagPlot(plot);
+                }
+                DrawTooltip("Mark the position of the plot in the map, if it's here." +
+                    "If you moved the plot, forget it (red button) and scan again");
 
                 DrawDesignSelector(plot, save);
                 ImGuiComponents.HelpMarker("If you made changes to the design and they don't show, try reselecting it.");

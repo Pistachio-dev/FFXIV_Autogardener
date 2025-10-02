@@ -1,5 +1,11 @@
 [
   {
+    "AssemblyVersion": "0.3.5.0",
+    "DalamudApiLevel": 13,
+    "ChangeLog": "- Garden patches now have information about their residential area, and the patches from different areas won't be highlighted. Patches in different instance of the same area (for instance lavender beds ward 12 and ward 16) will still show, nothing I can do about that without a ton of work. Not worth it.\n- Flowerpots are now counted as separate entities each, instead of being sometimes merged into one.\n- Newly registered plots or flowerpots will have the area name (for instance, Mist L 1 would be in a Large house in Mist)\n- Moved plots' location is updated when you see them again\n- Removed plots will print a warning so the user know they should delete them\n- Throttled and optimized the garden patch background lookup. It still only runs when the main window is open.\n- Flowerpots refuse to work properly. Just don't use this for flowerpots. Just don't.",
+    "IsTest": false
+  },
+  {
     "AssemblyVersion": "0.3.0.0",
     "DalamudApiLevel": 13,
     "ChangeLog": "- Fixed seeds and soils indexes being mixed. Woopsie.\n- Fixed having flowerpot-only seeds messing up planting outdoors\n- Added support for flowerpots\n- Added support for french and german language clients\n- Planting with the plugin now also updates the data for the plot\n- The button to create a new design now mentions the number of slots in the nearest plot, instead of the name",

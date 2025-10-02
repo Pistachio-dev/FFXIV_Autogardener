@@ -23,7 +23,20 @@ namespace Autogardener.Model.Plots
 
         public List<Plot> Plots { get; set; } = new();
 
-        public Vector3 Location => Plots.FirstOrDefault()?.Location.AsVector3() ?? Vector3.Zero;
+        public Vector3 Location { get { return Plots.FirstOrDefault()?.Location.AsVector3() ?? Vector3.Zero; }
+            set
+            {
+                foreach (var plot in Plots)
+                {
+                    plot.Location.X = value.X;
+                    plot.Location.Y = value.Y;
+                    plot.Location.Z = value.Z;
+                }
+            }
+        }
+
+        // Only plots have game object ids, not the patches. So we use the lowest
+        public ulong GameObjectId => Plots.OrderBy(plot => plot.GameObjectId).First().GameObjectId;
 
         public PlotDesign? Design(Plot plot)
         {
@@ -57,8 +70,8 @@ namespace Autogardener.Model.Plots
                 return false;
             }
 
-            ulong lowerGameObjectId = Plots.Select(p => p.GameObjectId).OrderBy(goid => goid).First();
-            ulong otherPlotLowerGameObjectId = otherPlotPatch.Plots.Select(p => p.GameObjectId).OrderBy(goid => goid).First();
+            ulong lowerGameObjectId = GameObjectId;
+            ulong otherPlotLowerGameObjectId = otherPlotPatch.GameObjectId;
             return lowerGameObjectId == otherPlotLowerGameObjectId;
         }
 
