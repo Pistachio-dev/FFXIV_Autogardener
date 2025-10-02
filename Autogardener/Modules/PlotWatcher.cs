@@ -179,6 +179,10 @@ namespace Autogardener.Modules
             var existing = plotsInArea.FirstOrDefault(p => p.Equals(plot));
             if (existing != null)
             {
+                if (Vector3.Distance(plot.Location, existing.Location) > 1)
+                {
+                    chatGui.PrintError("Coordinates have changed. The plot was moved.");
+                }
                 var map = dataManager.GetExcelSheet<Lumina.Excel.Sheets.Map>().GetRow(clientState.MapId);
                 var gameObject = objectTable.FirstOrDefault(o => o.GameObjectId == existing.GameObjectId);
                 if (gameObject == null) return;                
@@ -191,7 +195,8 @@ namespace Autogardener.Modules
                 return;
             }
 
-            chatGui.PrintError($"Plot \"{plot.Name}\" is not in this area.");
+            chatGui.PrintError($"Plot \"{plot.Name}\" is not in this area. " +
+                $"Maybe it was deleted, maybe it was in other ward, maybe you're in the wrong map.");
         }
 
         private bool HavePlotsChanged(List<PlotPatch> original, List<PlotPatch> newCombined)
