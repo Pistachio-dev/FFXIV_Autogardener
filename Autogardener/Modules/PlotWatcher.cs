@@ -120,9 +120,9 @@ namespace Autogardener.Modules
             {
                 bool warnOfMissing = EzThrottler.Throttle("Print missing plot warning", 15000);
                 
-                foreach (var patch in FilterByTerritory(patches))
+                foreach (PlotPatch patch in FilterByTerritory(patches))
                 {
-                    var gameObject = objectTable.EventObjects.FirstOrDefault(o => o.GameObjectId == patch.Plots.FirstOrDefault()?.GameObjectId);
+                    var gameObject = objectTable.EventObjects.FirstOrDefault(o => o.GameObjectId == patch.GameObjectId);
                     if (gameObject == null)
                     {
                         gameObject = objectTable.FirstOrDefault(o => o.GameObjectId == patch.Plots.FirstOrDefault()?.GameObjectId);
@@ -197,7 +197,12 @@ namespace Autogardener.Modules
         private List<PlotPatch> FilterByTerritory(List<PlotPatch> plots)
         {
             var territoryPrefix = territoryWatcher.GetTerritoryPrefix();
-            return plots.Where(p => territoryPrefix.IsNullOrEmpty() || p.TerritoryPrefix == territoryPrefix).ToList();
+            if (territoryPrefix.IsNullOrEmpty())
+            {
+                return new List<PlotPatch>();
+            }
+
+            return plots.Where(p => p.TerritoryPrefix == territoryPrefix).ToList();
         }
 
         private List<PlotPatch> FilterByDistance(List<PlotPatch> plots, float maxDistance)
