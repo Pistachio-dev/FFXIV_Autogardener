@@ -22,7 +22,6 @@ namespace Autogardener.Modules
         private readonly IClientState clientState;
         private readonly IGameInventory gameInventory;
 
-        
         public StoredDataActions(ILogService logService, IChatGui chatGui, ISaveManager<CharacterSaveState> saveManager,
             GlobalData globalData, PlotWatcher plotWatcher, IClientState clientState,
             IGameInventory gameInventory)
@@ -151,7 +150,7 @@ namespace Autogardener.Modules
 
             return expectedItems;
         }
-               
+
         public PlotPatch? GetNearestTrackedPlotPatch(bool addNewPlots)
         {
             var state = saveManager.GetCharacterSaveInMemory();            
@@ -166,7 +165,7 @@ namespace Autogardener.Modules
                 return null;
             }
 
-            plotWatcher.CheckForGoneOrMovedPlotsThrottled(state.Plots);
+            //plotWatcher.CheckForGoneOrMovedPlotsThrottled(state.Plots);
 
             Vector3 playerLocation = clientState.LocalPlayer?.Position ?? Vector3.Zero;
             if (playerLocation == Vector3.Zero)
