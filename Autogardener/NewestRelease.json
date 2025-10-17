@@ -1,6 +1,6 @@
 {
-    "AssemblyVersion": "0.3.6.1",
+    "AssemblyVersion": "0.3.7.1",
     "DalamudApiLevel": 13,
-    "ChangeLog": "- Plugin can now identify and update moved plots\n- Added a button to mark the location of a plot on the map\n- \"Plot missing\" message no longer shows in non-residential areas\n- Flowerpots are now impossible to register. That is a good thing.\n- Added an info marker about plots sometimes being forgotten and how to fix it",
+    "ChangeLog": "-Users can now fine tune the plugin's speed and patience\n- Plugin can now identify and update moved plots\n- Added a button to mark the location of a plot on the map\n- \"Plot missing\" message no longer shows in non-residential areas\n- Flowerpots are now impossible to register. That is a good thing.\n- Added an info marker about plots sometimes being forgotten and how to fix it",
     "IsTest": false
 }
