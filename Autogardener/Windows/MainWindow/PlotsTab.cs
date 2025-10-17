@@ -58,6 +58,9 @@ namespace Autogardener.Windows.MainWindow
                 }
                 DrawTooltip("Mark the position of the plot in the map, if it's here." +
                     "If you moved the plot, forget it (red button) and scan again");
+                ImGui.SameLine();
+                ImGuiComponents.HelpMarker("If \"Tend to plot\" says the plot is too far away, but you're on it, try removing it and scanning it again. " +
+                    "Don't forget to reselect the design. Apologies for the jank, this one bug is tricky.", FontAwesomeIcon.ClipboardQuestion);
 
                 DrawDesignSelector(plot, save);
                 ImGuiComponents.HelpMarker("If you made changes to the design and they don't show, try reselecting it.");
