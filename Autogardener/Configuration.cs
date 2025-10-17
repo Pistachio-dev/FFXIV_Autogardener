@@ -19,5 +19,9 @@ public class Configuration : IConfiguration
     public bool Harvest { get; set; } = false;
     public bool ShowOnlyItemsInInventory { get; set; } = true;
 
-    public int StepDelayInMs { get; set; } = 500;
+    public int StepDelayInMs { get; set; } = 33; // One frame at 30 fps
+
+    public int TaskAttemptsBeforeFailure { get; set; } = 50;
+
+    public int ConfirmationAttemptsBeforeFailure { get; set; } = 3;
 }

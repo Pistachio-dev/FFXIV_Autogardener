@@ -31,6 +31,7 @@ namespace Autogardener.Windows.MainWindow
             {
                 ImGui.TextUnformatted("Too far away from any registered plot");
             }
+            DrawTaskSpeedControls();
             if (ImGuiComponents.IconButtonWithText(FontAwesomeIcon.Search, "Scan nearby plots", Blue))
             {
                 storedDataActions.RegisterNearestPlotPatch();
@@ -74,6 +75,7 @@ namespace Autogardener.Windows.MainWindow
                 plotWatcher.HighlightPlots();
             }
         }
+
         private void DrawTendButtonAndParameters(PlotPatch nearestPlot)
         {
             var config = configService.GetConfiguration();
@@ -113,6 +115,37 @@ namespace Autogardener.Windows.MainWindow
             }
             DrawTooltip("After harvesting a plant, will plant the seeds given in the design.");            
 
+        }
+
+        private void DrawTaskSpeedControls()
+        {
+            if (ImGui.CollapsingHeader("Fine tune task timers"))
+            {
+                var delay = configService.GetConfiguration().StepDelayInMs;
+                if (ImGui.InputInt("Delay between tasks/attempts (milliseconds)", ref delay, 1, 10))
+                {
+                    configService.GetConfiguration().StepDelayInMs = delay;
+                }
+                ImGui.SameLine();
+                ImGuiComponents.HelpMarker("Time the plugin will wait before attempting to retry the task or move to the next one");
+
+                var taskAttempts = configService.GetConfiguration().TaskAttemptsBeforeFailure;
+                if (ImGui.InputInt("Task attempts before failure", ref taskAttempts, 1))
+                {
+                    configService.GetConfiguration().TaskAttemptsBeforeFailure = taskAttempts;
+                }
+                ImGui.SameLine();
+                ImGuiComponents.HelpMarker("How many times the plugin will try a task (like \"Select Fertilize\" or \"Plant seeds\" before giving up");
+
+                var confirmationAttempts = configService.GetConfiguration().ConfirmationAttemptsBeforeFailure;
+                if (ImGui.InputInt("Confirmation attempts before failure", ref confirmationAttempts, 1))
+                {
+                    configService.GetConfiguration().ConfirmationAttemptsBeforeFailure = confirmationAttempts;
+                }
+                ImGui.SameLine();
+                ImGuiComponents.HelpMarker("How many times the plugin will try to confirm a task was done, like checking a dialog is gone or your inventory has changed, before assuming failure");
+                ImGui.Separator();
+            }
         }
 
         private void DrawDesignItems(PlotPatchDesign plotPlan)

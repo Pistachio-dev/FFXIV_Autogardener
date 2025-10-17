@@ -1,4 +1,5 @@
 using Dalamud.Plugin.Services;
+using DalamudBasics.Configuration;
 using DalamudBasics.Logging;
 
 namespace Autogardener.Modules.Actions
@@ -6,7 +7,7 @@ namespace Autogardener.Modules.Actions
     public class GameActions
     {
         public GameActions(AddonManagement management, Targeting targeting, ILogService logService, GameObjectInteractions goInteractions,
-            DataExtraction dataExtraction, IChatGui chatGui, Inventory inventory)
+            DataExtraction dataExtraction, IChatGui chatGui, Inventory inventory, IConfigurationService<Configuration> configService)
         {
             AddonManagement = management;
             Targeting = targeting;
@@ -15,6 +16,7 @@ namespace Autogardener.Modules.Actions
             DataExtraction = dataExtraction;
             ChatGui = chatGui;
             Inventory = inventory;
+            ConfigService = configService;
         }
 
         public AddonManagement AddonManagement { get; }
@@ -24,5 +26,6 @@ namespace Autogardener.Modules.Actions
         public DataExtraction DataExtraction { get; }
         public IChatGui ChatGui { get; }
         public Inventory Inventory { get; }
+        public IConfigurationService<Configuration> ConfigService { get; }
     }
 }

@@ -10,9 +10,9 @@ namespace Autogardener.Modules.Tasks.IndividualTasks
         public string TaskName { get; }
         protected readonly GameActions op;
         private readonly bool softBailout; // On a bailout, skip this task and not the whole patch
-        private const int MaxTaskAttempts = 50;
-        private const int ConfirmationAttemptsBeforeRetry = 5;
-        private int throttleTime = 33; // One frame at 30 fps
+        private int MaxTaskAttempts => op.ConfigService.GetConfiguration().TaskAttemptsBeforeFailure;
+        private int ConfirmationAttemptsBeforeRetry => op.ConfigService.GetConfiguration().ConfirmationAttemptsBeforeFailure;
+        private int throttleTime => op.ConfigService.GetConfiguration().StepDelayInMs;
 
         private int taskAttempts = 0;
         private int confirmationAttempts = 0;
