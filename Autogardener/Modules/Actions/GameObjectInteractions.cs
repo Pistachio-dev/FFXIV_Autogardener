@@ -15,15 +15,15 @@ namespace Autogardener.Modules.Actions
     {
         private readonly IGameGui gameGui;
         private readonly IChatGui chatGui;
-        private readonly IClientState clientState;
+        private readonly IObjectTable objectTable;
         private readonly ILogService log;
         private readonly Utils utils;
 
-        public GameObjectInteractions(IGameGui gameGui, IChatGui chatGui, IClientState clientState, ILogService log, Utils utils)
+        public GameObjectInteractions(IGameGui gameGui, IChatGui chatGui, IObjectTable objectTable, ILogService log, Utils utils)
         {
             this.gameGui = gameGui;
             this.chatGui = chatGui;
-            this.clientState = clientState;
+            this.objectTable = objectTable;
             this.log = log;
             this.utils = utils;
         }
@@ -35,7 +35,7 @@ namespace Autogardener.Modules.Actions
             ag->OpenForItemSlot(fertilizerItemData.InventorySection->Type, fertilizerItemData.SlotNumber, 0, addonId);
             var contextMenu = gameGui.GetAddonByName("ContextMenu", 1);
             if (contextMenu == null) return false;
-            AtkUnitBasePtr ptr;
+
             for (var p = 0; p <= contextMenu.AtkValuesCount; p++)
             {
                 if (ag->EventIds[p] == 7)
@@ -55,14 +55,14 @@ namespace Autogardener.Modules.Actions
                 log.Debug("Interaction failed. Player not ready or occupied.");
                 return false;
             }
-            var plotSelected = clientState.LocalPlayer?.TargetObject;
+            var plotSelected = objectTable.LocalPlayer?.TargetObject;
             if (plotSelected == null)
             {
                 log.Warning("Attempting to interat with plot object, but no object is selected.");
                 return false;
             }
 
-            if (!GlobalData.GardenPlotDataIds.Contains(plotSelected.DataId))
+            if (!GlobalData.GardenPlotDataIds.Contains(plotSelected.BaseId))
             {
                 log.Warning("Attempting to interact with object that is not a plot");
                 return false;

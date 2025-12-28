@@ -57,8 +57,8 @@ namespace Autogardener.Modules.Actions
             }
             logService.Warning("Index:" + go?.ObjectIndex.ToString());
             logService.Warning($"GameObject searched: {go?.GameObjectId}: {go?.Position}");
-            logService.Warning($"Player: {clientState.LocalPlayer?.Position}");
-            var player = clientState.LocalPlayer;
+            logService.Warning($"Player: {objectTable.LocalPlayer?.Position}");
+            var player = objectTable.LocalPlayer;
             if (go == null || player == null)
             {
                 logService.Warning("Plot object not found");

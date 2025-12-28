@@ -271,7 +271,7 @@ namespace Autogardener.Modules
             List<PlotPatch> foundPlotPatches = new();
             PlotPatch? plotPatchInConstruction = null;
             var plotObjects = objectTable
-                .Where(o => o != null && GlobalData.GardenPlotDataIds.Contains(o.DataId)).OrderBy(o => o.GameObjectId).ToList();
+                .Where(o => o != null && GlobalData.GardenPlotDataIds.Contains(o.BaseId)).OrderBy(o => o.GameObjectId).ToList();
             var patchNumber = 1;
             int plotCounter = 0;
             IGameObject? lastPlotObject = null;
@@ -297,7 +297,7 @@ namespace Autogardener.Modules
                 }
 
                 var newHole = new Plot(plotObject.GameObjectId, plotObject.EntityId,
-                                                    plotObject.ObjectIndex, plotObject.DataId, new SerializableVector3(plotObject.Position));
+                                                    plotObject.ObjectIndex, plotObject.BaseId, new SerializableVector3(plotObject.Position));
                 plotPatchInConstruction?.Plots.Add(newHole);
                 plotCounter++;
                 lastPlotObject = plotObject;

@@ -19,7 +19,7 @@ namespace Autogardener.Model.Plots
             GameObjectId = ob.GameObjectId;
             EntityId = ob.EntityId;
             ObjectIndex = ob.ObjectIndex;
-            DataId = ob.DataId;
+            DataId = ob.BaseId;
             Location = new SerializableVector3(ob.Position.X, ob.Position.Y, ob.Position.Z);
         }
 

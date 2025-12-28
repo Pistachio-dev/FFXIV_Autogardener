@@ -205,10 +205,11 @@ namespace Autogardener.Windows.MainWindow
                 save.Plots.Remove(plot);
                 currentPlot = 0;
                 taskManager.Enqueue(() => saveManager.WriteCharacterSave());
+                logService.Info($"Plot {plot.Name} deleted");
                 return true;
             }
             
-            DrawTooltip("Ctrl+Shift to forget this plot\n(The plugin will stop tracking it)");
+            DrawTooltip("Ctrl+Shift+Click to forget this plot\n(The plugin will stop tracking it)");
 
             return false;
 

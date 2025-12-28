@@ -35,6 +35,8 @@ public sealed class Plugin : IDalamudPlugin
     private IServiceProvider serviceProvider { get; init; }
     private ILogService logService { get; set; }
 
+    private IObjectTable objectTable { get; set; }
+
     private IClientState clientState { get; set; }
 
     private ISaveManager<CharacterSaveState> saveManager { get; set; }
@@ -45,6 +47,7 @@ public sealed class Plugin : IDalamudPlugin
 
         serviceProvider = BuildServiceProvider(pluginInterface);
         logService = serviceProvider.GetRequiredService<ILogService>();
+        objectTable = serviceProvider.GetRequiredService<IObjectTable>();
         clientState = serviceProvider.GetRequiredService<IClientState>();
         saveManager = serviceProvider.GetRequiredService<ISaveManager<CharacterSaveState>>();
 
@@ -74,7 +77,7 @@ public sealed class Plugin : IDalamudPlugin
 
     private void MakeSaveReady(IFramework framework)
     {
-        if (State != null || clientState.LocalPlayer == null)
+        if (State != null || objectTable.LocalPlayer == null)
         {
             return;
         }
@@ -101,7 +104,7 @@ public sealed class Plugin : IDalamudPlugin
         serviceCollection.AddAllDalamudBasicsServices<Configuration>(pluginInterface);
         string saveFileName = "SavedData.json";
         serviceCollection.AddSingleton<ISaveManager<CharacterSaveState>>(
-            (sp) => new SaveManager<CharacterSaveState>(saveFileName, logService, clientState, sp.GetRequiredService<IFramework>(), pluginInterface));
+            (sp) => new SaveManager<CharacterSaveState>(saveFileName, logService, clientState, sp.GetRequiredService<IFramework>(), pluginInterface, sp.GetRequiredService<IObjectTable>()));
         serviceCollection.AddSingleton<StringDebugUtils>();
         serviceCollection.AddSingleton<Utils>();
         serviceCollection.AddSingleton<PlotWatcher>();
@@ -124,8 +127,8 @@ public sealed class Plugin : IDalamudPlugin
     private void InitializeServices(IServiceProvider serviceProvider)
     {
         IFramework framework = serviceProvider.GetRequiredService<IFramework>();
-        serviceProvider.GetRequiredService<ILogService>().AttachToGameLogicLoop(framework);
-        serviceProvider.GetRequiredService<IChatListener>().InitializeAndRun("[AG]");
+        serviceProvider.GetRequiredService<ILogService>().AttachToGameLogicLoop();
+        serviceProvider.GetRequiredService<IChatListener>().InitializeAndRun("[AG]", true, ChatChannelSets.CommonChannelsAndLinkshells);
         serviceProvider.GetRequiredService<ErrorMessageMonitor>().Attach();
         framework.Update += MakeSaveReady;
         serviceProvider.GetRequiredService<MovementController>().Attach(framework);
