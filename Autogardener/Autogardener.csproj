@@ -17,6 +17,7 @@
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
             <Visible>false</Visible>
         </Content>
+        <Content Include="Autogardener.json" />
         <Content Include="NewestRelease.json" />
     </ItemGroup>
   <ItemGroup>

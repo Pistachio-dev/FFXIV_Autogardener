@@ -20,7 +20,7 @@ namespace Autogardener.Windows.MainWindow
 
         private void DrawDesignsTab(CharacterSaveState save)
         {
-            UpdateSelectorData(configService.GetConfiguration().ShowOnlyItemsInInventory);            
+            UpdateSelectorData(configService.GetConfiguration().ShowOnlyItemsInInventory);
             var nearestPlot = GetNearestPlotThrottled();
             if (nearestPlot == null)
             {
@@ -54,7 +54,7 @@ namespace Autogardener.Windows.MainWindow
                     {
                         return;
                     }
-                }                               
+                }
 
                 if (selectedDesign.PlotDesigns.Count == 0)
                 {
@@ -115,7 +115,6 @@ namespace Autogardener.Windows.MainWindow
                 toggleRenameDesign = !toggleRenameDesign;
             }
             DrawTooltip(toggleRenameDesign ? "Save" : "Rename");
-
         }
 
         private bool DrawRemoveDesignButton(List<PlotPatchDesign> designs, PlotPatchDesign design)
@@ -138,8 +137,8 @@ namespace Autogardener.Windows.MainWindow
 
             DrawTooltip("Ctrl+Shift to delete this design");
             return false;
-
         }
+
         private void DrawSeedSelector(uint[] itemIds, string[] itemNames, PlotDesign design, uint index)
         {
             var seedComboIndex = design.DesignatedSeed == 0 ? 0 : itemIds.IndexOf(design.DesignatedSeed);
@@ -149,13 +148,14 @@ namespace Autogardener.Windows.MainWindow
                 saveManager.WriteCharacterSave();
             }
         }
+
         private void DrawPlotDesign(PlotDesign design, uint index, PlotPatchDesign parentPatchDesign)
         {
             ImGui.PushStyleVar(ImGuiStyleVar.FrameBorderSize, 1f);
             ImGui.BeginChildFrame(100 + index, new Vector2(200, 200));
-            
+
             if (parentPatchDesign.IsFlowerpot)
-            {                
+            {
                 DrawSeedSelector(seedIdsIncludingFlowerpots, seedNamesIncludingFlowerpots, design, index);
             }
             else
@@ -217,7 +217,7 @@ namespace Autogardener.Windows.MainWindow
             nameArray = new string[filtered.Count + 1];
             idArray[0] = 0;
             nameArray[0] = "None";
-            for(int i = 1; i < idArray.Length; i++)                
+            for (int i = 1; i < idArray.Length; i++)
             {
                 idArray[i] = orderedEnum[i - 1].id;
                 nameArray[i] = orderedEnum[i - 1].name;
