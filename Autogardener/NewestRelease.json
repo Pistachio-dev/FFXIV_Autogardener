@@ -1,6 +1,6 @@
 {
     "AssemblyVersion": "0.3.8.0",
     "DalamudApiLevel": 14,
-    "ChangeLog": "Updated for 7.4",
+    "ChangeLog": "- Updated for 7.4\n- Known issue: Item search window will be opened when using fertilizer",
     "IsTest": false
 }
