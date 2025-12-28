@@ -38,7 +38,8 @@ namespace Autogardener.Modules.Actions
 
             for (var p = 0; p <= contextMenu.AtkValuesCount; p++)
             {
-                if (ag->EventIds[p] == 7)
+                log.Info($"EventId[{p}] = {ag->EventIds[p]}");
+                if (ag->EventIds[p] == 16)
                 {
                     ECommons.Automation.Callback.Fire((AtkUnitBase*)contextMenu.Address, true, 0, p - 7, 0, 0, 0); // This may crash, watch out
                     return true;
