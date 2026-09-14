@@ -134,27 +134,27 @@ namespace Autogardener.Modules.Actions
                 var values = stackalloc AtkValue[5];
                 values[0] = new AtkValue()
                 {
-                    Type = FFXIVClientStructs.FFXIV.Component.GUI.ValueType.Int,
+                    Type = AtkValueType.Int,
                     Int = 2
                 };
                 values[1] = new AtkValue()
                 {
-                    Type = FFXIVClientStructs.FFXIV.Component.GUI.ValueType.UInt,
+                    Type = AtkValueType.UInt,
                     UInt = (uint)slot
                 };
                 values[2] = new AtkValue()
                 {
-                    Type = FFXIVClientStructs.FFXIV.Component.GUI.ValueType.Int,
+                    Type = AtkValueType.Int,
                     Int = 0
                 };
                 values[3] = new AtkValue()
                 {
-                    Type = FFXIVClientStructs.FFXIV.Component.GUI.ValueType.Int,
+                    Type = AtkValueType.Int,
                     Int = 0
                 };
                 values[4] = new AtkValue()
                 {
-                    Type = FFXIVClientStructs.FFXIV.Component.GUI.ValueType.UInt,
+                    Type = AtkValueType.UInt,
                     UInt = 1
                 };
 
@@ -168,27 +168,27 @@ namespace Autogardener.Modules.Actions
                 var values = stackalloc AtkValue[5];
                 values[0] = new AtkValue()
                 {
-                    Type = FFXIVClientStructs.FFXIV.Component.GUI.ValueType.Int,
+                    Type = AtkValueType.Int,
                     Int = 0
                 };
                 values[1] = new AtkValue()
                 {
-                    Type = FFXIVClientStructs.FFXIV.Component.GUI.ValueType.Int,
+                    Type = AtkValueType.Int,
                     Int = itemIndex
                 };
                 values[2] = new AtkValue()
                 {
-                    Type = FFXIVClientStructs.FFXIV.Component.GUI.ValueType.UInt,
+                    Type = AtkValueType.UInt,
                     UInt = value
                 };
                 values[3] = new AtkValue()
                 {
-                    Type = FFXIVClientStructs.FFXIV.Component.GUI.ValueType.UInt,
+                    Type = AtkValueType.UInt,
                     UInt = 0
                 };
                 values[4] = new AtkValue()
                 {
-                    Type = FFXIVClientStructs.FFXIV.Component.GUI.ValueType.Int,
+                    Type = AtkValueType.Int,
                     UInt = 0
                 };
 
@@ -206,7 +206,7 @@ namespace Autogardener.Modules.Actions
             var values = stackalloc AtkValue[1];
             values[0] = new AtkValue()
             {
-                Type = FFXIVClientStructs.FFXIV.Component.GUI.ValueType.Int,
+                Type = AtkValueType.Int,
                 Int = -1
             };
 
