@@ -44,7 +44,7 @@ public class TerritoryWatcher
         });
     }
 
-    private void ClientState_TerritoryChanged(ushort obj)
+    private void ClientState_TerritoryChanged(uint obj)
     {
         if(TerritoryUtils.IsTerritoryResidentialDistrict(obj))
         {
@@ -103,7 +103,7 @@ public class TerritoryWatcher
             };
         }
 
-        if (clientState.TerritoryType.EqualsAny<ushort>(Houses.Private_Cottage_Empyreum, Houses.Private_Cottage_Mist, Houses.Private_Cottage_Shirogane, Houses.Private_Cottage_The_Goblet, Houses.Private_Cottage_The_Lavender_Beds, 1249))
+        if (clientState.TerritoryType.EqualsAny<uint>(Houses.Private_Cottage_Empyreum, Houses.Private_Cottage_Mist, Houses.Private_Cottage_Shirogane, Houses.Private_Cottage_The_Goblet, Houses.Private_Cottage_The_Lavender_Beds, 1249))
         {
             return LastHousingOutdoorTerritory switch
             {
@@ -115,7 +115,7 @@ public class TerritoryWatcher
                 _ => GetTerritoryShortName(ResidentialArea.Other, HouseType.NotAHouse)
             };
         }
-        if(clientState.TerritoryType.EqualsAny<ushort>(Houses.Private_House_Empyreum, Houses.Private_House_Mist, Houses.Private_House_Shirogane, Houses.Private_House_The_Goblet, Houses.Private_House_The_Lavender_Beds, 1250))
+        if(clientState.TerritoryType.EqualsAny<uint>(Houses.Private_House_Empyreum, Houses.Private_House_Mist, Houses.Private_House_Shirogane, Houses.Private_House_The_Goblet, Houses.Private_House_The_Lavender_Beds, 1250))
         {
             return LastHousingOutdoorTerritory switch
             {
@@ -127,7 +127,7 @@ public class TerritoryWatcher
                 _ => GetTerritoryShortName(ResidentialArea.Other, HouseType.NotAHouse)
             };
         }
-        if(clientState.TerritoryType.EqualsAny<ushort>(Houses.Private_Mansion_Empyreum, Houses.Private_Mansion_Mist, Houses.Private_Mansion_Shirogane, Houses.Private_Mansion_The_Goblet, Houses.Private_Mansion_The_Lavender_Beds, 1251))
+        if(clientState.TerritoryType.EqualsAny<uint>(Houses.Private_Mansion_Empyreum, Houses.Private_Mansion_Mist, Houses.Private_Mansion_Shirogane, Houses.Private_Mansion_The_Goblet, Houses.Private_Mansion_The_Lavender_Beds, 1251))
         {
             return LastHousingOutdoorTerritory switch
             {

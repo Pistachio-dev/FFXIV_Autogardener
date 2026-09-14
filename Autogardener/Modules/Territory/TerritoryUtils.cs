@@ -31,7 +31,7 @@ namespace Autogardener.Modules.Territory
             return territory.EqualsAny(Houses.Private_Chambers_Empyreum, Houses.Private_Chambers_Mist, Houses.Private_Chambers_Shirogane, Houses.Private_Chambers_The_Goblet, Houses.Private_Chambers_The_Lavender_Beds);
         }
 
-        public static bool IsTerritoryResidentialDistrict(ushort obj)
+        public static bool IsTerritoryResidentialDistrict(uint obj)
         {
             return obj.EqualsAny(ResidentalAreas.Mist, ResidentalAreas.Shirogane, ResidentalAreas.Empyreum, ResidentalAreas.The_Goblet, ResidentalAreas.The_Lavender_Beds);
         }

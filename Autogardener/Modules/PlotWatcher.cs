@@ -109,11 +109,11 @@ namespace Autogardener.Modules
                 }
             }
 
-            if (clientState.LocalPlayer != null)
+            if (objectTable.LocalPlayer != null)
             {
-                log.Info($"Player pos: X:{clientState.LocalPlayer.Position.X} " +
-                    $"Y: {clientState.LocalPlayer.Position.Y} " +
-                    $"Z: {clientState.LocalPlayer.Position.Z}");
+                log.Info($"Player pos: X:{objectTable.LocalPlayer.Position.X} " +
+                    $"Y: {objectTable.LocalPlayer.Position.Y} " +
+                    $"Z: {objectTable.LocalPlayer.Position.Z}");
             }
         }
 
@@ -256,7 +256,7 @@ namespace Autogardener.Modules
 
         private List<PlotPatch> FilterByDistance(List<PlotPatch> plots, float maxDistance)
         {
-            var playerPos = clientState.LocalPlayer?.Position;
+            var playerPos = objectTable.LocalPlayer?.Position;
             if (playerPos == null)
             {
                 return plots;

@@ -7,7 +7,7 @@ namespace Autogardener.Modules.Movement
     public class MovementController
     {
         private readonly ILogService logService;
-        private readonly IClientState clientState;
+        private readonly IObjectTable objectTable;
         private readonly OverrideMovement movementOverride;
 
         private const float Tolerance = 0.2f;
@@ -18,15 +18,15 @@ namespace Autogardener.Modules.Movement
         internal bool movementTimedOut = false;
         internal bool ActionCompleted => movementWasCompleted || movementTimedOut;
 
-        public MovementController(ILogService logService, IClientState clientState) {
+        public MovementController(ILogService logService, IObjectTable objectTable) {
             this.logService = logService;
-            this.clientState = clientState;
+            this.objectTable = objectTable;
             movementOverride = new OverrideMovement();
         }
 
         public void MoveForwards()
         {
-            var playerPos = clientState.LocalPlayer?.Position ?? Vector3.Zero;
+            var playerPos = objectTable.LocalPlayer?.Position ?? Vector3.Zero;
             var destination = playerPos + new Vector3(4, 0, 9);
 
             movementOverride.DesiredPosition = destination;
@@ -36,18 +36,18 @@ namespace Autogardener.Modules.Movement
 
         private Vector3 PlayerPos()
         {
-            return clientState.LocalPlayer?.Position ?? Vector3.Zero;
+            return objectTable.LocalPlayer?.Position ?? Vector3.Zero;
         }
 
         public void MoveToPoint(Vector3 destination)
         {
             
-            if (clientState.LocalPlayer == null)
+            if (objectTable.LocalPlayer == null)
             {
                 logService.Warning("Attempting to do movement, but the local player does not exist.");
             }
 
-            logService.Info($"Starting movement: Player pos: {clientState.LocalPlayer?.Position} Destination: {destination}");
+            logService.Info($"Starting movement: Player pos: {objectTable.LocalPlayer?.Position} Destination: {destination}");
             movementWasCompleted = false;
             movementTimedOut = false;
             movementInProgress = true;

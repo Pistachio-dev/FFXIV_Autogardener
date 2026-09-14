@@ -20,10 +20,11 @@ namespace Autogardener.Modules
         private readonly GlobalData globalData;
         private readonly PlotWatcher plotWatcher;
         private readonly IClientState clientState;
+        private readonly IObjectTable objectTable;
         private readonly IGameInventory gameInventory;
 
         public StoredDataActions(ILogService logService, IChatGui chatGui, ISaveManager<CharacterSaveState> saveManager,
-            GlobalData globalData, PlotWatcher plotWatcher, IClientState clientState,
+            GlobalData globalData, PlotWatcher plotWatcher, IClientState clientState, IObjectTable objectTable,
             IGameInventory gameInventory)
         {
             this.logService = logService;
@@ -32,12 +33,13 @@ namespace Autogardener.Modules
             this.globalData = globalData;
             this.plotWatcher = plotWatcher;
             this.clientState = clientState;
+            this.objectTable = objectTable;
             this.gameInventory = gameInventory;
         }
 
         public void RegisterNearestPlotPatch()
         {            
-            var player = clientState.LocalPlayer;
+            var player = objectTable.LocalPlayer;
             if (player == null)
             {
                 logService.Warning("Attempted to register nearest plot patch, but local player is null.");
@@ -167,7 +169,7 @@ namespace Autogardener.Modules
 
             //plotWatcher.CheckForGoneOrMovedPlotsThrottled(state.Plots);
 
-            Vector3 playerLocation = clientState.LocalPlayer?.Position ?? Vector3.Zero;
+            Vector3 playerLocation = objectTable.LocalPlayer?.Position ?? Vector3.Zero;
             if (playerLocation == Vector3.Zero)
             {
                 logService.Debug("Player location is null. Can't register nearest plot.");

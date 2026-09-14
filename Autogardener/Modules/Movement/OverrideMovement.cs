@@ -1,3 +1,4 @@
+using Autogardener.Modules.Movement;
 using Dalamud.Game.Config;
 using Dalamud.Hooking;
 using Dalamud.Utility.Signatures;
@@ -8,7 +9,6 @@ using Service = ECommons.DalamudServices.Svc;
 
 namespace Autogardener.Modules.Movement;
 
-//Lifted straight from https://github.com/NightmareXIV/Lifestream
 public unsafe class OverrideMovement : IDisposable
 {
     public bool Enabled
@@ -19,11 +19,13 @@ public unsafe class OverrideMovement : IDisposable
             if (value)
             {
                 _rmiWalkHook.Enable();
+                _rmiFlyHook.Enable();
             }
             else
             {
                 UserInput = false;
                 _rmiWalkHook.Disable();
+                _rmiFlyHook.Disable();
             }
         }
     }
@@ -45,6 +47,10 @@ public unsafe class OverrideMovement : IDisposable
     [Signature("E8 ?? ?? ?? ?? 80 7B 3E 00 48 8D 3D")]
     private Hook<RMIWalkDelegate> _rmiWalkHook = null!;
 
+    private delegate void RMIFlyDelegate(void* self, PlayerMoveControllerFlyInput* result);
+    [Signature("E8 ?? ?? ?? ?? 0F B6 0D ?? ?? ?? ?? B8")]
+    private Hook<RMIFlyDelegate> _rmiFlyHook = null!;
+
     public OverrideMovement()
     {
         var rmiWalkIsInputEnabled1Addr = Service.SigScanner.ScanText("E8 ?? ?? ?? ?? 84 C0 75 10 38 43 3C");
@@ -56,6 +62,7 @@ public unsafe class OverrideMovement : IDisposable
 
         Service.Hook.InitializeFromAttributes(this);
         Service.Log.Information($"RMIWalk address: 0x{_rmiWalkHook.Address:X}");
+        Service.Log.Information($"RMIFly address: 0x{_rmiFlyHook.Address:X}");
         Service.GameConfig.UiControlChanged += OnConfigChanged;
         UpdateLegacyMode();
     }
@@ -64,27 +71,41 @@ public unsafe class OverrideMovement : IDisposable
     {
         Service.GameConfig.UiControlChanged -= OnConfigChanged;
         _rmiWalkHook.Dispose();
+        _rmiFlyHook.Dispose();
     }
 
     private void RMIWalkDetour(void* self, float* sumLeft, float* sumForward, float* sumTurnLeft, byte* haveBackwardOrStrafe, byte* a6, byte bAdditiveUnk)
     {
         _rmiWalkHook.Original(self, sumLeft, sumForward, sumTurnLeft, haveBackwardOrStrafe, a6, bAdditiveUnk);
         // TODO: we really need to introduce some extra checks that PlayerMoveController::readInput does - sometimes it skips reading input, and returning something non-zero breaks stuff...
-        var movementAllowed = bAdditiveUnk == 0 && _rmiWalkIsInputEnabled1(self) && _rmiWalkIsInputEnabled2(self); //&& !Service.Condition[Dalamud.Game.ClientState.Conditions.ConditionFlag.BeingMoved];
+        bool movementAllowed = bAdditiveUnk == 0 && _rmiWalkIsInputEnabled1(self) && _rmiWalkIsInputEnabled2(self); //&& !Service.Condition[Dalamud.Game.ClientState.Conditions.ConditionFlag.BeingMoved];
         UserInput = *sumLeft != 0 || *sumForward != 0;
         if (movementAllowed && (IgnoreUserInput || *sumLeft == 0 && *sumForward == 0) && DirectionToDestination(false) is var relDir && relDir != null)
         {
-            Service.Log.Debug($"relative dir: {relDir}");
+            Service.Log.Verbose($"relative dir: {relDir}");
             var dir = relDir.Value.h.ToDirection();
             *sumLeft = dir.X;
             *sumForward = dir.Y;
         }
     }
 
+    private void RMIFlyDetour(void* self, PlayerMoveControllerFlyInput* result)
+    {
+        _rmiFlyHook.Original(self, result);
+        UserInput = result->Forward != 0 || result->Left != 0 || result->Up != 0;
+        // TODO: we really need to introduce some extra checks that PlayerMoveController::readInput does - sometimes it skips reading input, and returning something non-zero breaks stuff...
+        if ((IgnoreUserInput || result->Forward == 0 && result->Left == 0 && result->Up == 0) && DirectionToDestination(true) is var relDir && relDir != null)
+        {
+            var dir = relDir.Value.h.ToDirection();
+            result->Forward = dir.Y;
+            result->Left = dir.X;
+            result->Up = relDir.Value.v.Rad;
+        }
+    }
 
     private (Angle h, Angle v)? DirectionToDestination(bool allowVertical)
     {
-        var player = Service.ClientState.LocalPlayer;
+        var player = Service.Objects.LocalPlayer;
         if (player == null)
             return null;
 
@@ -105,6 +126,6 @@ public unsafe class OverrideMovement : IDisposable
     private void UpdateLegacyMode()
     {
         _legacyMode = Service.GameConfig.UiControl.TryGetUInt("MoveMode", out var mode) && mode == 1;
-        Service.Log.Info($"Legacy mode is now {(_legacyMode ? "enabled" : "disabled")}");
+        Service.Log.Verbose($"Legacy mode is now {(_legacyMode ? "enabled" : "disabled")}");
     }
 }
