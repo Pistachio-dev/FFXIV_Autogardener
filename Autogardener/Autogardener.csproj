@@ -6,7 +6,7 @@
     <PackageProjectUrl>https://github.com/goatcorp/Autogardener</PackageProjectUrl>
     <PackageLicenseExpression>AGPL-3.0-or-later</PackageLicenseExpression>
       <FileVersion>0.0.1.0</FileVersion>
-      <AssemblyVersion>0.0.1.0</AssemblyVersion>
+      <AssemblyVersion>0.3.9.2</AssemblyVersion>
       <TargetFramework>net10.0-windows</TargetFramework>
       <Platforms>x64</Platforms>
     <IsPackable>false</IsPackable>
