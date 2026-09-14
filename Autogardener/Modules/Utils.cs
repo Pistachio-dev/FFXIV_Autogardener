@@ -43,7 +43,7 @@ namespace Autogardener.Modules
 
         public bool IsPlayerFalling()
         {
-            var p = Svc.ClientState.LocalPlayer;
+            var p = Svc.Objects.LocalPlayer;
             if (p == null)
                 return true;
 
@@ -155,7 +155,7 @@ namespace Autogardener.Modules
                    || Svc.Condition[ConditionFlag.Fishing]
                    || Svc.Condition[ConditionFlag.Transformed]
                    || Svc.Condition[ConditionFlag.UsingHousingFunctions]
-                   || Svc.ClientState.LocalPlayer?.IsTargetable != true;
+                   || Svc.Objects.LocalPlayer?.IsTargetable != true;
         }
     }
 }

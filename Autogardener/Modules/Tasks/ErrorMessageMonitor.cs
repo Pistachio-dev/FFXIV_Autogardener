@@ -1,3 +1,4 @@
+using Dalamud.Game.Chat;
 using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Plugin.Services;
@@ -48,8 +49,12 @@ namespace Autogardener.Modules.Tasks
             return false;
         }
 
-        private void RecordErrorMessages(XivChatType type, int timestamp, ref SeString sender, ref SeString message, ref bool isHandled)
+        private void RecordErrorMessages(IHandleableChatMessage messageObject)
         {
+            // XivChatType type, int timestamp, ref SeString sender, ref SeString message, ref bool isHandled)
+            var type = messageObject.LogKind;
+            var message = messageObject.Message;
+
             if (type == XivChatType.ErrorMessage || type == XivChatType.SystemError || type == (XivChatType)2108) //2108 is the type of the "Insufficient Inventory" messages
             {
                 RecordMessage(message);
